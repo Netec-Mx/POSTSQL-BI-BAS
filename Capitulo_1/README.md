@@ -1,4 +1,6 @@
-# Nombre del laboratorio 
+# Práctica 1.1 Entorno PostgreSQL 16 & Docker
+
+<br/><br/>
 
 ## Objetivo de la práctica:
 Al finalizar la práctica, serás capaz de:
