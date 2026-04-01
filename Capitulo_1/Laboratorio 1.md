@@ -926,7 +926,7 @@ Indexes:
 - [ ] La extensión `pg_stat_statements` fue instalada correctamente
 - [ ] La consulta de tamaños muestra las 4 bases de datos del sistema
 
-<br/
+<br/>
 
 > **Contexto arquitectónico:** Lo que acabas de explorar son los componentes fundamentales de PostgreSQL:
 > - **postmaster:** El proceso principal que acepta conexiones y gestiona los procesos hijo
