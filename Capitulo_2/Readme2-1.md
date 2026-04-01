@@ -30,7 +30,7 @@ Al completar este laboratorio, serás capaz de:
 
 ## Diagrama ER de la base de datos usadas en clase
 
-![Diagrama ER](../images/i2.png)
+![Diagrama ER](../images/i3.png)
 
 <br/><br/>
 
