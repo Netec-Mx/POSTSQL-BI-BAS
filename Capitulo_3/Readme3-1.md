@@ -185,22 +185,22 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    -- Asumiendo que productos tiene al menos 20 registros de la práctica anterior
    UPDATE productos SET category_id = (
        CASE
-           WHEN product_id % 21 IN (0, 1)  THEN 16  -- iPhone
-           WHEN product_id % 21 IN (2, 3)  THEN 17  -- Android
-           WHEN product_id % 21 IN (4)     THEN 18  -- Gaming Laptops
-           WHEN product_id % 21 IN (5)     THEN 19  -- Ultrabooks
-           WHEN product_id % 21 IN (6, 7)  THEN 20  -- Auriculares
-           WHEN product_id % 21 IN (8)     THEN 21  -- Altavoces
-           WHEN product_id % 21 IN (9, 10) THEN 10  -- Ropa Masculina
-           WHEN product_id % 21 IN (11)    THEN 11  -- Ropa Femenina
-           WHEN product_id % 21 IN (12)    THEN 12  -- Calzado
-           WHEN product_id % 21 IN (13)    THEN 13  -- Muebles
-           WHEN product_id % 21 IN (14)    THEN 15  -- Jardín
-           WHEN product_id % 21 IN (15)    THEN 16  -- Fútbol (reasignado a iPhone por mod)
-           WHEN product_id % 21 IN (16)    THEN 17  -- Ciclismo
-           WHEN product_id % 21 IN (17)    THEN 18  -- Fitness
-           WHEN product_id % 21 IN (18)    THEN 14  -- Novelas
-           WHEN product_id % 21 IN (19)    THEN 15  -- Técnicos
+           WHEN id_producto % 21 IN (0, 1)  THEN 16  -- iPhone
+           WHEN id_producto % 21 IN (2, 3)  THEN 17  -- Android
+           WHEN id_producto % 21 IN (4)     THEN 18  -- Gaming Laptops
+           WHEN id_producto % 21 IN (5)     THEN 19  -- Ultrabooks
+           WHEN id_producto % 21 IN (6, 7)  THEN 20  -- Auriculares
+           WHEN id_producto % 21 IN (8)     THEN 21  -- Altavoces
+           WHEN id_producto % 21 IN (9, 10) THEN 10  -- Ropa Masculina
+           WHEN id_producto % 21 IN (11)    THEN 11  -- Ropa Femenina
+           WHEN id_producto % 21 IN (12)    THEN 12  -- Calzado
+           WHEN id_producto % 21 IN (13)    THEN 13  -- Muebles
+           WHEN id_producto % 21 IN (14)    THEN 15  -- Jardín
+           WHEN id_producto % 21 IN (15)    THEN 16  -- Fútbol (reasignado a iPhone por mod)
+           WHEN id_producto % 21 IN (16)    THEN 17  -- Ciclismo
+           WHEN id_producto % 21 IN (17)    THEN 18  -- Fitness
+           WHEN id_producto % 21 IN (18)    THEN 14  -- Novelas
+           WHEN id_producto % 21 IN (19)    THEN 15  -- Técnicos
            ELSE 9                                    -- Cámaras (default)
        END
    );
@@ -272,7 +272,7 @@ ORDER BY manager_id NULLS FIRST, employee_id;
    -- Subconsulta no correlacionada en WHERE
    -- La subconsulta se ejecuta UNA SOLA VEZ y devuelve un escalar
    SELECT
-       p.product_id,
+       p.id_producto,
        p.product_name,
        p.price,
        ROUND(p.price - (SELECT AVG(price) FROM productos), 2) AS diferencia_vs_promedio
@@ -291,14 +291,14 @@ ORDER BY manager_id NULLS FIRST, employee_id;
    -- Subconsulta no correlacionada con IN
    -- Devuelve un conjunto de valores (no un escalar)
    SELECT
-       p.product_id,
+       p.id_producto,
        p.product_name,
        p.price
    FROM productos p
-   WHERE p.product_id IN (
-       SELECT oi.product_id
+   WHERE p.id_producto IN (
+       SELECT oi.id_producto
        FROM order_items oi
-       GROUP BY oi.product_id
+       GROUP BY oi.id_producto
        HAVING SUM(oi.quantity) > 50
    )
    ORDER BY p.product_name;
@@ -357,7 +357,7 @@ ORDER BY manager_id NULLS FIRST, employee_id;
 
 ```
 -- Consulta 1: productos sobre el promedio
- product_id | product_name | price | diferencia_vs_promedio
+ id_producto | product_name | price | diferencia_vs_promedio
 ------------+--------------+-------+------------------------
  ...        | ...          | ...   | ...
 (N rows)
@@ -404,7 +404,7 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
    -- La referencia p.category_id "correlaciona" la subconsulta con la fila actual
 
    SELECT
-       p.product_id,
+       p.id_producto,
        p.product_name,
        p.price                                                    AS precio_producto,
        (
@@ -440,7 +440,7 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
    -- Filtra productos que son "caros" DENTRO de su categoría
 
    SELECT
-       p.product_id,
+       p.id_producto,
        p.product_name,
        c.category_name,
        p.price
@@ -487,7 +487,7 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
    -- Analizar el plan de ejecución de la subconsulta correlacionada
    EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
    SELECT
-       p.product_id,
+       p.id_producto,
        p.product_name,
        p.price,
        (
@@ -507,7 +507,7 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
 ```sql
 
 -- Consulta 2: productos sobre el promedio de su categoría
- product_id | product_name | category_name | price
+ id_producto | product_name | category_name | price
 ------------+--------------+---------------+-------
  ...        | ...          | Smartphones   | ...
  ...        | ...          | Laptops       | ...
@@ -595,19 +595,19 @@ WHERE p.price > cat_avg.avg_price;
    -- CTE 1: calcular el total de ventas por producto
    ventas_por_producto AS (
        SELECT
-           oi.product_id,
+           oi.id_producto,
            SUM(oi.quantity)                    AS unidades_vendidas,
            SUM(oi.quantity * oi.unit_price)    AS ingreso_total,
            COUNT(DISTINCT oi.order_id)         AS num_pedidos
        FROM order_items oi
        INNER JOIN orders o ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
-       GROUP BY oi.product_id
+       GROUP BY oi.id_producto
    ),
    -- CTE 2: enriquecer con datos del producto y su categoría
    productos_enriquecidos AS (
        SELECT
-           p.product_id,
+           p.id_producto,
            p.product_name,
            p.category_id,
            p.price                         AS precio_actual,
@@ -615,7 +615,7 @@ WHERE p.price > cat_avg.avg_price;
            vp.ingreso_total,
            vp.num_pedidos
        FROM productos p
-       INNER JOIN ventas_por_producto vp ON vp.product_id = p.product_id
+       INNER JOIN ventas_por_producto vp ON vp.id_producto = p.id_producto
    ),
    -- CTE 3: calcular el ranking dentro de cada categoría
    ranking_por_categoria AS (
@@ -952,7 +952,7 @@ WHERE p.price > (
            p.category_id,
            SUM(oi.quantity * oi.unit_price) AS ventas_directas
        FROM productos p
-       INNER JOIN order_items oi ON oi.product_id = p.product_id
+       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
        GROUP BY p.category_id
@@ -1040,7 +1040,7 @@ ORDER BY nivel;
                SELECT SUM(oi2.quantity * oi2.unit_price)
                FROM order_items oi2
                INNER JOIN orders o2       ON o2.order_id = oi2.order_id
-               INNER JOIN productos p2     ON p2.product_id = oi2.product_id
+               INNER JOIN productos p2     ON p2.id_producto = oi2.id_producto
                INNER JOIN categories c2   ON c2.category_id = p2.category_id
                WHERE o2.status != 'cancelled'
                  AND (
@@ -1056,7 +1056,7 @@ ORDER BY nivel;
        prod_ranking.rank_en_categoria
    FROM (
        SELECT
-           p.product_id,
+           p.id_producto,
            p.product_name,
            p.category_id,
            SUM(oi.quantity * oi.unit_price)   AS ingreso_producto,
@@ -1065,10 +1065,10 @@ ORDER BY nivel;
                ORDER BY SUM(oi.quantity * oi.unit_price) DESC
            )                                  AS rank_en_categoria
        FROM productos p
-       INNER JOIN order_items oi ON oi.product_id = p.product_id
+       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
-       GROUP BY p.product_id, p.product_name, p.category_id
+       GROUP BY p.id_producto, p.product_name, p.category_id
    ) prod_ranking
    INNER JOIN categories cat_leaf  ON cat_leaf.category_id = prod_ranking.category_id
    INNER JOIN categories cat_raiz  ON (
@@ -1088,15 +1088,15 @@ ORDER BY nivel;
    -- CTE 1: ventas por producto
    ventas_producto AS (
        SELECT
-           p.product_id,
+           p.id_producto,
            p.product_name,
            p.category_id,
            SUM(oi.quantity * oi.unit_price) AS ingreso_producto
        FROM productos p
-       INNER JOIN order_items oi ON oi.product_id = p.product_id
+       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
-       GROUP BY p.product_id, p.product_name, p.category_id
+       GROUP BY p.id_producto, p.product_name, p.category_id
    ),
    -- CTE 2: mapear cada categoría hoja a su categoría raíz
    categoria_raiz_map AS (
@@ -1155,7 +1155,7 @@ ORDER BY nivel;
        prod_ranking.rank_en_categoria
    FROM (
        SELECT
-           p.product_id,
+           p.id_producto,
            p.product_name,
            p.category_id,
            SUM(oi.quantity * oi.unit_price) AS ingreso_producto,
@@ -1164,10 +1164,10 @@ ORDER BY nivel;
                ORDER BY SUM(oi.quantity * oi.unit_price) DESC
            ) AS rank_en_categoria
        FROM productos p
-       INNER JOIN order_items oi ON oi.product_id = p.product_id
+       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
-       GROUP BY p.product_id, p.product_name, p.category_id
+       GROUP BY p.id_producto, p.product_name, p.category_id
    ) prod_ranking
    INNER JOIN categories cat_leaf ON cat_leaf.category_id = prod_ranking.category_id
    INNER JOIN categories cat_raiz ON cat_raiz.category_id = cat_leaf.parent_id
@@ -1182,15 +1182,15 @@ ORDER BY nivel;
    WITH
    ventas_producto AS (
        SELECT
-           p.product_id,
+           p.id_producto,
            p.product_name,
            p.category_id,
            SUM(oi.quantity * oi.unit_price) AS ingreso_producto
        FROM productos p
-       INNER JOIN order_items oi ON oi.product_id = p.product_id
+       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
-       GROUP BY p.product_id, p.product_name, p.category_id
+       GROUP BY p.id_producto, p.product_name, p.category_id
    ),
    productos_rankeados AS (
        SELECT
@@ -1229,15 +1229,15 @@ ORDER BY nivel;
 
    WITH ventas_producto AS MATERIALIZED (
        SELECT
-           p.product_id,
+           p.id_producto,
            p.product_name,
            p.category_id,
            SUM(oi.quantity * oi.unit_price) AS ingreso_producto
        FROM productos p
-       INNER JOIN order_items oi ON oi.product_id = p.product_id
+       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
-       GROUP BY p.product_id, p.product_name, p.category_id
+       GROUP BY p.id_producto, p.product_name, p.category_id
    )
    SELECT COUNT(*), SUM(ingreso_producto)
    FROM ventas_producto;
@@ -1278,13 +1278,13 @@ SELECT COUNT(*) AS filas_version_cte
 FROM (
     WITH
     ventas_producto AS (
-        SELECT p.product_id, p.product_name, p.category_id,
+        SELECT p.id_producto, p.product_name, p.category_id,
                SUM(oi.quantity * oi.unit_price) AS ingreso_producto
         FROM productos p
-        INNER JOIN order_items oi ON oi.product_id = p.product_id
+        INNER JOIN order_items oi ON oi.id_producto = p.id_producto
         INNER JOIN orders o ON o.order_id = oi.order_id
         WHERE o.status != 'cancelled'
-        GROUP BY p.product_id, p.product_name, p.category_id
+        GROUP BY p.id_producto, p.product_name, p.category_id
     ),
     productos_rankeados AS (
         SELECT vp.*, c_hoja.parent_id AS cat_raiz_id,
@@ -1619,14 +1619,14 @@ INNER JOIN cte_b b ON a.category_id = b.parent_cat_id;
 WITH
 ventas_producto AS (
     SELECT
-        product_id  AS vp_product_id,   -- prefijo para evitar ambigüedad
+        id_producto  AS vp_id_producto,   -- prefijo para evitar ambigüedad
         category_id AS vp_category_id,
         SUM(quantity * unit_price) AS ingreso
     FROM order_items oi
     INNER JOIN orders o ON o.order_id = oi.order_id
-    GROUP BY product_id, category_id
+    GROUP BY id_producto, category_id
 )
-SELECT vp_product_id, vp_category_id, ingreso
+SELECT vp_id_producto, vp_category_id, ingreso
 FROM ventas_producto;
 ```
 
@@ -1693,14 +1693,14 @@ WHERE tablename = 'productos' AND indexname = 'idx_productos_category_id';
 
 -- Alternativa más eficiente: reescribir como JOIN con GROUP BY
 -- En lugar de subconsulta correlacionada:
-SELECT p.product_id, p.product_name, p.price
+SELECT p.id_producto, p.product_name, p.price
 FROM productos p
 WHERE p.price > (
     SELECT AVG(p2.price) FROM productos p2 WHERE p2.category_id = p.category_id
 );
 
 -- Versión eficiente con JOIN:
-SELECT p.product_id, p.product_name, p.price
+SELECT p.id_producto, p.product_name, p.price
 FROM productos p
 INNER JOIN (
     SELECT category_id, AVG(price) AS avg_price
