@@ -188,7 +188,9 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
 
 1. Manteniéndote conectado a `ventas_db` en psql, ejecuta el siguiente script de inserción de datos. Puedes copiarlo completo y pegarlo en la terminal:
 
-   ```sql
+
+```sql
+
    -- DML: Insertar categorías de productos
    INSERT INTO categorias (nombre, descripcion) VALUES
        ('Electrónica',     'Dispositivos electrónicos y accesorios tecnológicos'),
@@ -199,6 +201,11 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
        ('Alimentos',       'Productos alimenticios y bebidas'),
        ('Juguetes',        'Juguetes y entretenimiento infantil'),
        ('Belleza',         'Cosméticos, perfumes y cuidado personal');
+```
+    
+  <br/>
+
+```sql
 
    -- DML: Insertar productos
    INSERT INTO productos (nombre, precio_unitario, stock, id_categoria) VALUES
@@ -236,6 +243,12 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
        ('Perfume Floral 100ml',       95.00, 150,  8),
        ('Producto Sin Venta',        999.99, 10, 1);
 
+```
+
+<br/>
+
+```sql
+
    -- DML: Insertar vendedores
    INSERT INTO vendedores (nombre, apellido, region, correo) VALUES
        ('Carlos',   'Mendoza',   'Bogotá',      'cmendoza@ventas.co'),
@@ -246,6 +259,12 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
        ('Sofía',    'Morales',   'Medellín',    'smorales@ventas.co'),
        ('Julián',   'Vargas',    'Cali',        NULL),
        ('Daniela',  'Castro',    'Barranquilla','dcastro@ventas.co');
+
+```
+
+<br/>
+
+```sql
 
    -- DML: Insertar clientes
    INSERT INTO clientes (nombre, apellido, correo, ciudad, pais, fecha_registro) VALUES
@@ -270,6 +289,12 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
        ('Catalina',  'Núñez',      'catalina.n@email.com',     'Medellín',     'Colombia', '2024-01-17'),
        ('Tomás',     'Aguilar',    'tomas.a@email.com',        'Cali',         'Colombia', '2024-02-28'),
        ('Lucía',     'Islas',      'lucy.is@email.com',        'Ciudad de México', 'México', '2026-03-28');
+
+```
+
+<br/>
+
+```sql
 
    -- DML: Insertar órdenes
    INSERT INTO ordenes (id_cliente, id_vendedor, fecha_orden, estado, ciudad_envio) VALUES
@@ -303,6 +328,12 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
        ( 8,  6, '2024-02-19', 'entregado',  'Bogotá'),
        (10,  2, '2024-03-04', 'entregado',  'Bogotá'),
        (12,  3, '2024-03-18', 'pendiente',  'Cali');
+
+```
+
+<br/>
+
+```sql
 
    -- DML: Insertar detalles de órdenes
    INSERT INTO detalle_ordenes (id_orden, id_producto, cantidad, precio_venta, descuento) VALUES
@@ -360,11 +391,12 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
        (29, 31, 2,   28.00, 5.00),
        (30, 17, 1,  120.00, 0.00),
        (30, 26, 2,   24.00, 0.00);
-   ```
+
+```
 
 2. Verifica el conteo de registros en cada tabla:
 
-   ```sql
+```sql
    -- Verificar cantidad de registros por tabla
    SELECT 'categorias'      AS tabla, COUNT(*) AS registros FROM categorias
    UNION ALL
@@ -377,7 +409,7 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
    SELECT 'ordenes',                  COUNT(*)               FROM ordenes
    UNION ALL
    SELECT 'detalle_ordenes',          COUNT(*)               FROM detalle_ordenes;
-   ```
+```
 
 <br/>
 
