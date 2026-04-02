@@ -69,28 +69,28 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    docker exec -it curso_postgres psql -U postgres -d ventas_db
    ```
 
-2. Crea la tabla `categories` con soporte de jerarquía padre-hijo:
+2. Crea la tabla `categorias` con soporte de jerarquía padre-hijo:
 
    ```sql
    -- Tabla de categorías con jerarquía padre-hijo
-   CREATE TABLE IF NOT EXISTS categories (
+   CREATE TABLE IF NOT EXISTS categorias (
        category_id   SERIAL PRIMARY KEY,
        category_name VARCHAR(100) NOT NULL,
-       parent_id     INTEGER REFERENCES categories(category_id),
+       parent_id     INTEGER REFERENCES categorias(category_id),
        description   TEXT,
        created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
    );
 
    -- Comentario descriptivo en la tabla
-   COMMENT ON TABLE categories IS 'Jerarquía de categorías de productos (padre-hijo)';
-   COMMENT ON COLUMN categories.parent_id IS 'NULL indica categoría raíz; referencia a category_id del padre';
+   COMMENT ON TABLE categorias IS 'Jerarquía de categorías de productos (padre-hijo)';
+   COMMENT ON COLUMN categorias.parent_id IS 'NULL indica categoría raíz; referencia a category_id del padre';
    ```
 
 3. Inserta los datos de categorías con tres niveles jerárquicos:
 
    ```sql
    -- Nivel 1: Categorías raíz (parent_id = NULL)
-   INSERT INTO categories (category_name, parent_id, description) VALUES
+   INSERT INTO categorias (category_name, parent_id, description) VALUES
    ('Electrónica',       NULL, 'Dispositivos y equipos electrónicos'),
    ('Ropa y Moda',       NULL, 'Prendas de vestir y accesorios'),
    ('Hogar y Jardín',    NULL, 'Artículos para el hogar y jardín'),
@@ -98,7 +98,7 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ('Libros y Medios',   NULL, 'Libros, música, películas y software');
 
    -- Nivel 2: Subcategorías (referencia a categorías raíz)
-   INSERT INTO categories (category_name, parent_id, description) VALUES
+   INSERT INTO categorias (category_name, parent_id, description) VALUES
    ('Smartphones',       1, 'Teléfonos inteligentes y accesorios'),
    ('Laptops',           1, 'Computadoras portátiles'),
    ('Audio',             1, 'Auriculares, altavoces y equipos de sonido'),
@@ -116,7 +116,7 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ('Técnicos',          5, 'Libros técnicos y de programación');
 
    -- Nivel 3: Sub-subcategorías
-   INSERT INTO categories (category_name, parent_id, description) VALUES
+   INSERT INTO categorias (category_name, parent_id, description) VALUES
    ('iPhone',            6,  'Smartphones de Apple'),
    ('Android',           6,  'Smartphones con sistema Android'),
    ('Gaming Laptops',    7,  'Laptops para videojuegos de alto rendimiento'),
@@ -179,7 +179,7 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ```sql
    -- Agregar columna de categoría a productos (si no existe)
    ALTER TABLE productos
-       ADD COLUMN IF NOT EXISTS category_id INTEGER REFERENCES categories(category_id);
+       ADD COLUMN IF NOT EXISTS category_id INTEGER REFERENCES categorias(category_id);
 
    -- Asignar categorías a los productos existentes de forma distribuida
    -- Asumiendo que productos tiene al menos 20 registros de la práctica anterior
@@ -213,30 +213,6 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
 
 <br/>
 
-**Salida Esperada:**
-
-```
-CREATE TABLE
-COMMENT
-INSERT 0 5
-INSERT 0 15
-INSERT 0 6
-CREATE TABLE
-COMMENT
-INSERT 0 1
-INSERT 0 3
-INSERT 0 4
-INSERT 0 5
-ALTER TABLE
-UPDATE XX   -- (número de productos actualizados)
- productos_sin_categoria
--------------------------
-                       0
-(1 row)
-```
-
-<br/>
-
 **Verificación:**
 
 ```sql
@@ -245,7 +221,7 @@ SELECT category_id, category_name, parent_id,
        CASE WHEN parent_id IS NULL THEN 'Raíz'
             ELSE 'Subcategoría'
        END AS nivel
-FROM categories
+FROM categorias
 ORDER BY parent_id NULLS FIRST, category_id
 LIMIT 10;
 
@@ -327,7 +303,7 @@ ORDER BY manager_id NULLS FIRST, employee_id;
        WHERE p.category_id IS NOT NULL
        GROUP BY p.category_id
    ) AS resumen
-   INNER JOIN categories c ON c.category_id = resumen.category_id
+   INNER JOIN categorias c ON c.category_id = resumen.category_id
    ORDER BY resumen.precio_promedio DESC;
    ```
 
@@ -445,7 +421,7 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
        c.category_name,
        p.price
    FROM productos p
-   INNER JOIN categories c ON c.category_id = p.category_id
+   INNER JOIN categorias c ON c.category_id = p.category_id
    WHERE p.price > (
        SELECT AVG(p2.price)
        FROM productos p2
@@ -583,7 +559,7 @@ WHERE p.price > cat_avg.avg_price;
        rc.precio_maximo,
        rc.precio_minimo
    FROM resumen_categorias rc
-   INNER JOIN categories c ON c.category_id = rc.category_id
+   INNER JOIN categorias c ON c.category_id = rc.category_id
    ORDER BY rc.precio_promedio DESC;
    ```
 
@@ -627,7 +603,7 @@ WHERE p.price > cat_avg.avg_price;
                ORDER BY pe.ingreso_total DESC
            ) AS rank_en_categoria
        FROM productos_enriquecidos pe
-       INNER JOIN categories c ON c.category_id = pe.category_id
+       INNER JOIN categorias c ON c.category_id = pe.category_id
    )
    -- Query final: mostrar solo el top 3 por categoría
    SELECT
@@ -763,19 +739,19 @@ WHERE p.price > (
    -- Categorías raíz (nivel 1):
 
    SELECT category_id, category_name, parent_id
-   FROM categories
+   FROM categorias
    WHERE parent_id IS NULL;
 
    -- Hijos directos de "Electrónica" (category_id = 1):
    SELECT category_id, category_name, parent_id
-   FROM categories
+   FROM categorias
    WHERE parent_id = 1;
 
    -- Nietos de "Electrónica" (hijos de sus hijos):
    SELECT category_id, category_name, parent_id
-   FROM categories
+   FROM categorias
    WHERE parent_id IN (
-       SELECT category_id FROM categories WHERE parent_id = 1
+       SELECT category_id FROM categorias WHERE parent_id = 1
    );
 
    ```
@@ -795,7 +771,7 @@ WHERE p.price > (
            0                           AS nivel,          -- nivel 0 = raíz
            category_name::TEXT         AS ruta_completa,  -- ruta comienza con el nombre
            ARRAY[category_id]          AS ids_ruta        -- array para detectar ciclos
-       FROM categories
+       FROM categorias
        WHERE parent_id IS NULL
 
        UNION ALL
@@ -809,7 +785,7 @@ WHERE p.price > (
            jc.nivel + 1,                                          -- incrementar nivel
            (jc.ruta_completa || ' > ' || c.category_name)::TEXT, -- construir ruta
            jc.ids_ruta || c.category_id                          -- agregar al array
-       FROM categories c
+       FROM categorias c
        INNER JOIN jerarquia_categorias jc ON jc.category_id = c.parent_id
        WHERE NOT c.category_id = ANY(jc.ids_ruta)  -- prevenir ciclos infinitos
    )
@@ -933,7 +909,7 @@ WHERE p.price > (
            parent_id,
            0 AS nivel,
            category_name::TEXT AS ruta
-       FROM categories
+       FROM categorias
        WHERE parent_id IS NULL
 
        UNION ALL
@@ -944,7 +920,7 @@ WHERE p.price > (
            c.parent_id,
            j.nivel + 1,
            (j.ruta || ' > ' || c.category_name)::TEXT
-       FROM categories c
+       FROM categorias c
        INNER JOIN jerarquia j ON j.category_id = c.parent_id
    ),
    ventas_categoria AS (
@@ -1004,10 +980,10 @@ WHERE p.price > (
 -- Verificar que el CTE recursivo encuentra todos los niveles
 WITH RECURSIVE jerarquia AS (
     SELECT category_id, category_name, parent_id, 0 AS nivel
-    FROM categories WHERE parent_id IS NULL
+    FROM categorias WHERE parent_id IS NULL
     UNION ALL
     SELECT c.category_id, c.category_name, c.parent_id, j.nivel + 1
-    FROM categories c INNER JOIN jerarquia j ON j.category_id = c.parent_id
+    FROM categorias c INNER JOIN jerarquia j ON j.category_id = c.parent_id
 )
 SELECT nivel, COUNT(*) AS categorias_en_nivel
 FROM jerarquia
@@ -1041,13 +1017,13 @@ ORDER BY nivel;
                FROM order_items oi2
                INNER JOIN orders o2       ON o2.order_id = oi2.order_id
                INNER JOIN productos p2     ON p2.id_producto = oi2.id_producto
-               INNER JOIN categories c2   ON c2.category_id = p2.category_id
+               INNER JOIN categorias c2   ON c2.category_id = p2.category_id
                WHERE o2.status != 'cancelled'
                  AND (
                      c2.category_id = cat_raiz.category_id
                      OR c2.parent_id = cat_raiz.category_id
                      OR c2.parent_id IN (
-                         SELECT category_id FROM categories
+                         SELECT category_id FROM categorias
                          WHERE parent_id = cat_raiz.category_id
                      )
                  )
@@ -1070,8 +1046,8 @@ ORDER BY nivel;
        WHERE o.status != 'cancelled'
        GROUP BY p.id_producto, p.product_name, p.category_id
    ) prod_ranking
-   INNER JOIN categories cat_leaf  ON cat_leaf.category_id = prod_ranking.category_id
-   INNER JOIN categories cat_raiz  ON (
+   INNER JOIN categorias cat_leaf  ON cat_leaf.category_id = prod_ranking.category_id
+   INNER JOIN categorias cat_raiz  ON (
        cat_raiz.category_id = cat_leaf.parent_id
        OR cat_raiz.category_id = cat_leaf.category_id
    )
@@ -1104,8 +1080,8 @@ ORDER BY nivel;
            hoja.category_id      AS cat_hoja_id,
            COALESCE(raiz.category_id, hoja.category_id) AS cat_raiz_id,
            COALESCE(raiz.category_name, hoja.category_name) AS cat_raiz_nombre
-       FROM categories hoja
-       LEFT JOIN categories raiz ON raiz.category_id = hoja.parent_id
+       FROM categorias hoja
+       LEFT JOIN categorias raiz ON raiz.category_id = hoja.parent_id
                                  AND raiz.parent_id IS NULL
    ),
    -- CTE 3: ventas totales por categoría raíz
@@ -1169,8 +1145,8 @@ ORDER BY nivel;
        WHERE o.status != 'cancelled'
        GROUP BY p.id_producto, p.product_name, p.category_id
    ) prod_ranking
-   INNER JOIN categories cat_leaf ON cat_leaf.category_id = prod_ranking.category_id
-   INNER JOIN categories cat_raiz ON cat_raiz.category_id = cat_leaf.parent_id
+   INNER JOIN categorias cat_leaf ON cat_leaf.category_id = prod_ranking.category_id
+   INNER JOIN categorias cat_raiz ON cat_raiz.category_id = cat_leaf.parent_id
    WHERE cat_raiz.parent_id IS NULL
      AND prod_ranking.rank_en_categoria <= 5
    ORDER BY cat_raiz.category_name, prod_ranking.rank_en_categoria;
@@ -1201,7 +1177,7 @@ ORDER BY nivel;
                ORDER BY vp.ingreso_producto DESC
            ) AS rank_en_categoria
        FROM ventas_producto vp
-       INNER JOIN categories c_hoja ON c_hoja.category_id = vp.category_id
+       INNER JOIN categorias c_hoja ON c_hoja.category_id = vp.category_id
        WHERE c_hoja.parent_id IS NOT NULL
    )
    SELECT
@@ -1210,7 +1186,7 @@ ORDER BY nivel;
        ROUND(pr.ingreso_producto, 2) AS ingreso_producto,
        pr.rank_en_categoria
    FROM productos_rankeados pr
-   INNER JOIN categories c_raiz ON c_raiz.category_id = pr.cat_raiz_id
+   INNER JOIN categorias c_raiz ON c_raiz.category_id = pr.cat_raiz_id
    WHERE pr.rank_en_categoria <= 5
    ORDER BY c_raiz.category_name, pr.rank_en_categoria;
    ```
@@ -1291,7 +1267,7 @@ FROM (
                RANK() OVER (PARTITION BY c_hoja.parent_id
                             ORDER BY vp.ingreso_producto DESC) AS rnk
         FROM ventas_producto vp
-        INNER JOIN categories c_hoja ON c_hoja.category_id = vp.category_id
+        INNER JOIN categorias c_hoja ON c_hoja.category_id = vp.category_id
         WHERE c_hoja.parent_id IS NOT NULL
     )
     SELECT pr.product_name
@@ -1385,7 +1361,7 @@ ORDER BY categoria_raiz, rank;
 
 ### Criterios de Éxito
 
-- [ ] La tabla `categories` existe con 21 filas y relación padre-hijo correcta (5 raíz, 10 nivel-2, 6 nivel-3)
+- [ ] La tabla `categorias` existe con 21 filas y relación padre-hijo correcta (5 raíz, 10 nivel-2, 6 nivel-3)
 - [ ] La tabla `employees` existe con 13 filas y 4 niveles jerárquicos
 - [ ] La columna `productos.category_id` está poblada sin valores NULL
 - [ ] Las subconsultas correlacionadas en `SELECT` y `WHERE` devuelven resultados consistentes con los JOINs equivalentes
@@ -1402,7 +1378,7 @@ ORDER BY categoria_raiz, rank;
    ```sql
    -- Test 1: Contar filas en tablas nuevas
    SELECT
-       (SELECT COUNT(*) FROM categories)  AS total_categorias,
+       (SELECT COUNT(*) FROM categorias)  AS total_categorias,
        (SELECT COUNT(*) FROM employees)   AS total_empleados,
        (SELECT COUNT(*) FROM productos WHERE category_id IS NOT NULL) AS productos_con_cat;
    ```
@@ -1413,10 +1389,10 @@ ORDER BY categoria_raiz, rank;
    ```sql
    -- Test 2: No debe haber categorías con parent_id apuntando a IDs inexistentes
    SELECT COUNT(*) AS referencias_invalidas
-   FROM categories c
+   FROM categorias c
    WHERE c.parent_id IS NOT NULL
      AND NOT EXISTS (
-         SELECT 1 FROM categories p WHERE p.category_id = c.parent_id
+         SELECT 1 FROM categorias p WHERE p.category_id = c.parent_id
      );
    ```
    **Resultado Esperado:** `referencias_invalidas = 0`
@@ -1426,10 +1402,10 @@ ORDER BY categoria_raiz, rank;
    ```sql
    -- Test 3: Distribución de niveles en la jerarquía de categorías
    WITH RECURSIVE jerarquia AS (
-       SELECT category_id, 0 AS nivel FROM categories WHERE parent_id IS NULL
+       SELECT category_id, 0 AS nivel FROM categorias WHERE parent_id IS NULL
        UNION ALL
        SELECT c.category_id, j.nivel + 1
-       FROM categories c INNER JOIN jerarquia j ON j.category_id = c.parent_id
+       FROM categorias c INNER JOIN jerarquia j ON j.category_id = c.parent_id
    )
    SELECT nivel, COUNT(*) AS cantidad
    FROM jerarquia
@@ -1505,7 +1481,7 @@ ORDER BY categoria_raiz, rank;
 ### Issue 1: Error "infinite recursion detected in rules for relation" en CTE Recursivo
 
 **Síntomas:**
-- PostgreSQL lanza `ERROR: infinite recursion detected in rules for relation "categories"` o similar
+- PostgreSQL lanza `ERROR: infinite recursion detected in rules for relation "categorias"` o similar
 - La consulta `WITH RECURSIVE` no termina y debe cancelarse con `Ctrl+C`
 
 **Causa:**
@@ -1517,7 +1493,7 @@ Los datos contienen un ciclo en la jerarquía (por ejemplo, la categoría A tien
 -- Verificar si existen ciclos en la jerarquía de categorías
 WITH RECURSIVE deteccion_ciclos AS (
     SELECT category_id, parent_id, ARRAY[category_id] AS visitados, FALSE AS es_ciclo
-    FROM categories
+    FROM categorias
     WHERE parent_id IS NULL
 
     UNION ALL
@@ -1525,7 +1501,7 @@ WITH RECURSIVE deteccion_ciclos AS (
     SELECT c.category_id, c.parent_id,
            dc.visitados || c.category_id,
            c.category_id = ANY(dc.visitados)
-    FROM categories c
+    FROM categorias c
     INNER JOIN deteccion_ciclos dc ON dc.category_id = c.parent_id
     WHERE NOT dc.es_ciclo
 )
@@ -1534,7 +1510,7 @@ FROM deteccion_ciclos
 WHERE es_ciclo = TRUE;
 
 -- Si hay ciclos, corregirlos con UPDATE:
--- UPDATE categories SET parent_id = NULL WHERE category_id = <id_con_ciclo>;
+-- UPDATE categorias SET parent_id = NULL WHERE category_id = <id_con_ciclo>;
 
 -- Asegurarse de incluir siempre la cláusula anti-ciclo en CTEs recursivos:
 -- WHERE NOT c.category_id = ANY(ids_ruta)  -- o condición equivalente
@@ -1560,17 +1536,17 @@ Uso incorrecto de `UNION ALL` vs `UNION` en el CTE recursivo, o condición de JO
 ```sql
 -- Diagnóstico: verificar que la parte ancla solo incluye raíces reales
 SELECT COUNT(*) AS total_raices
-FROM categories
+FROM categorias
 WHERE parent_id IS NULL;  -- Debe ser 5
 
 -- Verificar que UNION ALL no genera duplicados no deseados
 -- Si hay duplicados, usar UNION en lugar de UNION ALL:
 WITH RECURSIVE jerarquia AS (
     SELECT category_id, category_name, parent_id, 0 AS nivel
-    FROM categories WHERE parent_id IS NULL
+    FROM categorias WHERE parent_id IS NULL
     UNION  -- <-- UNION en lugar de UNION ALL elimina duplicados (más lento)
     SELECT c.category_id, c.category_name, c.parent_id, j.nivel + 1
-    FROM categories c
+    FROM categorias c
     INNER JOIN jerarquia j ON j.category_id = c.parent_id
 )
 SELECT nivel, COUNT(*) FROM jerarquia GROUP BY nivel ORDER BY nivel;
@@ -1598,16 +1574,16 @@ Cuando múltiples CTEs en una cadena tienen columnas con el mismo nombre, y el q
 ```sql
 -- INCORRECTO: ambigüedad por nombres repetidos
 WITH
-cte_a AS (SELECT category_id, category_name FROM categories),
-cte_b AS (SELECT category_id, parent_id FROM categories)
+cte_a AS (SELECT category_id, category_name FROM categorias),
+cte_b AS (SELECT category_id, parent_id FROM categorias)
 SELECT category_id  -- ¿de cte_a o cte_b?
 FROM cte_a
 INNER JOIN cte_b ON cte_a.category_id = cte_b.category_id;
 
 -- CORRECTO: siempre calificar con alias de tabla
 WITH
-cte_a AS (SELECT category_id, category_name FROM categories),
-cte_b AS (SELECT category_id AS parent_cat_id, parent_id FROM categories)
+cte_a AS (SELECT category_id, category_name FROM categorias),
+cte_b AS (SELECT category_id AS parent_cat_id, parent_id FROM categorias)
 SELECT
     a.category_id,
     a.category_name,
@@ -1726,24 +1702,24 @@ ALTER TABLE productos DROP COLUMN IF EXISTS category_id;
 
 -- Eliminar tablas nuevas (en orden correcto por dependencias)
 DROP TABLE IF EXISTS employees CASCADE;
-DROP TABLE IF EXISTS categories CASCADE;
+DROP TABLE IF EXISTS categorias CASCADE;
 
 -- Verificar que las tablas fueron eliminadas
 SELECT tablename
 FROM pg_tables
 WHERE schemaname = 'public'
-  AND tablename IN ('categories', 'employees');
+  AND tablename IN ('categorias', 'employees');
 -- Debe devolver 0 filas
 ```
 
-> **Advertencia:** No ejecutes el script de limpieza si planeas continuar con la práctica 3.2. Las tablas `categories` y `employees`, y la columna `productos.category_id` son prerrequisitos para todos las prácticas del capítulo 3. Si accidentalmente las eliminas, puedes restaurarlas ejecutando el script de setup: `labs/3-1/setup/3-1-setup.sql` disponible en el repositorio Git del curso.
+> **Advertencia:** No ejecutes el script de limpieza si planeas continuar con la práctica 3.2. Las tablas `categorias` y `employees`, y la columna `productos.category_id` son prerrequisitos para todos las prácticas del capítulo 3. Si accidentalmente las eliminas, puedes restaurarlas ejecutando el script de setup: `labs/3-1/setup/3-1-setup.sql` disponible en el repositorio Git del curso.
 
 
 ```bash
 # Para verificar el estado actual del esquema sin modificarlo:
 docker exec -it curso_postgres psql -U postgres -d ventas_db -c "\dt"
 docker exec -it curso_postgres psql -U postgres -d ventas_db \
-  -c "SELECT COUNT(*) FROM categories; SELECT COUNT(*) FROM employees;"
+  -c "SELECT COUNT(*) FROM categorias; SELECT COUNT(*) FROM employees;"
 ```
 
 <br/>
