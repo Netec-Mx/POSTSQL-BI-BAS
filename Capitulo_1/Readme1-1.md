@@ -2,19 +2,7 @@
 
 <br/><br/>
 
-## Descripción General
-
-En este laboratorio configurarás desde cero el entorno de desarrollo que utilizarás durante **todo el curso**. Levantarás un contenedor PostgreSQL 16 junto con pgAdmin 4 usando Docker Compose, realizarás tus primeras conexiones al motor de base de datos y explorarás los comandos fundamentales del cliente `psql`. Este entorno es la base sobre la que construirás todos los ejercicios de SQL avanzado, optimización e integración con Power BI de los módulos siguientes.
-
-La relevancia práctica de este laboratorio va más allá del curso: saber levantar un entorno PostgreSQL reproducible con Docker es una habilidad directamente aplicable en equipos de desarrollo y análisis de datos del mundo real, donde la consistencia del entorno entre desarrolladores es crítica.
-
-> **Nota de Seguridad:** Este laboratorio utiliza credenciales simplificadas (`postgres`/`postgres`) para facilitar el aprendizaje. Estas configuraciones son **exclusivamente para entornos de desarrollo local** y **jamás deben usarse en producción**. En producción, siempre usa contraseñas complejas, roles con privilegios mínimos y conexiones cifradas con TLS.
-
-> **Orden secuencial obligatorio:** Este es el primer laboratorio del curso. Todos los laboratorios posteriores dependen del entorno configurado aquí. Complétalo íntegramente antes de avanzar al laboratorio 02-00-01.
-
-<br/><br/>
-
-## Objetivos de Aprendizaje
+## Objetivos
 
 Al completar este laboratorio, serás capaz de:
 

@@ -7,15 +7,7 @@
 
 <br/><br/>
 
-## Descripción General
-
-En este laboratorio construirás y consultarás un dataset de ventas minoristas compuesto por seis tablas relacionadas: `clientes`, `productos`, `categorias`, `vendedores`, `ordenes` y `detalle_ordenes`. Partiendo desde SELECTs simples con filtros WHERE, avanzarás progresivamente hacia consultas multi-tabla con distintos tipos de JOIN, manejo de valores NULL y análisis agregados con GROUP BY. Al finalizar, serás capaz de responder preguntas de negocio concretas usando SQL como herramienta analítica, aplicando todas las convenciones de estilo y reglas de escritura estudiadas en la Lección 2.1.
-
-Este laboratorio es el punto de partida del dataset de ventas que se reutilizará y enriquecerá en todos los laboratorios posteriores del curso. Es fundamental completarlo en su totalidad antes de avanzar al Laboratorio 03-00-01.
-
-<br/><br/>
-
-## Objetivos de Aprendizaje
+## Objetivos
 
 Al completar este laboratorio, serás capaz de:
 
@@ -58,21 +50,21 @@ Antes de comenzar, verifica que tu entorno del Laboratorio 01-00-01 esté operat
 
 ```bash
 # Verificar que el contenedor PostgreSQL está en ejecución
-docker ps --filter "name=postgres_lab"
+docker ps --filter "name=curso_postgres"
 ```
 
 Si el contenedor no aparece en la lista, inícialo:
 
 ```bash
 # Iniciar el contenedor (nombre puede variar según tu configuración del Lab 01-00-01)
-docker start postgres_lab
+docker start curso_postgres
 ```
 
 Verifica la conectividad accediendo a psql:
 
 ```bash
 # Conectarse a psql dentro del contenedor
-docker exec -it postgres_lab psql -U postgres
+docker exec -it curso_postgres psql -U postgres
 ```
 
 Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
@@ -88,7 +80,7 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
 1. Conéctate al contenedor PostgreSQL mediante psql:
 
    ```bash
-   docker exec -it postgres_lab psql -U postgres
+   docker exec -it curso_postgres psql -U postgres
    ```
 
 2. Crea la base de datos `ventas_db` y conéctate a ella:
@@ -241,7 +233,8 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
        ('LEGO Classic 500pz',         65.00, 120,  7),
        ('Muñeca Interactiva',         45.00, 100,  7),
        ('Crema Hidratante SPF50',     28.00, 300,  8),
-       ('Perfume Floral 100ml',       95.00, 150,  8);
+       ('Perfume Floral 100ml',       95.00, 150,  8),
+       ('Producto Sin Venta',        999.99, 10, 1);
 
    -- DML: Insertar vendedores
    INSERT INTO vendedores (nombre, apellido, region, correo) VALUES
@@ -275,7 +268,8 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
        ('Mariana',   'Reyes',      'mariana.r@email.com',      'Cali',         'Colombia', '2023-11-20'),
        ('Daniel',    'Ortiz',      'daniel.o@email.com',       'Bogotá',       'Colombia', '2023-12-05'),
        ('Catalina',  'Núñez',      'catalina.n@email.com',     'Medellín',     'Colombia', '2024-01-17'),
-       ('Tomás',     'Aguilar',    'tomas.a@email.com',        'Cali',         'Colombia', '2024-02-28');
+       ('Tomás',     'Aguilar',    'tomas.a@email.com',        'Cali',         'Colombia', '2024-02-28'),
+       ('Lucía',     'Islas',      'lucy.is@email.com',        'Ciudad de México', 'México', '2026-03-28');
 
    -- DML: Insertar órdenes
    INSERT INTO ordenes (id_cliente, id_vendedor, fecha_orden, estado, ciudad_envio) VALUES
@@ -393,8 +387,8 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
       tabla       | registros
 ------------------+-----------
  categorias       |         8
- productos        |        32
- clientes         |        20
+ productos        |        33
+ clientes         |        21
  vendedores       |         8
  ordenes          |        30
  detalle_ordenes  |        54
@@ -942,54 +936,20 @@ Escribe y ejecuta una consulta SQL para cada una de las siguientes preguntas de 
 
 1. **Ejercicio 8.1:** ¿Cuáles son los 3 productos más vendidos en términos de unidades totales? Muestra el nombre del producto, la categoría y el total de unidades vendidas.
 
-   > 💡 **Pista:** Necesitarás `SUM(cantidad)` con `GROUP BY` y un `LIMIT 3`.
+   > **Pista:** Necesitarás `SUM(cantidad)` con `GROUP BY` y un `LIMIT 3`.
 
-   ```sql
-   -- Escribe tu consulta aquí
-   SELECT
-       p.nombre        AS producto,
-       cat.nombre      AS categoria,
-       SUM(d.cantidad) AS unidades_vendidas
-   FROM detalle_ordenes AS d
-   INNER JOIN productos  AS p   ON d.id_producto  = p.id_producto
-   INNER JOIN categorias AS cat ON p.id_categoria = cat.id_categoria
-   GROUP BY p.id_producto, p.nombre, cat.nombre
-   ORDER BY unidades_vendidas DESC
-   LIMIT 3;
-   ```
+
+<br/>
 
 2. **Ejercicio 8.2:** ¿Qué porcentaje del total de órdenes tiene estado 'cancelado'? Muestra el conteo y el porcentaje redondeado a 2 decimales.
 
-   > 💡 **Pista:** Usa `COUNT(*) FILTER (WHERE estado = 'cancelado')` o una subconsulta. La función `ROUND()` y una división con `::NUMERIC` te ayudarán.
+   > **Pista:** Usa `COUNT(*) FILTER (WHERE estado = 'cancelado')` o una subconsulta. La función `ROUND()` y una división con `::NUMERIC` te ayudarán.
 
-   ```sql
-   -- Escribe tu consulta aquí
-   SELECT
-       COUNT(*)                                                             AS total_ordenes,
-       COUNT(*) FILTER (WHERE estado = 'cancelado')                        AS ordenes_canceladas,
-       ROUND(
-           COUNT(*) FILTER (WHERE estado = 'cancelado') * 100.0 / COUNT(*),
-           2
-       )                                                                    AS porcentaje_cancelado
-   FROM ordenes;
-   ```
+<br/>
 
 3. **Ejercicio 8.3:** Lista los productos que nunca han sido vendidos (no aparecen en `detalle_ordenes`). Muestra el nombre del producto, su precio y la categoría.
 
-   > 💡 **Pista:** Usa `LEFT JOIN` entre `productos` y `detalle_ordenes`, filtrando con `IS NULL`.
-
-   ```sql
-   -- Escribe tu consulta aquí
-   SELECT
-       p.nombre         AS producto,
-       p.precio_unitario,
-       cat.nombre       AS categoria
-   FROM productos AS p
-   INNER JOIN categorias AS cat ON p.id_categoria = cat.id_categoria
-   LEFT JOIN  detalle_ordenes AS d ON p.id_producto = d.id_producto
-   WHERE d.id_detalle IS NULL
-   ORDER BY cat.nombre, p.nombre;
-   ```
+   > **Pista:** Usa `LEFT JOIN` entre `productos` y `detalle_ordenes`, filtrando con `IS NULL`.
 
 <br/>
 
@@ -1030,6 +990,8 @@ Escribe y ejecuta una consulta SQL para cada una de las siguientes preguntas de 
 
    **Resultado Esperado:** 6 tablas listadas en el esquema `public`.
 
+<br/>
+
 2. Ejecuta el script de validación completo:
 
    ```sql
@@ -1046,14 +1008,14 @@ Escribe y ejecuta una consulta SQL para cada una de las siguientes preguntas de 
 
        -- Validar productos
        SELECT COUNT(*) INTO v_count FROM productos;
-       IF v_count <> 32 THEN
-           RAISE EXCEPTION 'ERROR: productos tiene % registros, se esperaban 32', v_count;
+       IF v_count <> 33 THEN
+           RAISE EXCEPTION 'ERROR: productos tiene % registros, se esperaban 33', v_count;
        END IF;
 
        -- Validar clientes
        SELECT COUNT(*) INTO v_count FROM clientes;
-       IF v_count <> 20 THEN
-           RAISE EXCEPTION 'ERROR: clientes tiene % registros, se esperaban 20', v_count;
+       IF v_count <> 21 THEN
+           RAISE EXCEPTION 'ERROR: clientes tiene % registros, se esperaban 21', v_count;
        END IF;
 
        -- Validar vendedores
@@ -1079,6 +1041,7 @@ Escribe y ejecuta una consulta SQL para cada una de las siguientes preguntas de 
    $$;
    ```
 
+
    **Resultado Esperado:**
 
    ```
@@ -1086,10 +1049,14 @@ Escribe y ejecuta una consulta SQL para cada una de las siguientes preguntas de 
    DO
    ```
 
+<br/>
+
 3. Verifica que las relaciones de clave foránea están intactas:
 
    ```sql
+
    -- Verificar integridad referencial: todos los productos tienen categoría válida
+
    SELECT COUNT(*) AS productos_sin_categoria
    FROM productos AS p
    LEFT JOIN categorias AS cat ON p.id_categoria = cat.id_categoria
@@ -1207,7 +1174,7 @@ HAVING SUM(d.precio_venta * d.cantidad) > 1000;  -- CORRECTO
 ### Problema 5: El contenedor Docker no responde
 
 **Síntomas:**
-- `docker exec -it postgres_lab psql -U postgres` retorna: `Error response from daemon: Container is not running`
+- `docker exec -it curso_postgres psql -U postgres` retorna: `Error response from daemon: Container is not running`
 
 **Causa:**
 El contenedor está detenido o fue eliminado.
@@ -1216,24 +1183,24 @@ El contenedor está detenido o fue eliminado.
 
 ```bash
 # Verificar el estado de todos los contenedores (incluyendo los detenidos)
-docker ps -a --filter "name=postgres_lab"
+docker ps -a --filter "name=curso_postgres"
 
 # Si el contenedor está detenido (STATUS = Exited), iniciarlo
-docker start postgres_lab
+docker start curso_postgres
 
 # Esperar 5 segundos y verificar que esté en ejecución
 sleep 5
-docker ps --filter "name=postgres_lab"
+docker ps --filter "name=curso_postgres"
 
 # Intentar la conexión nuevamente
-docker exec -it postgres_lab psql -U postgres -d ventas_db
+docker exec -it curso_postgres psql -U postgres -d ventas_db
 ```
 
 <br/><br/>
 
 ## Limpieza
 
-> **ADVERTENCIA CRÍTICA:** **NO ejecutes los comandos de limpieza completa** si planeas continuar con los laboratorios 03-00-01 en adelante. El dataset de ventas (`ventas_db`) es utilizado y enriquecido en todos los laboratorios posteriores. La limpieza total solo debe realizarse si necesitas reiniciar completamente el laboratorio desde cero.
+> **ADVERTENCIA CRÍTICA:** **NO ejecutes los comandos de limpieza completa** si planeas continuar con las práctica del capítulo 3 en adelante. El dataset de ventas (`ventas_db`) es utilizado y enriquecido en todos los laboratorios posteriores. La limpieza total solo debe realizarse si necesitas reiniciar completamente el laboratorio desde cero.
 
 **Limpieza parcial (solo para reiniciar el laboratorio manteniendo la BD):**
 
@@ -1265,14 +1232,14 @@ DROP DATABASE IF EXISTS ventas_db;
 
 ```bash
 # Verificar desde psql que ventas_db ya no existe
-docker exec -it postgres_lab psql -U postgres -c "\l"
+docker exec -it curso_postgres psql -U postgres -c "\l"
 ```
 
-> 💾 **Recomendación:** Antes de cualquier limpieza, crea un backup del estado actual para poder restaurarlo si es necesario:
+> **Recomendación:** Antes de cualquier limpieza, crea un backup del estado actual para poder restaurarlo si es necesario:
 
 ```bash
 # Crear backup de ventas_db antes de limpiar
-docker exec postgres_lab pg_dump -U postgres ventas_db > backup_ventas_db_lab02.sql
+docker exec curso_postgres pg_dump -U postgres ventas_db > backup_ventas_db_lab02.sql
 ```
 
 <br/><br/>
@@ -1304,15 +1271,16 @@ docker exec postgres_lab pg_dump -U postgres ventas_db > backup_ventas_db_lab02.
 
 <br/><br/>
 
-### Reto Integrador — Nivel: Fácil-Intermedio
+## Retos — Nivel: Fácil-Intermedio
 
-> **Instrucciones:** Resuelve las siguientes preguntas de negocio escribiendo una sola consulta SQL por cada una. No se provee solución — el instructor evaluará tu respuesta. Completa este reto antes de avanzar al Laboratorio 03-00-01.
+**Instrucciones:** Resuelve las siguientes preguntas de negocio escribiendo una sola consulta SQL por cada una. No se provee solución — el instructor evaluará tu respuesta. Completa este reto antes de avanzar al Laboratorio 03-00-01.
 
-**Reto A:** Genera un reporte que muestre, para cada ciudad donde hay clientes, el número total de clientes registrados, el número de clientes que han realizado al menos una orden, y el número de clientes que **nunca** han realizado una orden. Ordena por ciudad alfabéticamente.
+A. Genera un reporte que muestre, para cada ciudad donde hay clientes, el número total de clientes registrados, el número de clientes que han realizado al menos una orden, y el número de clientes que **nunca** han realizado una orden. Ordena por ciudad alfabéticamente.
 
-**Reto B:** Encuentra los 5 productos que generaron el mayor ingreso total (suma de subtotales netos: `cantidad * precio_venta - descuento`), pero solo considerando órdenes con estado `'entregado'`. Muestra el nombre del producto, la categoría, el ingreso total y el número de órdenes distintas en que fue vendido.
+B. Encuentra los 5 productos que generaron el mayor ingreso total (suma de subtotales netos: `cantidad * precio_venta - descuento`), pero solo considerando órdenes con estado `'entregado'`. Muestra el nombre del producto, la categoría, el ingreso total y el número de órdenes distintas en que fue vendido.
 
-**Reto C:** Escribe una consulta que liste todos los vendedores junto con el total de ventas que realizaron en el primer semestre de 2023 (enero a junio). Incluye también los vendedores que no tuvieron ventas en ese período (deben aparecer con `0` en el total, no con NULL — usa `COALESCE`). Ordena de mayor a menor total de ventas.
+C. Escribe una consulta que liste todos los vendedores junto con el total de ventas que realizaron en el primer semestre de 2023 (enero a junio). Incluye también los vendedores que no tuvieron ventas en ese período (deben aparecer con `0` en el total, no con NULL — usa `COALESCE`). Ordena de mayor a menor total de ventas.
+
 
 <br/><br/>
 
