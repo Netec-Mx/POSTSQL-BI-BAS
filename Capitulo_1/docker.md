@@ -42,5 +42,6 @@
 <br/>
 
 > **Tip:** Docker trabaja con imágenes (plantillas) y contenedores (instancias en ejecución). Primero descargas una imagen (`pull`) y luego creas un contenedor (`run`).
-```
+
+
 
