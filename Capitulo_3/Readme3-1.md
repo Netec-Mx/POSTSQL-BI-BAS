@@ -6,11 +6,11 @@
 
 Al completar este práctica, serás capaz de:
 
-- [ ] Escribir subconsultas correlacionadas y no correlacionadas en cláusulas `SELECT`, `FROM` y `WHERE` para filtrar y transformar datos del dataset de ventas
-- [ ] Crear CTEs con la cláusula `WITH` para estructurar lógica analítica compleja en pasos legibles y reutilizables
-- [ ] Implementar CTEs recursivos (`WITH RECURSIVE`) para navegar jerarquías de categorías padre-hijo y árboles de empleados
-- [ ] Comparar el rendimiento y la legibilidad entre subconsultas anidadas y CTEs equivalentes usando `EXPLAIN ANALYZE`
-- [ ] Aplicar CTEs encadenados para construir pipelines analíticos paso a paso sobre datos de ventas
+- Escribir subconsultas correlacionadas y no correlacionadas en cláusulas `SELECT`, `FROM` y `WHERE` para filtrar y transformar datos del dataset de ventas
+- Crear CTEs con la cláusula `WITH` para estructurar lógica analítica compleja en pasos legibles y reutilizables
+- Implementar CTEs recursivos (`WITH RECURSIVE`) para navegar jerarquías de categorías padre-hijo y árboles de empleados
+- Comparar el rendimiento y la legibilidad entre subconsultas anidadas y CTEs equivalentes usando `EXPLAIN ANALYZE`
+- Aplicar CTEs encadenados para construir pipelines analíticos paso a paso sobre datos de ventas
 
 <br/><br/>
 
