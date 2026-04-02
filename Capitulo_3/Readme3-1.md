@@ -10,14 +10,14 @@ Al completar este práctica, serás capaz de:
 - Crear CTEs con la cláusula `WITH` para estructurar lógica analítica compleja en pasos legibles y reutilizables
 - Implementar CTEs recursivos (`WITH RECURSIVE`) para navegar jerarquías de categorías padre-hijo y árboles de empleados
 - Comparar el rendimiento y la legibilidad entre subconsultas anidadas y CTEs equivalentes usando `EXPLAIN ANALYZE`
-- Aplicar CTEs encadenados para construir pipelines analíticos paso a paso sobre datos de ventas
+- [ ] Aplicar CTEs encadenados para construir pipelines analíticos paso a paso sobre datos de ventas
 
 <br/><br/>
 
 ## Objetivo Visual
 
 <p align="center">
- <img src="ruta/imagen.png" style="display: block; margin: 0 auto;" width="300"/>
+  <img src="../images/i4.png" style="display: block; margin: 0 auto;" width="600"/>
 </p>
 
 <br/><br/>
