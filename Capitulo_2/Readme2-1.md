@@ -1069,13 +1069,12 @@ Escribe y ejecuta una consulta SQL para cada una de las siguientes preguntas de 
    $$;
    ```
 
+<br/>
 
    **Resultado Esperado:**
 
-   ```
-   NOTICE:  VALIDACIÓN EXITOSA: Todas las tablas tienen los registros correctos.
-   DO
-   ```
+![Resultado esperado práctica 2.1](../images/i2.png)
+  
 
 <br/>
 
