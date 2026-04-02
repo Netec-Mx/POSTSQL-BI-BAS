@@ -9,7 +9,7 @@
 
 ## Objetivos
 
-Al completar este laboratorio, serás capaz de:
+Al completar esta práctica, serás capaz de:
 
 - Escribir consultas SELECT con filtros WHERE usando operadores lógicos (`AND`, `OR`, `NOT`) y de comparación (`=`, `<>`, `>`, `<`, `>=`, `<=`)
 - Aplicar ordenamiento con `ORDER BY` (ASC/DESC) y paginación con `LIMIT` y `OFFSET`
@@ -38,15 +38,13 @@ Al completar este laboratorio, serás capaz de:
 
 ### Acceso Requerido
 
-- Contenedor Docker de PostgreSQL 16 en ejecución (iniciado en el Laboratorio 01-00-01)
+- Contenedor Docker de PostgreSQL 16 en ejecución (iniciado en la práctica 1.1)
 - Acceso a `psql` CLI (dentro del contenedor o instalación local) o pgAdmin 4
 - Permisos de lectura y escritura sobre la base de datos `ventas_db` (usuario `postgres`)
 
 <br/><br/>
 
 ### Configuración Inicial
-
-Antes de comenzar, verifica que tu entorno del Laboratorio 01-00-01 esté operativo:
 
 ```bash
 # Verificar que el contenedor PostgreSQL está en ejecución
@@ -69,8 +67,6 @@ docker exec -it curso_postgres psql -U postgres
 
 Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
 
-> **Nota de Seguridad:** Este laboratorio usa las credenciales `usuario: postgres / contraseña: postgres` exclusivamente para entornos de desarrollo local. **Nunca uses estas credenciales en un entorno de producción.**
-
 <br/><br/>
 
 ## Instrucciones 
@@ -86,7 +82,7 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
 2. Crea la base de datos `ventas_db` y conéctate a ella:
 
    ```sql
-   -- DDL: Crear la base de datos del laboratorio
+   -- DDL: Crear la base de datos de la práctica
    CREATE DATABASE ventas_db;
    \c ventas_db
    ```
@@ -1027,7 +1023,7 @@ Escribe y ejecuta una consulta SQL para cada una de las siguientes preguntas de 
 2. Ejecuta el script de validación completo:
 
    ```sql
-   -- Script de validación del Laboratorio 02-00-01
+   -- Script de validación de la práctica 
    DO $$
    DECLARE
        v_count INTEGER;
@@ -1108,7 +1104,7 @@ Escribe y ejecuta una consulta SQL para cada una de las siguientes preguntas de 
 - Al ejecutar `CREATE DATABASE ventas_db;` aparece el error: `ERROR: database "ventas_db" already exists`
 
 **Causa:**
-La base de datos fue creada en una sesión anterior o en un intento previo del laboratorio.
+La base de datos fue creada en una sesión anterior o en un intento previo a la práctica.
 
 **Solución:**
 
@@ -1232,16 +1228,14 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db
 
 ## Limpieza
 
-> **ADVERTENCIA CRÍTICA:** **NO ejecutes los comandos de limpieza completa** si planeas continuar con las práctica del capítulo 3 en adelante. El dataset de ventas (`ventas_db`) es utilizado y enriquecido en todos los laboratorios posteriores. La limpieza total solo debe realizarse si necesitas reiniciar completamente el laboratorio desde cero.
-
-**Limpieza parcial (solo para reiniciar el laboratorio manteniendo la BD):**
+> **ADVERTENCIA:** **NO ejecutes los comandos de limpieza completa** si planeas continuar con las práctica del capítulo 3 en adelante. El dataset de ventas (`ventas_db`) es utilizado y enriquecido en todos los prácticas siguientes.
 
 ```sql
 -- Conectarse a ventas_db
 \c ventas_db
 
 -- Eliminar datos manteniendo la estructura de tablas
--- USAR SOLO SI NECESITAS REINICIAR EL LABORATORIO
+-- USAR SOLO SI NECESITAS REINICIAR LA PRÁCTICA
 TRUNCATE TABLE detalle_ordenes RESTART IDENTITY CASCADE;
 TRUNCATE TABLE ordenes         RESTART IDENTITY CASCADE;
 TRUNCATE TABLE clientes        RESTART IDENTITY CASCADE;
@@ -1250,13 +1244,13 @@ TRUNCATE TABLE productos       RESTART IDENTITY CASCADE;
 TRUNCATE TABLE categorias      RESTART IDENTITY CASCADE;
 ```
 
-**Limpieza completa (solo si se abandona el laboratorio permanentemente):**
+**Limpieza completa:**
 
 ```sql
 -- Conectarse a la base de datos por defecto antes de eliminar ventas_db
 \c postgres
 
--- Eliminar completamente la base de datos del laboratorio
+-- Eliminar completamente la base de datos de la práctica
 DROP DATABASE IF EXISTS ventas_db;
 ```
 
@@ -1298,7 +1292,7 @@ docker exec curso_postgres pg_dump -U postgres ventas_db > backup_ventas_db_lab0
 - **Diferencia WHERE vs HAVING:** `WHERE` filtra filas individuales antes de la agregación; `HAVING` filtra grupos después de aplicar las funciones de agregación.
 - **NULL no es cero ni cadena vacía:** Los valores NULL requieren operadores especiales (`IS NULL`, `IS NOT NULL`) y la función `COALESCE` para ser manejados en cálculos.
 - **JOIN como puente entre tablas:** El tipo de JOIN determina qué registros se incluyen cuando no hay coincidencia: `INNER` excluye los no coincidentes, `LEFT` los incluye con NULL desde la tabla derecha.
-- **Persistencia del dataset:** Las tablas creadas en este laboratorio son la base de todos los laboratorios posteriores. Mantén el contenedor Docker en ejecución y no elimines `ventas_db`.
+- **Persistencia del dataset:** Las tablas creadas en esta práctica son la base de las siguientes prácticas. Mantén el contenedor Docker en ejecución y no elimines `ventas_db`.
 
 
 <br/><br/>
@@ -1323,7 +1317,7 @@ Resuelve las siguientes preguntas de negocio escribiendo una sola consulta SQL p
 
 - **PostgreSQL Documentation — Functions and Operators**: Documentación de todas las funciones de agregación (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`) y funciones de manejo de NULL (`COALESCE`, `NULLIF`). Disponible en [https://www.postgresql.org/docs/16/functions.html](https://www.postgresql.org/docs/16/functions.html)
 
-- **SQL Style Guide de Simon Holywell**: Guía de estilo para escribir SQL legible y consistente, aplicable directamente a las convenciones practicadas en este laboratorio. Disponible en [https://www.sqlstyle.guide/](https://www.sqlstyle.guide/)
+- **SQL Style Guide de Simon Holywell**: Guía de estilo para escribir SQL legible y consistente, aplicable directamente a las convenciones practicadas en esta práctica. Disponible en [https://www.sqlstyle.guide/](https://www.sqlstyle.guide/)
 
 - **PostgreSQL Documentation — JOIN Types**: Explicación detallada de los tipos de JOIN con diagramas de Venn y ejemplos. Disponible en [https://www.postgresql.org/docs/16/queries-table-expressions.html](https://www.postgresql.org/docs/16/queries-table-expressions.html)
 

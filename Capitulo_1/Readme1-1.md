@@ -4,7 +4,7 @@
 
 ## Objetivos
 
-Al completar este laboratorio, serás capaz de:
+Al completar esta práctica, serás capaz de:
 
 - Verificar que Docker Desktop está correctamente instalado y configurado en tu sistema operativo
 - Crear un archivo `docker-compose.yml` que levante simultáneamente PostgreSQL 16 y pgAdmin 4 con volúmenes persistentes
@@ -43,7 +43,7 @@ Al completar este laboratorio, serás capaz de:
 
 <br/><br/>
 
-## Entorno de Laboratorio
+## Entorno para prácticas
 
 ### Requerimientos de Hardware
 
@@ -72,7 +72,7 @@ Al completar este laboratorio, serás capaz de:
 
 ### Configuración Inicial de Docker Desktop
 
-Antes de comenzar los pasos del laboratorio, configura los límites de memoria de Docker Desktop para evitar que consuma todos los recursos del sistema:
+Antes de comenzar los pasos de la práctica, configura los límites de memoria de Docker Desktop para evitar que consuma todos los recursos del sistema:
 
 **En Windows y macOS (Docker Desktop con interfaz gráfica):**
 
@@ -359,7 +359,7 @@ d-----        15/01/2025  10:00 AM                pgdata
 
 <br/>
 
-   > **Nota sobre los paths en Windows con WSL2:** Si usas Docker Desktop con WSL2 en Windows, los paths relativos (`./pgdata`) funcionan correctamente. Si experimentas problemas de permisos con los volúmenes, consulta la sección de Solución de Problemas al final de este laboratorio.
+   > **Nota sobre los paths en Windows con WSL2:** Si usas Docker Desktop con WSL2 en Windows, los paths relativos (`./pgdata`) funcionan correctamente. Si experimentas problemas de permisos con los volúmenes, consulta la sección de Solución de Problemas al final de esta práctica.
 
 
 3. Verifica que el archivo fue creado correctamente mostrando su contenido:
@@ -1179,7 +1179,7 @@ docker volume ls
 
 ## Limpieza
 
-> **Advertencia Importante:** Los siguientes comandos detendrán los contenedores. **NO ejecutes los comandos que eliminan volúmenes** si quieres conservar los datos para los laboratorios posteriores. El entorno configurado en este laboratorio se reutiliza en todos los módulos del curso.
+> **Advertencia Importante:** Los siguientes comandos detendrán los contenedores. **NO ejecutes los comandos que eliminan volúmenes** si quieres conservar los datos para las prácticas siguientes.  
 
 
 ### Detener los contenedores (sin eliminar datos)
@@ -1202,7 +1202,7 @@ docker compose start
 ### Eliminar completamente el entorno (SOLO si deseas empezar desde cero)
 
 ```bash
-# ADVERTENCIA: Esto elimina TODOS los datos del laboratorio
+# ADVERTENCIA: Esto elimina TODOS los datos de la práctica
 # Solo ejecutar si necesitas reinstalar completamente
 
 # Detener y eliminar contenedores, redes y volúmenes

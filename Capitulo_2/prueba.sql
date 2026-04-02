@@ -1,4 +1,4 @@
--- Script de validación del Laboratorio 02-00-01
+-- Script de validación de la práctica 2.1
 DO $$
 DECLARE
     v_count INTEGER;
