@@ -27,11 +27,14 @@ Este laboratorio es el punto de partida del dataset de ventas que se reutilizar�
 
 
 
-### [Práctica 3. Nombre de la práctica](CHAPTER_03/ch03-cashback-dgs-service/README.md)
+### [Práctica 3.1 Creación de Consultas con Subconsultas y CTEs](Capitulo_3/Readme3-1.md)
 
-  - **Descripción**: xxx.
+## Descripción General
 
-  - ⏱️**Duración estimada**: xx min.
+En este práctica ampliarás el esquema del dataset de ventas incorporando una tabla de categorías jerárquica (relación padre-hijo) y una tabla de empleados con estructura de reporte (manager-subordinado). A partir de ese esquema enriquecido, aprenderás a escribir subconsultas no correlacionadas y correlacionadas en las cláusulas `WHERE`, `FROM` y `SELECT`, para luego refactorizar esas mismas consultas utilizando CTEs (`WITH`) y CTEs recursivos (`WITH RECURSIVE`). La práctica culmina con un ejercicio comparativo que te permitirá evaluar la legibilidad y el plan de ejecución de ambos enfoques, consolidando criterios prácticos para elegir la técnica más adecuada en cada situación analítica.
+
+
+  - **Duración estimada**: 60 min.
 
 
 
