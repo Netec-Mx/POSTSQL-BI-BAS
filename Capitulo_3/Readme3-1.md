@@ -26,23 +26,23 @@ Al completar este práctica, serás capaz de:
 
 ### Conocimientos Requeridos
 
-- Laboratorio 02-00-01 completado con el dataset de ventas cargado en PostgreSQL
+- Práctica 2.1 completado con el dataset de ventas cargado en PostgreSQL
 - Dominio de `SELECT`, `JOIN` (INNER, LEFT, RIGHT) y `GROUP BY` con funciones de agregación
 - Comprensión básica de claves primarias, claves foráneas y relaciones entre tablas
 - Familiaridad con el cliente `psql` o pgAdmin 4 para ejecutar consultas SQL
 
 ### Acceso Requerido
 
-- Contenedor Docker de PostgreSQL 16 en ejecución (configurado en el laboratorio 01-00-01)
+- Contenedor Docker de PostgreSQL 16 en ejecución.
 - Acceso al cliente `psql` dentro del contenedor o desde el host
 - pgAdmin 4 disponible en `http://localhost:8080` (opcional, para visualización del plan de ejecución)
-- Base de datos `ventas_db` con el esquema y datos del laboratorio 02-00-01
+- Base de datos `ventas_db` con el esquema y datos de la práctica 2.1
 
 <br/><br/>
 
 ### Configuración Inicial
 
-Antes de comenzar, verifica que el entorno del laboratorio anterior esté operativo:
+Antes de comenzar, verifica que el entorno de la práctica anterior:
 
 ```bash
 # Verificar que el contenedor de PostgreSQL está en ejecución
@@ -55,7 +55,7 @@ docker start curso_postgres
 docker exec -it curso_postgres psql -U postgres -d ventas_db -c "\dt"
 ```
 
-Si el comando anterior muestra las tablas `products`, `customers`, `orders` y `order_items`, el entorno está listo. En caso contrario, consulta la sección **Solución de Problemas** al final de este laboratorio.
+Si el comando anterior muestra las tablas `products`, `customers`, `orders` y `order_items`, el entorno está listo. En caso contrario, consulta la sección **Solución de Problemas** al final de esta práctica.
 
 <br/><br/>
 
@@ -182,7 +182,7 @@ Si el comando anterior muestra las tablas `products`, `customers`, `orders` y `o
        ADD COLUMN IF NOT EXISTS category_id INTEGER REFERENCES categories(category_id);
 
    -- Asignar categorías a los productos existentes de forma distribuida
-   -- Asumiendo que products tiene al menos 20 registros del laboratorio anterior
+   -- Asumiendo que products tiene al menos 20 registros de la práctica anterior
    UPDATE products SET category_id = (
        CASE
            WHEN product_id % 21 IN (0, 1)  THEN 16  -- iPhone
@@ -1301,7 +1301,7 @@ FROM (
 ```
 
 - Confirma que ambas versiones devuelven el mismo número de filas
-- Anota los tiempos de ejecución de `EXPLAIN ANALYZE` en tu cuaderno de laboratorio
+- Anota los tiempos de ejecución de `EXPLAIN ANALYZE`.
 - Observa si PostgreSQL aplica "CTE inlining" o materialización en cada caso
 
 <br/>
@@ -1715,11 +1715,11 @@ WHERE p.price > cat_avg.avg_price;
 
 ## Limpieza
 
-Al finalizar el laboratorio, los objetos creados deben **mantenerse** ya que serán utilizados en los laboratorios posteriores (03-00-02 en adelante). Sin embargo, si necesitas reiniciar el laboratorio desde cero, ejecuta el siguiente script de limpieza:
+Al finalizar el práctica, los objetos creados deben **mantenerse** ya que serán utilizados en los prácticas siguientes Sin embargo, si necesitas reiniciar la práctica desde cero, ejecuta el siguiente script de limpieza:
 
 ```sql
--- EJECUTAR SOLO SI NECESITAS REINICIAR EL LABORATORIO DESDE CERO
--- Estos objetos son necesarios para los laboratorios 03-00-02 en adelante
+-- EJECUTAR SOLO SI NECESITAS REINICIAR LA PRÁTICA DESDE CERO
+-- Estos objetos son necesarios para las prácticas 3.2 en adelante
 
 -- Eliminar columna category_id de products (revertir cambio del Paso 1)
 ALTER TABLE products DROP COLUMN IF EXISTS category_id;
@@ -1736,7 +1736,7 @@ WHERE schemaname = 'public'
 -- Debe devolver 0 filas
 ```
 
-> **Advertencia:** No ejecutes el script de limpieza si planeas continuar con el laboratorio 03-00-02. Las tablas `categories` y `employees`, y la columna `products.category_id` son prerrequisitos para todos los laboratorios del Módulo 3. Si accidentalmente las eliminas, puedes restaurarlas ejecutando el script de setup: `labs/03-00-01/setup/03-00-01-setup.sql` disponible en el repositorio Git del curso.
+> **Advertencia:** No ejecutes el script de limpieza si planeas continuar con la práctica 3.2. Las tablas `categories` y `employees`, y la columna `products.category_id` son prerrequisitos para todos las prácticas del capítulo 3. Si accidentalmente las eliminas, puedes restaurarlas ejecutando el script de setup: `labs/3-1/setup/3-1-setup.sql` disponible en el repositorio Git del curso.
 
 
 ```bash
