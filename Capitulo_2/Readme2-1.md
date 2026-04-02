@@ -1305,13 +1305,13 @@ docker exec curso_postgres pg_dump -U postgres ventas_db > backup_ventas_db_lab0
 
 ## Retos 
 
-Resuelve las siguientes preguntas de negocio escribiendo una sola consulta SQL por cada una. No se provee solución — el instructor evaluará tu respuesta. Completa este reto antes de avanzar al Laboratorio 03-00-01.
+Resuelve las siguientes preguntas de negocio escribiendo una sola consulta SQL por cada una. No se provee solución.  
 
-**1.** Genera un reporte que muestre, para cada ciudad donde hay clientes, el número total de clientes registrados, el número de clientes que han realizado al menos una orden, y el número de clientes que **nunca** han realizado una orden. Ordena por ciudad alfabéticamente.
+1. Genera un reporte que muestre, para cada ciudad donde hay clientes, el número total de clientes registrados, el número de clientes que han realizado al menos una orden, y el número de clientes que **nunca** han realizado una orden. Ordena por ciudad alfabéticamente.
 
-**2.** Encuentra los 5 productos que generaron el mayor ingreso total (suma de subtotales netos: `cantidad * precio_venta - descuento`), pero solo considerando órdenes con estado `'entregado'`. Muestra el nombre del producto, la categoría, el ingreso total y el número de órdenes distintas en que fue vendido.
+2. Encuentra los 5 productos que generaron el mayor ingreso total (suma de subtotales netos: `cantidad * precio_venta - descuento`), pero solo considerando órdenes con estado `'entregado'`. Muestra el nombre del producto, la categoría, el ingreso total y el número de órdenes distintas en que fue vendido.
 
-**3.** Escribe una consulta que liste todos los vendedores junto con el total de ventas que realizaron en el primer semestre de 2023 (enero a junio). Incluye también los vendedores que no tuvieron ventas en ese período (deben aparecer con `0` en el total, no con NULL — usa `COALESCE`). Ordena de mayor a menor total de ventas.
+3. Escribe una consulta que liste todos los vendedores junto con el total de ventas que realizaron en el primer semestre de 2023 (enero a junio). Incluye también los vendedores que no tuvieron ventas en ese período (deben aparecer con `0` en el total, no con NULL — usa `COALESCE`). Ordena de mayor a menor total de ventas.
 
 
 <br/><br/>
