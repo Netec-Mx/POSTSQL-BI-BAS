@@ -6,11 +6,11 @@
 
 Al completar este práctica, serás capaz de:
 
-- Escribir subconsultas correlacionadas y no correlacionadas en cláusulas `SELECT`, `FROM` y `WHERE` para filtrar y transformar datos del dataset de ventas
-- Crear CTEs con la cláusula `WITH` para estructurar lógica analítica compleja en pasos legibles y reutilizables
-- Implementar CTEs recursivos (`WITH RECURSIVE`) para navegar jerarquías de categorías padre-hijo y árboles de empleados
-- Comparar el rendimiento y la legibilidad entre subconsultas anidadas y CTEs equivalentes usando `EXPLAIN ANALYZE`
-- [ ] Aplicar CTEs encadenados para construir pipelines analíticos paso a paso sobre datos de ventas
+- Escribir subconsultas correlacionadas y no correlacionadas en cláusulas `SELECT`, `FROM` y `WHERE` para filtrar y transformar datos del dataset de ventas.
+- Crear CTEs con la cláusula `WITH` para estructurar lógica analítica compleja en pasos legibles y reutilizables.
+- Implementar CTEs recursivos (`WITH RECURSIVE`) para navegar jerarquías de categorías padre-hijo y árboles de empleados.
+- Comparar el rendimiento y la legibilidad entre subconsultas anidadas y CTEs equivalentes usando `EXPLAIN ANALYZE`.
+- Aplicar CTEs encadenados para construir pipelines analíticos paso a paso sobre datos de ventas.
 
 <br/><br/>
 
@@ -26,17 +26,17 @@ Al completar este práctica, serás capaz de:
 
 ### Conocimientos Requeridos
 
-- Práctica 2.1 completado con el dataset de ventas cargado en PostgreSQL
-- Dominio de `SELECT`, `JOIN` (INNER, LEFT, RIGHT) y `GROUP BY` con funciones de agregación
-- Comprensión básica de claves primarias, claves foráneas y relaciones entre tablas
-- Familiaridad con el cliente `psql` o pgAdmin 4 para ejecutar consultas SQL
+- Práctica 2.1 completado con el dataset de ventas cargado en PostgreSQL.
+- Dominio de `SELECT`, `JOIN` (INNER, LEFT, RIGHT) y `GROUP BY` con funciones de agregación.
+- Comprensión básica de claves primarias, claves foráneas y relaciones entre tablas.
+- Familiaridad con el cliente `psql` o pgAdmin 4 para ejecutar consultas SQL.
 
 ### Acceso Requerido
 
 - Contenedor Docker de PostgreSQL 16 en ejecución.
-- Acceso al cliente `psql` dentro del contenedor o desde el host
-- pgAdmin 4 disponible en `http://localhost:8080` (opcional, para visualización del plan de ejecución)
-- Base de datos `ventas_db` con el esquema y datos de la práctica 2.1
+- Acceso al cliente `psql` dentro del contenedor o desde el host.
+- pgAdmin 4 disponible en `http://localhost:8080` (opcional, para visualización del plan de ejecución).
+- Base de datos `ventas_db` con el esquema y datos de la práctica 2.1.
 
 <br/><br/>
 
@@ -55,7 +55,7 @@ docker start curso_postgres
 docker exec -it curso_postgres psql -U postgres -d ventas_db -c "\dt"
 ```
 
-Si el comando anterior muestra las tablas `products`, `customers`, `orders` y `order_items`, el entorno está listo. En caso contrario, consulta la sección **Solución de Problemas** al final de esta práctica.
+Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `detalle_ordenes`, el entorno está listo. En caso contrario, consulta la sección **Solución de Problemas** al final de esta práctica.
 
 <br/><br/>
 
