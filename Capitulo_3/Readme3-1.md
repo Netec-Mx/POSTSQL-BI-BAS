@@ -174,16 +174,16 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ('Sebastián', 'Vargas',    'Analista de Logística',    'Operaciones',    8, '2022-02-28', 34000.00, 'se.vargas@empresa.com');
    ```
 
-6. Agrega la columna `category_id` a la tabla `products` y actualiza los datos:
+6. Agrega la columna `category_id` a la tabla `productos` y actualiza los datos:
 
    ```sql
    -- Agregar columna de categoría a productos (si no existe)
-   ALTER TABLE products
+   ALTER TABLE productos
        ADD COLUMN IF NOT EXISTS category_id INTEGER REFERENCES categories(category_id);
 
    -- Asignar categorías a los productos existentes de forma distribuida
-   -- Asumiendo que products tiene al menos 20 registros de la práctica anterior
-   UPDATE products SET category_id = (
+   -- Asumiendo que productos tiene al menos 20 registros de la práctica anterior
+   UPDATE productos SET category_id = (
        CASE
            WHEN product_id % 21 IN (0, 1)  THEN 16  -- iPhone
            WHEN product_id % 21 IN (2, 3)  THEN 17  -- Android
@@ -207,7 +207,7 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
 
    -- Verificar que todos los productos tienen categoría asignada
    SELECT COUNT(*) AS productos_sin_categoria
-   FROM products
+   FROM productos
    WHERE category_id IS NULL;
    ```
 
@@ -258,7 +258,7 @@ ORDER BY manager_id NULLS FIRST, employee_id;
 
 - Confirma que existen 21 categorías en total (5 raíz + 16 hijos)
 - Confirma que existen 13 empleados con la jerarquía correcta
-- Confirma que `products.category_id` no tiene valores NULL
+- Confirma que `productos.category_id` no tiene valores NULL
 
 
 <br/><br/>
@@ -275,11 +275,11 @@ ORDER BY manager_id NULLS FIRST, employee_id;
        p.product_id,
        p.product_name,
        p.price,
-       ROUND(p.price - (SELECT AVG(price) FROM products), 2) AS diferencia_vs_promedio
-   FROM products p
+       ROUND(p.price - (SELECT AVG(price) FROM productos), 2) AS diferencia_vs_promedio
+   FROM productos p
    WHERE p.price > (
        SELECT AVG(price)
-       FROM products
+       FROM productos
    )
    ORDER BY p.price DESC
    LIMIT 10;
@@ -294,7 +294,7 @@ ORDER BY manager_id NULLS FIRST, employee_id;
        p.product_id,
        p.product_name,
        p.price
-   FROM products p
+   FROM productos p
    WHERE p.product_id IN (
        SELECT oi.product_id
        FROM order_items oi
@@ -323,7 +323,7 @@ ORDER BY manager_id NULLS FIRST, employee_id;
            ROUND(AVG(p.price), 2) AS precio_promedio,
            MAX(p.price)        AS precio_maximo,
            MIN(p.price)        AS precio_minimo
-       FROM products p
+       FROM productos p
        WHERE p.category_id IS NOT NULL
        GROUP BY p.category_id
    ) AS resumen
@@ -376,7 +376,7 @@ ORDER BY manager_id NULLS FIRST, employee_id;
 
 ```sql
 -- Confirmar que la subconsulta escalar devuelve exactamente 1 valor
-SELECT ROUND(AVG(price), 2) AS promedio_global FROM products;
+SELECT ROUND(AVG(price), 2) AS promedio_global FROM productos;
 
 -- Confirmar que EXISTS y IN producen el mismo resultado (deben coincidir)
 SELECT COUNT(*) FROM customers cu
@@ -409,22 +409,22 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
        p.price                                                    AS precio_producto,
        (
            SELECT ROUND(AVG(p2.price), 2)
-           FROM products p2
+           FROM productos p2
            WHERE p2.category_id = p.category_id   -- <-- correlación
        )                                                          AS promedio_categoria,
        ROUND(
            p.price - (
                SELECT AVG(p2.price)
-               FROM products p2
+               FROM productos p2
                WHERE p2.category_id = p.category_id
            ),
        2)                                                         AS diferencia_vs_cat
-   FROM products p
+   FROM productos p
    WHERE p.category_id IS NOT NULL
    ORDER BY ABS(
        p.price - (
            SELECT AVG(p2.price)
-           FROM products p2
+           FROM productos p2
            WHERE p2.category_id = p.category_id
        )
    ) DESC
@@ -444,11 +444,11 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
        p.product_name,
        c.category_name,
        p.price
-   FROM products p
+   FROM productos p
    INNER JOIN categories c ON c.category_id = p.category_id
    WHERE p.price > (
        SELECT AVG(p2.price)
-       FROM products p2
+       FROM productos p2
        WHERE p2.category_id = p.category_id   -- <-- correlación con la fila externa
    )
    ORDER BY c.category_name, p.price DESC;
@@ -492,10 +492,10 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
        p.price,
        (
            SELECT ROUND(AVG(p2.price), 2)
-           FROM products p2
+           FROM productos p2
            WHERE p2.category_id = p.category_id
        ) AS promedio_categoria
-   FROM products p
+   FROM productos p
    WHERE p.category_id IS NOT NULL;
 
    ```
@@ -514,10 +514,10 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
 (N rows)
 
 -- Plan de ejecución (fragmento)
-Seq Scan on products p  (cost=... rows=... width=...)
+Seq Scan on productos p  (cost=... rows=... width=...)
   SubPlan 1
     ->  Aggregate  (cost=... rows=1 width=32)
-          ->  Seq Scan on products p2  (cost=... rows=... width=...)
+          ->  Seq Scan on productos p2  (cost=... rows=... width=...)
                 Filter: (category_id = p.category_id)
 ```
 
@@ -529,17 +529,17 @@ Seq Scan on products p  (cost=... rows=... width=...)
 -- Verificar que la subconsulta correlacionada y el JOIN producen resultados equivalentes
 -- Método 1: subconsulta correlacionada
 SELECT COUNT(*) AS total_sobre_promedio_subquery
-FROM products p
+FROM productos p
 WHERE p.price > (
-    SELECT AVG(p2.price) FROM products p2 WHERE p2.category_id = p.category_id
+    SELECT AVG(p2.price) FROM productos p2 WHERE p2.category_id = p.category_id
 );
 
 -- Método 2: JOIN con GROUP BY (equivalente, generalmente más eficiente)
 SELECT COUNT(*) AS total_sobre_promedio_join
-FROM products p
+FROM productos p
 INNER JOIN (
     SELECT category_id, AVG(price) AS avg_price
-    FROM products
+    FROM productos
     GROUP BY category_id
 ) cat_avg ON cat_avg.category_id = p.category_id
 WHERE p.price > cat_avg.avg_price;
@@ -570,7 +570,7 @@ WHERE p.price > cat_avg.avg_price;
            ROUND(AVG(p.price), 2) AS precio_promedio,
            MAX(p.price)           AS precio_maximo,
            MIN(p.price)           AS precio_minimo
-       FROM products p
+       FROM productos p
        WHERE p.category_id IS NOT NULL
        GROUP BY p.category_id
    )
@@ -614,7 +614,7 @@ WHERE p.price > cat_avg.avg_price;
            vp.unidades_vendidas,
            vp.ingreso_total,
            vp.num_pedidos
-       FROM products p
+       FROM productos p
        INNER JOIN ventas_por_producto vp ON vp.product_id = p.product_id
    ),
    -- CTE 3: calcular el ranking dentro de cada categoría
@@ -718,19 +718,19 @@ WHERE p.price > cat_avg.avg_price;
 
 WITH resumen AS (
     SELECT category_id, ROUND(AVG(price), 2) AS avg_price
-    FROM products GROUP BY category_id
+    FROM productos GROUP BY category_id
 )
 SELECT COUNT(*) AS total_cte
-FROM products p
+FROM productos p
 INNER JOIN resumen r ON r.category_id = p.category_id
 WHERE p.price > r.avg_price;
 
 -- Versión con subconsulta (debe dar el mismo número)
 
 SELECT COUNT(*) AS total_subquery
-FROM products p
+FROM productos p
 WHERE p.price > (
-    SELECT AVG(p2.price) FROM products p2 WHERE p2.category_id = p.category_id
+    SELECT AVG(p2.price) FROM productos p2 WHERE p2.category_id = p.category_id
 );
 
 ```
@@ -951,7 +951,7 @@ WHERE p.price > (
        SELECT
            p.category_id,
            SUM(oi.quantity * oi.unit_price) AS ventas_directas
-       FROM products p
+       FROM productos p
        INNER JOIN order_items oi ON oi.product_id = p.product_id
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
@@ -1040,7 +1040,7 @@ ORDER BY nivel;
                SELECT SUM(oi2.quantity * oi2.unit_price)
                FROM order_items oi2
                INNER JOIN orders o2       ON o2.order_id = oi2.order_id
-               INNER JOIN products p2     ON p2.product_id = oi2.product_id
+               INNER JOIN productos p2     ON p2.product_id = oi2.product_id
                INNER JOIN categories c2   ON c2.category_id = p2.category_id
                WHERE o2.status != 'cancelled'
                  AND (
@@ -1064,7 +1064,7 @@ ORDER BY nivel;
                PARTITION BY p.category_id
                ORDER BY SUM(oi.quantity * oi.unit_price) DESC
            )                                  AS rank_en_categoria
-       FROM products p
+       FROM productos p
        INNER JOIN order_items oi ON oi.product_id = p.product_id
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
@@ -1092,7 +1092,7 @@ ORDER BY nivel;
            p.product_name,
            p.category_id,
            SUM(oi.quantity * oi.unit_price) AS ingreso_producto
-       FROM products p
+       FROM productos p
        INNER JOIN order_items oi ON oi.product_id = p.product_id
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
@@ -1163,7 +1163,7 @@ ORDER BY nivel;
                PARTITION BY p.category_id
                ORDER BY SUM(oi.quantity * oi.unit_price) DESC
            ) AS rank_en_categoria
-       FROM products p
+       FROM productos p
        INNER JOIN order_items oi ON oi.product_id = p.product_id
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
@@ -1186,7 +1186,7 @@ ORDER BY nivel;
            p.product_name,
            p.category_id,
            SUM(oi.quantity * oi.unit_price) AS ingreso_producto
-       FROM products p
+       FROM productos p
        INNER JOIN order_items oi ON oi.product_id = p.product_id
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
@@ -1233,7 +1233,7 @@ ORDER BY nivel;
            p.product_name,
            p.category_id,
            SUM(oi.quantity * oi.unit_price) AS ingreso_producto
-       FROM products p
+       FROM productos p
        INNER JOIN order_items oi ON oi.product_id = p.product_id
        INNER JOIN orders o       ON o.order_id = oi.order_id
        WHERE o.status != 'cancelled'
@@ -1280,7 +1280,7 @@ FROM (
     ventas_producto AS (
         SELECT p.product_id, p.product_name, p.category_id,
                SUM(oi.quantity * oi.unit_price) AS ingreso_producto
-        FROM products p
+        FROM productos p
         INNER JOIN order_items oi ON oi.product_id = p.product_id
         INNER JOIN orders o ON o.order_id = oi.order_id
         WHERE o.status != 'cancelled'
@@ -1387,7 +1387,7 @@ ORDER BY categoria_raiz, rank;
 
 - [ ] La tabla `categories` existe con 21 filas y relación padre-hijo correcta (5 raíz, 10 nivel-2, 6 nivel-3)
 - [ ] La tabla `employees` existe con 13 filas y 4 niveles jerárquicos
-- [ ] La columna `products.category_id` está poblada sin valores NULL
+- [ ] La columna `productos.category_id` está poblada sin valores NULL
 - [ ] Las subconsultas correlacionadas en `SELECT` y `WHERE` devuelven resultados consistentes con los JOINs equivalentes
 - [ ] El CTE recursivo de categorías devuelve exactamente 21 filas con rutas completas
 - [ ] El CTE recursivo de empleados devuelve exactamente 13 filas con cadenas de reporte correctas
@@ -1404,7 +1404,7 @@ ORDER BY categoria_raiz, rank;
    SELECT
        (SELECT COUNT(*) FROM categories)  AS total_categorias,
        (SELECT COUNT(*) FROM employees)   AS total_empleados,
-       (SELECT COUNT(*) FROM products WHERE category_id IS NOT NULL) AS productos_con_cat;
+       (SELECT COUNT(*) FROM productos WHERE category_id IS NOT NULL) AS productos_con_cat;
    ```
    **Resultado Esperado:** `total_categorias = 21`, `total_empleados = 13`, `productos_con_cat = total de productos`
 
@@ -1452,18 +1452,18 @@ ORDER BY categoria_raiz, rank;
    -- Test 4: Subconsulta y CTE deben producir el mismo conteo
    WITH avg_cat AS (
        SELECT category_id, AVG(price) AS avg_price
-       FROM products GROUP BY category_id
+       FROM productos GROUP BY category_id
    )
    SELECT
        (
-           SELECT COUNT(*) FROM products p
+           SELECT COUNT(*) FROM productos p
            INNER JOIN avg_cat a ON a.category_id = p.category_id
            WHERE p.price > a.avg_price
        ) AS conteo_cte,
        (
-           SELECT COUNT(*) FROM products p
+           SELECT COUNT(*) FROM productos p
            WHERE p.price > (
-               SELECT AVG(p2.price) FROM products p2
+               SELECT AVG(p2.price) FROM productos p2
                WHERE p2.category_id = p.category_id
            )
        ) AS conteo_subquery;
@@ -1682,29 +1682,29 @@ Las subconsultas correlacionadas se ejecutan una vez por cada fila del query ext
 **Solución:**
 
 ```sql
--- Crear índice en la columna de correlación (category_id en products)
-CREATE INDEX IF NOT EXISTS idx_products_category_id
-ON products(category_id);
+-- Crear índice en la columna de correlación (category_id en productos)
+CREATE INDEX IF NOT EXISTS idx_productos_category_id
+ON productos(category_id);
 
 -- Verificar que el índice existe
 SELECT indexname, indexdef
 FROM pg_indexes
-WHERE tablename = 'products' AND indexname = 'idx_products_category_id';
+WHERE tablename = 'productos' AND indexname = 'idx_productos_category_id';
 
 -- Alternativa más eficiente: reescribir como JOIN con GROUP BY
 -- En lugar de subconsulta correlacionada:
 SELECT p.product_id, p.product_name, p.price
-FROM products p
+FROM productos p
 WHERE p.price > (
-    SELECT AVG(p2.price) FROM products p2 WHERE p2.category_id = p.category_id
+    SELECT AVG(p2.price) FROM productos p2 WHERE p2.category_id = p.category_id
 );
 
 -- Versión eficiente con JOIN:
 SELECT p.product_id, p.product_name, p.price
-FROM products p
+FROM productos p
 INNER JOIN (
     SELECT category_id, AVG(price) AS avg_price
-    FROM products
+    FROM productos
     GROUP BY category_id
 ) cat_avg ON cat_avg.category_id = p.category_id
 WHERE p.price > cat_avg.avg_price;
@@ -1721,8 +1721,8 @@ Al finalizar el práctica, los objetos creados deben **mantenerse** ya que será
 -- EJECUTAR SOLO SI NECESITAS REINICIAR LA PRÁTICA DESDE CERO
 -- Estos objetos son necesarios para las prácticas 3.2 en adelante
 
--- Eliminar columna category_id de products (revertir cambio del Paso 1)
-ALTER TABLE products DROP COLUMN IF EXISTS category_id;
+-- Eliminar columna category_id de productos (revertir cambio del Paso 1)
+ALTER TABLE productos DROP COLUMN IF EXISTS category_id;
 
 -- Eliminar tablas nuevas (en orden correcto por dependencias)
 DROP TABLE IF EXISTS employees CASCADE;
@@ -1736,7 +1736,7 @@ WHERE schemaname = 'public'
 -- Debe devolver 0 filas
 ```
 
-> **Advertencia:** No ejecutes el script de limpieza si planeas continuar con la práctica 3.2. Las tablas `categories` y `employees`, y la columna `products.category_id` son prerrequisitos para todos las prácticas del capítulo 3. Si accidentalmente las eliminas, puedes restaurarlas ejecutando el script de setup: `labs/3-1/setup/3-1-setup.sql` disponible en el repositorio Git del curso.
+> **Advertencia:** No ejecutes el script de limpieza si planeas continuar con la práctica 3.2. Las tablas `categories` y `employees`, y la columna `productos.category_id` son prerrequisitos para todos las prácticas del capítulo 3. Si accidentalmente las eliminas, puedes restaurarlas ejecutando el script de setup: `labs/3-1/setup/3-1-setup.sql` disponible en el repositorio Git del curso.
 
 
 ```bash
