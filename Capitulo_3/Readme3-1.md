@@ -74,23 +74,23 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ```sql
    -- Tabla de categorías con jerarquía padre-hijo
    CREATE TABLE IF NOT EXISTS categorias (
-       category_id   SERIAL PRIMARY KEY,
-       category_name VARCHAR(100) NOT NULL,
-       parent_id     INTEGER REFERENCES categorias(category_id),
-       description   TEXT,
-       created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+       id_categoria   SERIAL PRIMARY KEY,
+       nombre_categoria VARCHAR(100) NOT NULL,
+       id_padre     INTEGER REFERENCES categorias(id_categoria),
+       descripcion   TEXT,
+       fecha_creacion    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
    );
 
    -- Comentario descriptivo en la tabla
    COMMENT ON TABLE categorias IS 'Jerarquía de categorías de productos (padre-hijo)';
-   COMMENT ON COLUMN categorias.parent_id IS 'NULL indica categoría raíz; referencia a category_id del padre';
+   COMMENT ON COLUMN categorias.id_padre IS 'NULL indica categoría raíz; referencia a id_categoria del padre';
    ```
 
 3. Inserta los datos de categorías con tres niveles jerárquicos:
 
    ```sql
-   -- Nivel 1: Categorías raíz (parent_id = NULL)
-   INSERT INTO categorias (category_name, parent_id, description) VALUES
+   -- Nivel 1: Categorías raíz (id_padre = NULL)
+   INSERT INTO categorias (nombre_categoria, id_padre, descripcion) VALUES
    ('Electrónica',       NULL, 'Dispositivos y equipos electrónicos'),
    ('Ropa y Moda',       NULL, 'Prendas de vestir y accesorios'),
    ('Hogar y Jardín',    NULL, 'Artículos para el hogar y jardín'),
@@ -98,7 +98,7 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ('Libros y Medios',   NULL, 'Libros, música, películas y software');
 
    -- Nivel 2: Subcategorías (referencia a categorías raíz)
-   INSERT INTO categorias (category_name, parent_id, description) VALUES
+   INSERT INTO categorias (nombre_categoria, id_padre, descripcion) VALUES
    ('Smartphones',       1, 'Teléfonos inteligentes y accesorios'),
    ('Laptops',           1, 'Computadoras portátiles'),
    ('Audio',             1, 'Auriculares, altavoces y equipos de sonido'),
@@ -116,7 +116,7 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ('Técnicos',          5, 'Libros técnicos y de programación');
 
    -- Nivel 3: Sub-subcategorías
-   INSERT INTO categorias (category_name, parent_id, description) VALUES
+   INSERT INTO categorias (nombre_categoria, id_padre, descripcion) VALUES
    ('iPhone',            6,  'Smartphones de Apple'),
    ('Android',           6,  'Smartphones con sistema Android'),
    ('Gaming Laptops',    7,  'Laptops para videojuegos de alto rendimiento'),
@@ -137,43 +137,43 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ```sql
    -- Tabla de empleados con jerarquía de reporte
    CREATE TABLE IF NOT EXISTS empleados (
-       employee_id   SERIAL PRIMARY KEY,
-       first_name    VARCHAR(50)  NOT NULL,
-       last_name     VARCHAR(50)  NOT NULL,
-       job_title     VARCHAR(100) NOT NULL,
-       department    VARCHAR(50)  NOT NULL,
-       manager_id    INTEGER REFERENCES empleados(employee_id),
-       hire_date     DATE         NOT NULL,
+       id_empleado   SERIAL PRIMARY KEY,
+       nombre    VARCHAR(50)  NOT NULL,
+       apellido     VARCHAR(50)  NOT NULL,
+       puesto     VARCHAR(100) NOT NULL,
+       departamento    VARCHAR(50)  NOT NULL,
+       id_manager    INTEGER REFERENCES empleados(id_empleado),
+       fecha_contratacion     DATE         NOT NULL,
        salary        NUMERIC(10,2) NOT NULL,
        email         VARCHAR(100) UNIQUE NOT NULL
    );
 
    COMMENT ON TABLE empleados IS 'Estructura organizacional con jerarquía de reporte manager-subordinado';
-   COMMENT ON COLUMN empleados.manager_id IS 'NULL indica que el empleado es CEO o director sin jefe directo';
+   COMMENT ON COLUMN empleados.id_manager IS 'NULL indica que el empleado es CEO o director sin jefe directo';
    ```
 
 5. Inserta los datos de empleados con cuatro niveles organizacionales:
 
    ```sql
    -- Nivel 1: CEO
-   INSERT INTO empleados (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
+   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, email) VALUES
    ('Carlos',    'Mendoza',   'CEO',                      'Dirección',   NULL, '2015-01-15', 95000.00, 'c.mendoza@empresa.com');
 
-   -- Nivel 2: Directores (reportan al CEO, employee_id=1)
-   INSERT INTO empleados (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
+   -- Nivel 2: Directores (reportan al CEO, id_empleado=1)
+   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, email) VALUES
    ('Ana',       'Rodríguez', 'Directora de Ventas',      'Ventas',         1, '2016-03-01', 72000.00, 'a.rodriguez@empresa.com'),
    ('Luis',      'García',    'Director de Marketing',    'Marketing',      1, '2016-06-15', 68000.00, 'l.garcia@empresa.com'),
    ('Sofía',     'López',     'Directora de Operaciones', 'Operaciones',    1, '2017-01-10', 70000.00, 's.lopez@empresa.com');
 
    -- Nivel 3: Gerentes (reportan a directores)
-   INSERT INTO empleados (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
+   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, email) VALUES
    ('Pedro',     'Martínez',  'Gerente de Ventas Norte',  'Ventas',         2, '2018-02-20', 52000.00, 'p.martinez@empresa.com'),
    ('Laura',     'Sánchez',   'Gerente de Ventas Sur',    'Ventas',         2, '2018-05-10', 51000.00, 'l.sanchez@empresa.com'),
    ('Diego',     'Torres',    'Gerente de Campañas',      'Marketing',      3, '2019-01-08', 48000.00, 'd.torres@empresa.com'),
    ('Valentina', 'Flores',    'Gerente de Logística',     'Operaciones',    4, '2018-11-15', 50000.00, 'v.flores@empresa.com');
 
    -- Nivel 4: Analistas y ejecutivos (reportan a gerentes)
-   INSERT INTO empleados (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
+   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, email) VALUES
    ('Marcos',    'Jiménez',   'Ejecutivo de Ventas',      'Ventas',         5, '2020-03-01', 38000.00, 'm.jimenez@empresa.com'),
    ('Camila',    'Ruiz',      'Ejecutiva de Ventas',      'Ventas',         5, '2020-07-15', 37500.00, 'c.ruiz@empresa.com'),
    ('Andrés',    'Morales',   'Ejecutivo de Ventas',      'Ventas',         6, '2021-01-10', 36000.00, 'a.morales@empresa.com'),
@@ -181,16 +181,16 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ('Sebastián', 'Vargas',    'Analista de Logística',    'Operaciones',    8, '2022-02-28', 34000.00, 'se.vargas@empresa.com');
    ```
 
-6. Agrega la columna `category_id` a la tabla `productos` y actualiza los datos:
+6. Agrega la columna `id_categoria` a la tabla `productos` y actualiza los datos:
 
    ```sql
    -- Agregar columna de categoría a productos (si no existe)
    ALTER TABLE productos
-       ADD COLUMN IF NOT EXISTS category_id INTEGER REFERENCES categorias(category_id);
+       ADD COLUMN IF NOT EXISTS id_categoria INTEGER REFERENCES categorias(id_categoria);
 
    -- Asignar categorías a los productos existentes de forma distribuida
    -- Asumiendo que productos tiene al menos 20 registros de la práctica anterior
-   UPDATE productos SET category_id = (
+   UPDATE productos SET id_categoria = (
        CASE
            WHEN id_producto % 21 IN (0, 1)  THEN 16  -- iPhone
            WHEN id_producto % 21 IN (2, 3)  THEN 17  -- Android
@@ -215,7 +215,7 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    -- Verificar que todos los productos tienen categoría asignada
    SELECT COUNT(*) AS productos_sin_categoria
    FROM productos
-   WHERE category_id IS NULL;
+   WHERE id_categoria IS NULL;
    ```
 
 <br/>
@@ -224,24 +224,24 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
 
 ```sql
 -- Verificar estructura de categorías
-SELECT category_id, category_name, parent_id,
-       CASE WHEN parent_id IS NULL THEN 'Raíz'
+SELECT id_categoria, nombre_categoria, id_padre,
+       CASE WHEN id_padre IS NULL THEN 'Raíz'
             ELSE 'Subcategoría'
        END AS nivel
 FROM categorias
-ORDER BY parent_id NULLS FIRST, category_id
+ORDER BY id_padre NULLS FIRST, id_categoria
 LIMIT 10;
 
 -- Verificar estructura de empleados
-SELECT employee_id, first_name || ' ' || last_name AS nombre,
-       job_title, manager_id
+SELECT id_empleado, nombre || ' ' || apellido AS nombre,
+       puesto, id_manager
 FROM empleados
-ORDER BY manager_id NULLS FIRST, employee_id;
+ORDER BY id_manager NULLS FIRST, id_empleado;
 ```
 
-- Confirma que existen 21 categorías en total (5 raíz + 16 hijos)
+- Confirma que existen 26 categorías en total (5 raíz, 15 nivel 2, 6 nivel 3)
 - Confirma que existen 13 empleados con la jerarquía correcta
-- Confirma que `productos.category_id` no tiene valores NULL
+- Confirma que `productos.id_categoria` no tiene valores NULL
 
 
 <br/><br/>
@@ -256,15 +256,15 @@ ORDER BY manager_id NULLS FIRST, employee_id;
    -- La subconsulta se ejecuta UNA SOLA VEZ y devuelve un escalar
    SELECT
        p.id_producto,
-       p.product_name,
-       p.price,
-       ROUND(p.price - (SELECT AVG(price) FROM productos), 2) AS diferencia_vs_promedio
+       p.nombre,
+       p.precio_unitario,
+       ROUND(p.precio_unitario - (SELECT AVG(precio_unitario) FROM productos), 2) AS diferencia_vs_promedio
    FROM productos p
-   WHERE p.price > (
-       SELECT AVG(price)
+   WHERE p.precio_unitario > (
+       SELECT AVG(precio_unitario)
        FROM productos
    )
-   ORDER BY p.price DESC
+   ORDER BY p.precio_unitario DESC
    LIMIT 10;
    ```
 
@@ -275,42 +275,42 @@ ORDER BY manager_id NULLS FIRST, employee_id;
    -- Devuelve un conjunto de valores (no un escalar)
    SELECT
        p.id_producto,
-       p.product_name,
-       p.price
+       p.nombre,
+       p.precio_unitario
    FROM productos p
    WHERE p.id_producto IN (
        SELECT oi.id_producto
-       FROM order_items oi
+       FROM detalle_ordenes oi
        GROUP BY oi.id_producto
-       HAVING SUM(oi.quantity) > 50
+       HAVING SUM(oi.cantidad) > 50
    )
-   ORDER BY p.product_name;
+   ORDER BY p.nombre;
    ```
 
 3. Construye una tabla derivada en la cláusula `FROM` (subconsulta como tabla virtual):
 
-   ```sql
+   ```sqlcc
    -- Subconsulta en FROM (tabla derivada / derived table)
    -- La subconsulta genera un conjunto de resultados que se trata como tabla
    SELECT
-       resumen.category_id,
-       c.category_name,
+       resumen.id_categoria,
+       c.nombre_categoria,
        resumen.total_productos,
        resumen.precio_promedio,
        resumen.precio_maximo,
        resumen.precio_minimo
    FROM (
        SELECT
-           p.category_id,
+           p.id_categoria,
            COUNT(*)            AS total_productos,
-           ROUND(AVG(p.price), 2) AS precio_promedio,
-           MAX(p.price)        AS precio_maximo,
-           MIN(p.price)        AS precio_minimo
+           ROUND(AVG(p.precio_unitario), 2) AS precio_promedio,
+           MAX(p.precio_unitario)        AS precio_maximo,
+           MIN(p.precio_unitario)        AS precio_minimo
        FROM productos p
-       WHERE p.category_id IS NOT NULL
-       GROUP BY p.category_id
+       WHERE p.id_categoria IS NOT NULL
+       GROUP BY p.id_categoria
    ) AS resumen
-   INNER JOIN categorias c ON c.category_id = resumen.category_id
+   INNER JOIN categorias c ON c.id_categoria = resumen.id_categoria
    ORDER BY resumen.precio_promedio DESC;
    ```
 
@@ -319,17 +319,17 @@ ORDER BY manager_id NULLS FIRST, employee_id;
    ```sql
    -- Subconsulta con EXISTS (más eficiente que IN para conjuntos grandes)
    SELECT
-       cu.customer_id,
-       cu.first_name || ' ' || cu.last_name AS cliente,
+       cu.id_cliente,
+       cu.nombre || ' ' || cu.apellido AS cliente,
        cu.email
-   FROM customers cu
+   FROM clientes cu
    WHERE EXISTS (
        SELECT 1
-       FROM orders o
-       WHERE o.customer_id = cu.customer_id
-         AND o.order_date >= CURRENT_DATE - INTERVAL '6 months'
+       FROM ordenes o
+       WHERE o.id_cliente = cu.id_cliente
+         AND o.fecha >= CURRENT_DATE - INTERVAL '6 months'
    )
-   ORDER BY cu.last_name, cu.first_name
+   ORDER BY cu.apellido, cu.nombre
    LIMIT 10;
 
    ```
@@ -340,13 +340,13 @@ ORDER BY manager_id NULLS FIRST, employee_id;
 
 ```
 -- Consulta 1: productos sobre el promedio
- id_producto | product_name | price | diferencia_vs_promedio
+ id_producto | nombre | precio_unitario | diferencia_vs_promedio
 ------------+--------------+-------+------------------------
  ...        | ...          | ...   | ...
 (N rows)
 
 -- Consulta 3: resumen por categoría
- category_id | category_name  | total_productos | precio_promedio | precio_maximo | precio_minimo
+ id_categoria | nombre_categoria  | total_productos | precio_promedio | precio_maximo | precio_minimo
 -------------+----------------+-----------------+-----------------+---------------+--------------
  ...         | ...            | ...             | ...             | ...           | ...
 (N rows)
@@ -359,15 +359,15 @@ ORDER BY manager_id NULLS FIRST, employee_id;
 
 ```sql
 -- Confirmar que la subconsulta escalar devuelve exactamente 1 valor
-SELECT ROUND(AVG(price), 2) AS promedio_global FROM productos;
+SELECT ROUND(AVG(precio_unitario), 2) AS promedio_global FROM productos;
 
 -- Confirmar que EXISTS y IN producen el mismo resultado (deben coincidir)
-SELECT COUNT(*) FROM customers cu
-WHERE EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = cu.customer_id
-              AND o.order_date >= CURRENT_DATE - INTERVAL '6 months');
+SELECT COUNT(*) FROM clientes cu
+WHERE EXISTS (SELECT 1 FROM ordenes o WHERE o.id_cliente = cu.id_cliente
+              AND o.fecha >= CURRENT_DATE - INTERVAL '6 months');
 
-SELECT COUNT(DISTINCT o.customer_id) FROM orders o
-WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
+SELECT COUNT(DISTINCT o.id_cliente) FROM ordenes o
+WHERE o.fecha >= CURRENT_DATE - INTERVAL '6 months';
 ```
 
 - Ambos `COUNT` deben devolver el mismo número
@@ -384,31 +384,31 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
 
    -- Subconsulta correlacionada en SELECT
    -- Se ejecuta UNA VEZ POR FILA del query externo
-   -- La referencia p.category_id "correlaciona" la subconsulta con la fila actual
+   -- La referencia p.id_categoria "correlaciona" la subconsulta con la fila actual
 
    SELECT
        p.id_producto,
-       p.product_name,
-       p.price                                                    AS precio_producto,
+       p.nombre,
+       p.precio_unitario                                                    AS precio_producto,
        (
-           SELECT ROUND(AVG(p2.price), 2)
+           SELECT ROUND(AVG(p2.precio_unitario), 2)
            FROM productos p2
-           WHERE p2.category_id = p.category_id   -- <-- correlación
+           WHERE p2.id_categoria = p.id_categoria   -- <-- correlación
        )                                                          AS promedio_categoria,
        ROUND(
-           p.price - (
-               SELECT AVG(p2.price)
+           p.precio_unitario - (
+               SELECT AVG(p2.precio_unitario)
                FROM productos p2
-               WHERE p2.category_id = p.category_id
+               WHERE p2.id_categoria = p.id_categoria
            ),
        2)                                                         AS diferencia_vs_cat
    FROM productos p
-   WHERE p.category_id IS NOT NULL
+   WHERE p.id_categoria IS NOT NULL
    ORDER BY ABS(
-       p.price - (
-           SELECT AVG(p2.price)
+       p.precio_unitario - (
+           SELECT AVG(p2.precio_unitario)
            FROM productos p2
-           WHERE p2.category_id = p.category_id
+           WHERE p2.id_categoria = p.id_categoria
        )
    ) DESC
    LIMIT 15;
@@ -424,17 +424,17 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
 
    SELECT
        p.id_producto,
-       p.product_name,
-       c.category_name,
-       p.price
+       p.nombre,
+       c.nombre_categoria,
+       p.precio_unitario
    FROM productos p
-   INNER JOIN categorias c ON c.category_id = p.category_id
-   WHERE p.price > (
-       SELECT AVG(p2.price)
+   INNER JOIN categorias c ON c.id_categoria = p.id_categoria
+   WHERE p.precio_unitario > (
+       SELECT AVG(p2.precio_unitario)
        FROM productos p2
-       WHERE p2.category_id = p.category_id   -- <-- correlación con la fila externa
+       WHERE p2.id_categoria = p.id_categoria   -- <-- correlación con la fila externa
    )
-   ORDER BY c.category_name, p.price DESC;
+   ORDER BY c.nombre_categoria, p.precio_unitario DESC;
 
    ```
 
@@ -445,19 +445,19 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
    -- Subconsulta correlacionada para obtener el máximo por grupo
    -- Patrón clásico: "el último X de cada Y"
    SELECT
-       cu.customer_id,
-       cu.first_name || ' ' || cu.last_name AS cliente,
+       cu.id_cliente,
+       cu.nombre || ' ' || cu.apellido AS cliente,
        (
-           SELECT MAX(o.order_date)
-           FROM orders o
-           WHERE o.customer_id = cu.customer_id   -- <-- correlación
+           SELECT MAX(o.fecha)
+           FROM ordenes o
+           WHERE o.id_cliente = cu.id_cliente   -- <-- correlación
        )                                           AS ultimo_pedido,
        (
            SELECT COUNT(*)
-           FROM orders o
-           WHERE o.customer_id = cu.customer_id
+           FROM ordenes o
+           WHERE o.id_cliente = cu.id_cliente
        )                                           AS total_pedidos
-   FROM customers cu
+   FROM clientes cu
    ORDER BY ultimo_pedido DESC NULLS LAST
    LIMIT 10;
 
@@ -471,15 +471,15 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
    EXPLAIN (ANALYZE, BUFFERS, FORMAT TEXT)
    SELECT
        p.id_producto,
-       p.product_name,
-       p.price,
+       p.nombre,
+       p.precio_unitario,
        (
-           SELECT ROUND(AVG(p2.price), 2)
+           SELECT ROUND(AVG(p2.precio_unitario), 2)
            FROM productos p2
-           WHERE p2.category_id = p.category_id
+           WHERE p2.id_categoria = p.id_categoria
        ) AS promedio_categoria
    FROM productos p
-   WHERE p.category_id IS NOT NULL;
+   WHERE p.id_categoria IS NOT NULL;
 
    ```
 
@@ -490,7 +490,7 @@ WHERE o.order_date >= CURRENT_DATE - INTERVAL '6 months';
 ```sql
 
 -- Consulta 2: productos sobre el promedio de su categoría
- id_producto | product_name | category_name | price
+ id_producto | nombre | nombre_categoria | precio_unitario
 ------------+--------------+---------------+-------
  ...        | ...          | Smartphones   | ...
  ...        | ...          | Laptops       | ...
@@ -501,7 +501,7 @@ Seq Scan on productos p  (cost=... rows=... width=...)
   SubPlan 1
     ->  Aggregate  (cost=... rows=1 width=32)
           ->  Seq Scan on productos p2  (cost=... rows=... width=...)
-                Filter: (category_id = p.category_id)
+                Filter: (id_categoria = p.id_categoria)
 ```
 
 <br/>
@@ -513,19 +513,19 @@ Seq Scan on productos p  (cost=... rows=... width=...)
 -- Método 1: subconsulta correlacionada
 SELECT COUNT(*) AS total_sobre_promedio_subquery
 FROM productos p
-WHERE p.price > (
-    SELECT AVG(p2.price) FROM productos p2 WHERE p2.category_id = p.category_id
+WHERE p.precio_unitario > (
+    SELECT AVG(p2.precio_unitario) FROM productos p2 WHERE p2.id_categoria = p.id_categoria
 );
 
 -- Método 2: JOIN con GROUP BY (equivalente, generalmente más eficiente)
 SELECT COUNT(*) AS total_sobre_promedio_join
 FROM productos p
 INNER JOIN (
-    SELECT category_id, AVG(price) AS avg_price
+    SELECT id_categoria, AVG(precio_unitario) AS avg_precio_unitario
     FROM productos
-    GROUP BY category_id
-) cat_avg ON cat_avg.category_id = p.category_id
-WHERE p.price > cat_avg.avg_price;
+    GROUP BY id_categoria
+) cat_avg ON cat_avg.id_categoria = p.id_categoria
+WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
 ```
 
 <br/>
@@ -548,25 +548,25 @@ WHERE p.price > cat_avg.avg_price;
    WITH resumen_categorias AS (
        -- Este bloque es idéntico a la subconsulta en FROM del Paso 2
        SELECT
-           p.category_id,
+           p.id_categoria,
            COUNT(*)               AS total_productos,
-           ROUND(AVG(p.price), 2) AS precio_promedio,
-           MAX(p.price)           AS precio_maximo,
-           MIN(p.price)           AS precio_minimo
+           ROUND(AVG(p.precio_unitario), 2) AS precio_promedio,
+           MAX(p.precio_unitario)           AS precio_maximo,
+           MIN(p.precio_unitario)           AS precio_minimo
        FROM productos p
-       WHERE p.category_id IS NOT NULL
-       GROUP BY p.category_id
+       WHERE p.id_categoria IS NOT NULL
+       GROUP BY p.id_categoria
    )
    -- Ahora el SELECT principal referencia el CTE por nombre
    SELECT
-       rc.category_id,
-       c.category_name,
+       rc.id_categoria,
+       c.nombre_categoria,
        rc.total_productos,
        rc.precio_promedio,
        rc.precio_maximo,
        rc.precio_minimo
    FROM resumen_categorias rc
-   INNER JOIN categorias c ON c.category_id = rc.category_id
+   INNER JOIN categorias c ON c.id_categoria = rc.id_categoria
    ORDER BY rc.precio_promedio DESC;
    ```
 
@@ -579,21 +579,21 @@ WHERE p.price > cat_avg.avg_price;
    ventas_por_producto AS (
        SELECT
            oi.id_producto,
-           SUM(oi.quantity)                    AS unidades_vendidas,
-           SUM(oi.quantity * oi.unit_price)    AS ingreso_total,
-           COUNT(DISTINCT oi.order_id)         AS num_pedidos
-       FROM order_items oi
-       INNER JOIN orders o ON o.order_id = oi.order_id
-       WHERE o.status != 'cancelled'
+           SUM(oi.cantidad)                    AS unidades_vendidas,
+           SUM(oi.cantidad * oi.precio_unitario)    AS ingreso_total,
+           COUNT(DISTINCT oi.id_orden)         AS num_pedidos
+       FROM detalle_ordenes oi
+       INNER JOIN ordenes o ON o.id_orden = oi.id_orden
+       WHERE o.estado != 'cancelled'
        GROUP BY oi.id_producto
    ),
    -- CTE 2: enriquecer con datos del producto y su categoría
    productos_enriquecidos AS (
        SELECT
            p.id_producto,
-           p.product_name,
-           p.category_id,
-           p.price                         AS precio_actual,
+           p.nombre,
+           p.id_categoria,
+           p.precio_unitario                         AS precio_actual,
            vp.unidades_vendidas,
            vp.ingreso_total,
            vp.num_pedidos
@@ -604,25 +604,25 @@ WHERE p.price > cat_avg.avg_price;
    ranking_por_categoria AS (
        SELECT
            pe.*,
-           c.category_name,
+           c.nombre_categoria,
            RANK() OVER (
-               PARTITION BY pe.category_id
+               PARTITION BY pe.id_categoria
                ORDER BY pe.ingreso_total DESC
            ) AS rank_en_categoria
        FROM productos_enriquecidos pe
-       INNER JOIN categorias c ON c.category_id = pe.category_id
+       INNER JOIN categorias c ON c.id_categoria = pe.id_categoria
    )
    -- Query final: mostrar solo el top 3 por categoría
    SELECT
-       category_name,
+       nombre_categoria,
        rank_en_categoria AS rank,
-       product_name,
+       nombre,
        precio_actual,
        unidades_vendidas,
        ROUND(ingreso_total, 2) AS ingreso_total
    FROM ranking_por_categoria
    WHERE rank_en_categoria <= 3
-   ORDER BY category_name, rank_en_categoria;
+   ORDER BY nombre_categoria, rank_en_categoria;
    ```
 
 3. Usa un CTE para calcular métricas de clientes y luego segmentarlos:
@@ -632,17 +632,17 @@ WHERE p.price > cat_avg.avg_price;
    WITH
    metricas_cliente AS (
        SELECT
-           cu.customer_id,
-           cu.first_name || ' ' || cu.last_name          AS cliente,
-           COUNT(DISTINCT o.order_id)                    AS frecuencia,
-           SUM(oi.quantity * oi.unit_price)              AS valor_total,
-           MAX(o.order_date)                             AS ultima_compra,
-           CURRENT_DATE - MAX(o.order_date)              AS dias_desde_ultima
-       FROM customers cu
-       LEFT JOIN orders o    ON o.customer_id = cu.customer_id
-                             AND o.status != 'cancelled'
-       LEFT JOIN order_items oi ON oi.order_id = o.order_id
-       GROUP BY cu.customer_id, cu.first_name, cu.last_name
+           cu.id_cliente,
+           cu.nombre || ' ' || cu.apellido          AS cliente,
+           COUNT(DISTINCT o.id_orden)                    AS frecuencia,
+           SUM(oi.cantidad * oi.precio_unitario)              AS valor_total,
+           MAX(o.fecha)                             AS ultima_compra,
+           CURRENT_DATE - MAX(o.fecha)              AS dias_desde_ultima
+       FROM clientes cu
+       LEFT JOIN ordenes o    ON o.id_cliente = cu.id_cliente
+                             AND o.estado != 'cancelled'
+       LEFT JOIN detalle_ordenes oi ON oi.id_orden = o.id_orden
+       GROUP BY cu.id_cliente, cu.nombre, cu.apellido
    ),
    clientes_segmentados AS (
        SELECT
@@ -674,7 +674,7 @@ WHERE p.price > cat_avg.avg_price;
 ```sql
 
 -- Consulta 2: top 3 por categoría
- category_name  | rank | product_name | precio_actual | unidades_vendidas | ingreso_total
+ nombre_categoria  | rank | nombre | precio_actual | unidades_vendidas | ingreso_total
 ----------------+------+--------------+---------------+-------------------+--------------
  Android        |    1 | ...          |          ...  |               ... |          ...
  Android        |    2 | ...          |          ...  |               ... |          ...
@@ -700,20 +700,20 @@ WHERE p.price > cat_avg.avg_price;
 -- Versión con CTE
 
 WITH resumen AS (
-    SELECT category_id, ROUND(AVG(price), 2) AS avg_price
-    FROM productos GROUP BY category_id
+    SELECT id_categoria, ROUND(AVG(precio_unitario), 2) AS avg_price
+    FROM productos GROUP BY id_categoria
 )
 SELECT COUNT(*) AS total_cte
 FROM productos p
-INNER JOIN resumen r ON r.category_id = p.category_id
-WHERE p.price > r.avg_price;
+INNER JOIN resumen r ON r.id_categoria = p.id_categoria
+WHERE p.precio_unitario > r.avg_price;
 
 -- Versión con subconsulta (debe dar el mismo número)
 
 SELECT COUNT(*) AS total_subquery
 FROM productos p
-WHERE p.price > (
-    SELECT AVG(p2.price) FROM productos p2 WHERE p2.category_id = p.category_id
+WHERE p.precio_unitario > (
+    SELECT AVG(p2.precio_unitario) FROM productos p2 WHERE p2.id_categoria = p.id_categoria
 );
 
 ```
@@ -745,20 +745,20 @@ WHERE p.price > (
    -- Primero, exploremos la jerarquía de categorías manualmente
    -- Categorías raíz (nivel 1):
 
-   SELECT category_id, category_name, parent_id
+   SELECT id_categoria, nombre_categoria, id_padre
    FROM categorias
-   WHERE parent_id IS NULL;
+   WHERE id_padre IS NULL;
 
-   -- Hijos directos de "Electrónica" (category_id = 1):
-   SELECT category_id, category_name, parent_id
+   -- Hijos directos de "Electrónica" (id_categoria = 1):
+   SELECT id_categoria, nombre_categoria, id_padre
    FROM categorias
-   WHERE parent_id = 1;
+   WHERE id_padre = 1;
 
    -- Nietos de "Electrónica" (hijos de sus hijos):
-   SELECT category_id, category_name, parent_id
+   SELECT id_categoria, nombre_categoria, id_padre
    FROM categorias
-   WHERE parent_id IN (
-       SELECT category_id FROM categorias WHERE parent_id = 1
+   WHERE id_padre IN (
+       SELECT id_categoria FROM categorias WHERE id_padre = 1
    );
 
    ```
@@ -772,36 +772,36 @@ WHERE p.price > (
 
        -- PARTE ANCLA: categorías raíz (punto de partida)
        SELECT
-           category_id,
-           category_name,
-           parent_id,
+           id_categoria,
+           nombre_categoria,
+           id_padre,
            0                           AS nivel,          -- nivel 0 = raíz
-           category_name::TEXT         AS ruta_completa,  -- ruta comienza con el nombre
-           ARRAY[category_id]          AS ids_ruta        -- array para detectar ciclos
+           nombre_categoria::TEXT         AS ruta_completa,  -- ruta comienza con el nombre
+           ARRAY[id_categoria]          AS ids_ruta        -- array para detectar ciclos
        FROM categorias
-       WHERE parent_id IS NULL
+       WHERE id_padre IS NULL
 
        UNION ALL
 
        -- PARTE RECURSIVA: hijos de cada nodo ya procesado
        -- "jc" referencia la iteración anterior del CTE
        SELECT
-           c.category_id,
-           c.category_name,
-           c.parent_id,
+           c.id_categoria,
+           c.nombre_categoria,
+           c.id_padre,
            jc.nivel + 1,                                          -- incrementar nivel
-           (jc.ruta_completa || ' > ' || c.category_name)::TEXT, -- construir ruta
-           jc.ids_ruta || c.category_id                          -- agregar al array
+           (jc.ruta_completa || ' > ' || c.nombre_categoria)::TEXT, -- construir ruta
+           jc.ids_ruta || c.id_categoria                          -- agregar al array
        FROM categorias c
-       INNER JOIN jerarquia_categorias jc ON jc.category_id = c.parent_id
-       WHERE NOT c.category_id = ANY(jc.ids_ruta)  -- prevenir ciclos infinitos
+       INNER JOIN jerarquia_categorias jc ON jc.id_categoria = c.id_padre
+       WHERE NOT c.id_categoria = ANY(jc.ids_ruta)  -- prevenir ciclos infinitos
    )
    SELECT
        nivel,
-       REPEAT('  ', nivel) || category_name   AS categoria_indentada,
+       REPEAT('  ', nivel) || nombre_categoria   AS categoria_indentada,
        ruta_completa,
-       category_id,
-       parent_id
+       id_categoria,
+       id_padre
    FROM jerarquia_categorias
    ORDER BY ruta_completa;
 
@@ -816,37 +816,37 @@ WHERE p.price > (
 
        -- PARTE ANCLA: CEO (sin manager)
        SELECT
-           employee_id,
-           first_name || ' ' || last_name      AS nombre_completo,
-           job_title,
-           department,
-           manager_id,
+           id_empleado,
+           nombre || ' ' || apellido      AS nombre_completo,
+           puesto,
+           departamento,
+           id_manager,
            0                                   AS nivel_jerarquico,
-           (first_name || ' ' || last_name)::TEXT AS cadena,
+           (nombre || ' ' || apellido)::TEXT AS cadena,
            salary
        FROM empleados
-       WHERE manager_id IS NULL   -- CEO: no tiene manager
+       WHERE id_manager IS NULL   -- CEO: no tiene manager
 
        UNION ALL
 
        -- PARTE RECURSIVA: subordinados de cada empleado procesado
        SELECT
-           e.employee_id,
-           e.first_name || ' ' || e.last_name,
-           e.job_title,
-           e.department,
-           e.manager_id,
+           e.id_empleado,
+           e.nombre || ' ' || e.apellido,
+           e.puesto,
+           e.departamento,
+           e.id_manager,
            cm.nivel_jerarquico + 1,
-           (cm.cadena || ' → ' || e.first_name || ' ' || e.last_name)::TEXT,
+           (cm.cadena || ' → ' || e.nombre || ' ' || e.apellido)::TEXT,
            e.salary
        FROM empleados e
-       INNER JOIN cadena_de_mando cm ON cm.employee_id = e.manager_id
+       INNER JOIN cadena_de_mando cm ON cm.id_empleado = e.id_manager
    )
    SELECT
        nivel_jerarquico                                         AS nivel,
        REPEAT('  ', nivel_jerarquico) || nombre_completo       AS empleado,
-       job_title,
-       department,
+       puesto,
+       departamento,
        salary,
        cadena                                                   AS cadena_de_reporte
    FROM cadena_de_mando
@@ -859,45 +859,45 @@ WHERE p.price > (
    ```sql
 
    -- Encontrar todos los subordinados (directos e indirectos) de "Ana Rodríguez"
-   -- Primero, identificar su employee_id
+   -- Primero, identificar su id_empleado
 
-   SELECT employee_id, first_name, last_name, job_title
+   SELECT id_empleado, nombre, apellido, puesto
    FROM empleados
-   WHERE first_name = 'Ana' AND last_name = 'Rodríguez';
+   WHERE nombre = 'Ana' AND apellido = 'Rodríguez';
 
    ```
 
    ```sql
 
-   -- CTE recursivo para subordinados de Ana Rodríguez (employee_id = 2)
+   -- CTE recursivo para subordinados de Ana Rodríguez (id_empleado = 2)
    WITH RECURSIVE subordinados AS (
 
        -- ANCLA: el manager de interés
        SELECT
-           employee_id,
-           first_name || ' ' || last_name AS nombre,
-           job_title,
-           manager_id,
+           id_empleado,
+           nombre || ' ' || apellido AS nombre,
+           puesto,
+           id_manager,
            0 AS nivel_bajo_manager
        FROM empleados
-       WHERE employee_id = 2   -- Ana Rodríguez
+       WHERE id_empleado = 2   -- Ana Rodríguez
 
        UNION ALL
 
        -- RECURSIVO: sus subordinados directos e indirectos
        SELECT
-           e.employee_id,
-           e.first_name || ' ' || e.last_name,
-           e.job_title,
-           e.manager_id,
+           e.id_empleado,
+           e.nombre || ' ' || e.apellido,
+           e.puesto,
+           e.id_manager,
            s.nivel_bajo_manager + 1
        FROM empleados e
-       INNER JOIN subordinados s ON s.employee_id = e.manager_id
+       INNER JOIN subordinados s ON s.id_empleado = e.id_manager
    )
    SELECT
        nivel_bajo_manager AS nivel,
        nombre,
-       job_title
+       puesto
    FROM subordinados
    WHERE nivel_bajo_manager > 0   -- excluir al manager mismo
    ORDER BY nivel_bajo_manager, nombre;
@@ -911,42 +911,42 @@ WHERE p.price > (
    -- Combinar CTE recursivo con datos de ventas
    WITH RECURSIVE jerarquia AS (
        SELECT
-           category_id,
-           category_name,
-           parent_id,
+           id_categoria,
+           nombre_categoria,
+           id_padre,
            0 AS nivel,
-           category_name::TEXT AS ruta
+           nombre_categoria::TEXT AS ruta
        FROM categorias
-       WHERE parent_id IS NULL
+       WHERE id_padre IS NULL
 
        UNION ALL
 
        SELECT
-           c.category_id,
-           c.category_name,
-           c.parent_id,
+           c.id_categoria,
+           c.nombre_categoria,
+           c.id_padre,
            j.nivel + 1,
-           (j.ruta || ' > ' || c.category_name)::TEXT
+           (j.ruta || ' > ' || c.nombre_categoria)::TEXT
        FROM categorias c
-       INNER JOIN jerarquia j ON j.category_id = c.parent_id
+       INNER JOIN jerarquia j ON j.id_categoria = c.id_padre
    ),
    ventas_categoria AS (
        SELECT
-           p.category_id,
-           SUM(oi.quantity * oi.unit_price) AS ventas_directas
+           p.id_categoria,
+           SUM(oi.cantidad * oi.precio_unitario) AS ventas_directas
        FROM productos p
-       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
-       INNER JOIN orders o       ON o.order_id = oi.order_id
-       WHERE o.status != 'cancelled'
-       GROUP BY p.category_id
+       INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
+       INNER JOIN ordenes o       ON o.id_orden = oi.id_orden
+       WHERE o.estado != 'cancelled'
+       GROUP BY p.id_categoria
    )
    SELECT
        j.nivel,
-       REPEAT('  ', j.nivel) || j.category_name AS categoria,
+       REPEAT('  ', j.nivel) || j.nombre_categoria AS categoria,
        j.ruta,
        COALESCE(vc.ventas_directas, 0)           AS ventas_directas
    FROM jerarquia j
-   LEFT JOIN ventas_categoria vc ON vc.category_id = j.category_id
+   LEFT JOIN ventas_categoria vc ON vc.id_categoria = j.id_categoria
    ORDER BY j.ruta;
    ```
 
@@ -970,7 +970,7 @@ WHERE p.price > (
 (21 rows)
 
 -- Árbol de empleados
- nivel |           empleado              | job_title
+ nivel |           empleado              | puesto
 -------+---------------------------------+---------------------------
      0 | Carlos Mendoza                  | CEO
      1 |   Ana Rodríguez                 | Directora de Ventas
@@ -986,11 +986,11 @@ WHERE p.price > (
 ```sql
 -- Verificar que el CTE recursivo encuentra todos los niveles
 WITH RECURSIVE jerarquia AS (
-    SELECT category_id, category_name, parent_id, 0 AS nivel
-    FROM categorias WHERE parent_id IS NULL
+    SELECT id_categoria, nombre_categoria, id_padre, 0 AS nivel
+    FROM categorias WHERE id_padre IS NULL
     UNION ALL
-    SELECT c.category_id, c.category_name, c.parent_id, j.nivel + 1
-    FROM categorias c INNER JOIN jerarquia j ON j.category_id = c.parent_id
+    SELECT c.id_categoria, c.nombre_categoria, c.id_padre, j.nivel + 1
+    FROM categorias c INNER JOIN jerarquia j ON j.id_categoria = c.id_padre
 )
 SELECT nivel, COUNT(*) AS categorias_en_nivel
 FROM jerarquia
@@ -1014,24 +1014,24 @@ ORDER BY nivel;
    -- Pregunta: ¿Cuáles son los 5 productos más vendidos de cada categoría raíz,
    --           con su porcentaje del total de ventas de esa categoría?
    SELECT
-       cat_raiz.category_name                                          AS categoria_raiz,
-       prod_ranking.product_name,
+       cat_raiz.nombre_categoria                                          AS categoria_raiz,
+       prod_ranking.nombre,
        prod_ranking.ingreso_producto,
        ROUND(
            prod_ranking.ingreso_producto * 100.0 /
            (
-               SELECT SUM(oi2.quantity * oi2.unit_price)
-               FROM order_items oi2
-               INNER JOIN orders o2       ON o2.order_id = oi2.order_id
+               SELECT SUM(oi2.cantidad * oi2.precio_unitario)
+               FROM detalle_ordenes oi2
+               INNER JOIN ordenes o2       ON o2.id_orden = oi2.id_orden
                INNER JOIN productos p2     ON p2.id_producto = oi2.id_producto
-               INNER JOIN categorias c2   ON c2.category_id = p2.category_id
-               WHERE o2.status != 'cancelled'
+               INNER JOIN categorias c2   ON c2.id_categoria = p2.id_categoria
+               WHERE o2.estado != 'cancelled'
                  AND (
-                     c2.category_id = cat_raiz.category_id
-                     OR c2.parent_id = cat_raiz.category_id
-                     OR c2.parent_id IN (
-                         SELECT category_id FROM categorias
-                         WHERE parent_id = cat_raiz.category_id
+                     c2.id_categoria = cat_raiz.id_categoria
+                     OR c2.id_padre = cat_raiz.id_categoria
+                     OR c2.id_padre IN (
+                         SELECT id_categoria FROM categorias
+                         WHERE id_padre = cat_raiz.id_categoria
                      )
                  )
            ),
@@ -1040,27 +1040,27 @@ ORDER BY nivel;
    FROM (
        SELECT
            p.id_producto,
-           p.product_name,
-           p.category_id,
-           SUM(oi.quantity * oi.unit_price)   AS ingreso_producto,
+           p.nombre,
+           p.id_categoria,
+           SUM(oi.cantidad * oi.precio_unitario)   AS ingreso_producto,
            RANK() OVER (
-               PARTITION BY p.category_id
-               ORDER BY SUM(oi.quantity * oi.unit_price) DESC
+               PARTITION BY p.id_categoria
+               ORDER BY SUM(oi.cantidad * oi.precio_unitario) DESC
            )                                  AS rank_en_categoria
        FROM productos p
-       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
-       INNER JOIN orders o       ON o.order_id = oi.order_id
-       WHERE o.status != 'cancelled'
-       GROUP BY p.id_producto, p.product_name, p.category_id
+       INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
+       INNER JOIN ordenes o       ON o.id_orden = oi.id_orden
+       WHERE o.estado != 'cancelled'
+       GROUP BY p.id_producto, p.nombre, p.id_categoria
    ) prod_ranking
-   INNER JOIN categorias cat_leaf  ON cat_leaf.category_id = prod_ranking.category_id
+   INNER JOIN categorias cat_leaf  ON cat_leaf.id_categoria = prod_ranking.id_categoria
    INNER JOIN categorias cat_raiz  ON (
-       cat_raiz.category_id = cat_leaf.parent_id
-       OR cat_raiz.category_id = cat_leaf.category_id
+       cat_raiz.id_categoria = cat_leaf.id_padre
+       OR cat_raiz.id_categoria = cat_leaf.id_categoria
    )
-   WHERE cat_raiz.parent_id IS NULL
+   WHERE cat_raiz.id_padre IS NULL
      AND prod_ranking.rank_en_categoria <= 5
-   ORDER BY cat_raiz.category_name, prod_ranking.rank_en_categoria;
+   ORDER BY cat_raiz.nombre_categoria, prod_ranking.rank_en_categoria;
    ```
 
 2. Reescribe la misma consulta usando CTEs encadenados (versión legible):
@@ -1072,24 +1072,24 @@ ORDER BY nivel;
    ventas_producto AS (
        SELECT
            p.id_producto,
-           p.product_name,
-           p.category_id,
-           SUM(oi.quantity * oi.unit_price) AS ingreso_producto
+           p.nombre,
+           p.id_categoria,
+           SUM(oi.cantidad * oi.precio_unitario) AS ingreso_producto
        FROM productos p
-       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
-       INNER JOIN orders o       ON o.order_id = oi.order_id
-       WHERE o.status != 'cancelled'
-       GROUP BY p.id_producto, p.product_name, p.category_id
+       INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
+       INNER JOIN ordenes o       ON o.id_orden = oi.id_orden
+       WHERE o.estado != 'cancelled'
+       GROUP BY p.id_producto, p.nombre, p.id_categoria
    ),
    -- CTE 2: mapear cada categoría hoja a su categoría raíz
    categoria_raiz_map AS (
        SELECT
-           hoja.category_id      AS cat_hoja_id,
-           COALESCE(raiz.category_id, hoja.category_id) AS cat_raiz_id,
-           COALESCE(raiz.category_name, hoja.category_name) AS cat_raiz_nombre
+           hoja.id_categoria      AS cat_hoja_id,
+           COALESCE(raiz.id_categoria, hoja.id_categoria) AS cat_raiz_id,
+           COALESCE(raiz.nombre_categoria, hoja.nombre_categoria) AS cat_raiz_nombre
        FROM categorias hoja
-       LEFT JOIN categorias raiz ON raiz.category_id = hoja.parent_id
-                                 AND raiz.parent_id IS NULL
+       LEFT JOIN categorias raiz ON raiz.id_categoria = hoja.id_padre
+                                 AND raiz.id_padre IS NULL
    ),
    -- CTE 3: ventas totales por categoría raíz
    ventas_por_raiz AS (
@@ -1097,7 +1097,7 @@ ORDER BY nivel;
            crm.cat_raiz_id,
            SUM(vp.ingreso_producto) AS total_ingreso_raiz
        FROM ventas_producto vp
-       INNER JOIN categoria_raiz_map crm ON crm.cat_hoja_id = vp.category_id
+       INNER JOIN categoria_raiz_map crm ON crm.cat_hoja_id = vp.id_categoria
        GROUP BY crm.cat_raiz_id
    ),
    -- CTE 4: ranking de productos dentro de su categoría
@@ -1111,12 +1111,12 @@ ORDER BY nivel;
                ORDER BY vp.ingreso_producto DESC
            ) AS rank_en_categoria
        FROM ventas_producto vp
-       INNER JOIN categoria_raiz_map crm ON crm.cat_hoja_id = vp.category_id
+       INNER JOIN categoria_raiz_map crm ON crm.cat_hoja_id = vp.id_categoria
    )
    -- Query final: top 5 por categoría raíz con porcentaje
    SELECT
        pr.cat_raiz_nombre                                              AS categoria_raiz,
-       pr.product_name,
+       pr.nombre,
        ROUND(pr.ingreso_producto, 2)                                  AS ingreso_producto,
        ROUND(pr.ingreso_producto * 100.0 / vpr.total_ingreso_raiz, 2) AS pct_categoria,
        pr.rank_en_categoria
@@ -1132,31 +1132,31 @@ ORDER BY nivel;
    -- Plan de ejecución: Versión con subconsultas anidadas
    EXPLAIN (ANALYZE, COSTS, FORMAT TEXT)
    SELECT
-       cat_raiz.category_name AS categoria_raiz,
-       prod_ranking.product_name,
+       cat_raiz.nombre_categoria AS categoria_raiz,
+       prod_ranking.nombre,
        prod_ranking.ingreso_producto,
        prod_ranking.rank_en_categoria
    FROM (
        SELECT
            p.id_producto,
-           p.product_name,
-           p.category_id,
-           SUM(oi.quantity * oi.unit_price) AS ingreso_producto,
+           p.nombre,
+           p.id_categoria,
+           SUM(oi.cantidad * oi.precio_unitario) AS ingreso_producto,
            RANK() OVER (
-               PARTITION BY p.category_id
-               ORDER BY SUM(oi.quantity * oi.unit_price) DESC
+               PARTITION BY p.id_categoria
+               ORDER BY SUM(oi.cantidad * oi.precio_unitario) DESC
            ) AS rank_en_categoria
        FROM productos p
-       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
-       INNER JOIN orders o       ON o.order_id = oi.order_id
-       WHERE o.status != 'cancelled'
-       GROUP BY p.id_producto, p.product_name, p.category_id
+       INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
+       INNER JOIN ordenes o       ON o.id_orden = oi.id_orden
+       WHERE o.estado != 'cancelled'
+       GROUP BY p.id_producto, p.nombre, p.id_categoria
    ) prod_ranking
-   INNER JOIN categorias cat_leaf ON cat_leaf.category_id = prod_ranking.category_id
-   INNER JOIN categorias cat_raiz ON cat_raiz.category_id = cat_leaf.parent_id
-   WHERE cat_raiz.parent_id IS NULL
+   INNER JOIN categorias cat_leaf ON cat_leaf.id_categoria = prod_ranking.id_categoria
+   INNER JOIN categorias cat_raiz ON cat_raiz.id_categoria = cat_leaf.id_padre
+   WHERE cat_raiz.id_padre IS NULL
      AND prod_ranking.rank_en_categoria <= 5
-   ORDER BY cat_raiz.category_name, prod_ranking.rank_en_categoria;
+   ORDER BY cat_raiz.nombre_categoria, prod_ranking.rank_en_categoria;
    ```
 
    ```sql
@@ -1166,36 +1166,36 @@ ORDER BY nivel;
    ventas_producto AS (
        SELECT
            p.id_producto,
-           p.product_name,
-           p.category_id,
-           SUM(oi.quantity * oi.unit_price) AS ingreso_producto
+           p.nombre,
+           p.id_categoria,
+           SUM(oi.cantidad * oi.precio_unitario) AS ingreso_producto
        FROM productos p
-       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
-       INNER JOIN orders o       ON o.order_id = oi.order_id
-       WHERE o.status != 'cancelled'
-       GROUP BY p.id_producto, p.product_name, p.category_id
+       INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
+       INNER JOIN ordenes o       ON o.id_orden = oi.id_orden
+       WHERE o.estado != 'cancelled'
+       GROUP BY p.id_producto, p.nombre, p.id_categoria
    ),
    productos_rankeados AS (
        SELECT
            vp.*,
-           c_hoja.parent_id AS cat_raiz_id,
+           c_hoja.id_padre AS cat_raiz_id,
            RANK() OVER (
-               PARTITION BY c_hoja.parent_id
+               PARTITION BY c_hoja.id_padre
                ORDER BY vp.ingreso_producto DESC
            ) AS rank_en_categoria
        FROM ventas_producto vp
-       INNER JOIN categorias c_hoja ON c_hoja.category_id = vp.category_id
-       WHERE c_hoja.parent_id IS NOT NULL
+       INNER JOIN categorias c_hoja ON c_hoja.id_categoria = vp.id_categoria
+       WHERE c_hoja.id_padre IS NOT NULL
    )
    SELECT
-       c_raiz.category_name AS categoria_raiz,
-       pr.product_name,
+       c_raiz.nombre_categoria AS categoria_raiz,
+       pr.nombre,
        ROUND(pr.ingreso_producto, 2) AS ingreso_producto,
        pr.rank_en_categoria
    FROM productos_rankeados pr
-   INNER JOIN categorias c_raiz ON c_raiz.category_id = pr.cat_raiz_id
+   INNER JOIN categorias c_raiz ON c_raiz.id_categoria = pr.cat_raiz_id
    WHERE pr.rank_en_categoria <= 5
-   ORDER BY c_raiz.category_name, pr.rank_en_categoria;
+   ORDER BY c_raiz.nombre_categoria, pr.rank_en_categoria;
    ```
 
 4. Documenta tus observaciones sobre legibilidad y rendimiento:
@@ -1213,14 +1213,14 @@ ORDER BY nivel;
    WITH ventas_producto AS MATERIALIZED (
        SELECT
            p.id_producto,
-           p.product_name,
-           p.category_id,
-           SUM(oi.quantity * oi.unit_price) AS ingreso_producto
+           p.nombre,
+           p.id_categoria,
+           SUM(oi.cantidad * oi.precio_unitario) AS ingreso_producto
        FROM productos p
-       INNER JOIN order_items oi ON oi.id_producto = p.id_producto
-       INNER JOIN orders o       ON o.order_id = oi.order_id
-       WHERE o.status != 'cancelled'
-       GROUP BY p.id_producto, p.product_name, p.category_id
+       INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
+       INNER JOIN ordenes o       ON o.id_orden = oi.id_orden
+       WHERE o.estado != 'cancelled'
+       GROUP BY p.id_producto, p.nombre, p.id_categoria
    )
    SELECT COUNT(*), SUM(ingreso_producto)
    FROM ventas_producto;
@@ -1261,23 +1261,23 @@ SELECT COUNT(*) AS filas_version_cte
 FROM (
     WITH
     ventas_producto AS (
-        SELECT p.id_producto, p.product_name, p.category_id,
-               SUM(oi.quantity * oi.unit_price) AS ingreso_producto
+        SELECT p.id_producto, p.nombre, p.id_categoria,
+               SUM(oi.cantidad * oi.precio_unitario) AS ingreso_producto
         FROM productos p
-        INNER JOIN order_items oi ON oi.id_producto = p.id_producto
-        INNER JOIN orders o ON o.order_id = oi.order_id
-        WHERE o.status != 'cancelled'
-        GROUP BY p.id_producto, p.product_name, p.category_id
+        INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
+        INNER JOIN ordenes o ON o.id_orden = oi.id_orden
+        WHERE o.estado != 'cancelled'
+        GROUP BY p.id_producto, p.nombre, p.id_categoria
     ),
     productos_rankeados AS (
-        SELECT vp.*, c_hoja.parent_id AS cat_raiz_id,
-               RANK() OVER (PARTITION BY c_hoja.parent_id
+        SELECT vp.*, c_hoja.id_padre AS cat_raiz_id,
+               RANK() OVER (PARTITION BY c_hoja.id_padre
                             ORDER BY vp.ingreso_producto DESC) AS rnk
         FROM ventas_producto vp
-        INNER JOIN categorias c_hoja ON c_hoja.category_id = vp.category_id
-        WHERE c_hoja.parent_id IS NOT NULL
+        INNER JOIN categorias c_hoja ON c_hoja.id_categoria = vp.id_categoria
+        WHERE c_hoja.id_padre IS NOT NULL
     )
-    SELECT pr.product_name
+    SELECT pr.nombre
     FROM productos_rankeados pr
     WHERE pr.rnk <= 5
 ) t;
@@ -1370,7 +1370,7 @@ ORDER BY categoria_raiz, rank;
 
 - [ ] La tabla `categorias` existe con 21 filas y relación padre-hijo correcta (5 raíz, 10 nivel-2, 6 nivel-3)
 - [ ] La tabla `empleados` existe con 13 filas y 4 niveles jerárquicos
-- [ ] La columna `productos.category_id` está poblada sin valores NULL
+- [ ] La columna `productos.id_categoria` está poblada sin valores NULL
 - [ ] Las subconsultas correlacionadas en `SELECT` y `WHERE` devuelven resultados consistentes con los JOINs equivalentes
 - [ ] El CTE recursivo de categorías devuelve exactamente 21 filas con rutas completas
 - [ ] El CTE recursivo de empleados devuelve exactamente 13 filas con cadenas de reporte correctas
@@ -1387,19 +1387,19 @@ ORDER BY categoria_raiz, rank;
    SELECT
        (SELECT COUNT(*) FROM categorias)  AS total_categorias,
        (SELECT COUNT(*) FROM empleados)   AS total_empleados,
-       (SELECT COUNT(*) FROM productos WHERE category_id IS NOT NULL) AS productos_con_cat;
+       (SELECT COUNT(*) FROM productos WHERE id_categoria IS NOT NULL) AS productos_con_cat;
    ```
    **Resultado Esperado:** `total_categorias = 21`, `total_empleados = 13`, `productos_con_cat = total de productos`
 
 2. Verificar la integridad referencial de la jerarquía:
 
    ```sql
-   -- Test 2: No debe haber categorías con parent_id apuntando a IDs inexistentes
+   -- Test 2: No debe haber categorías con id_padre apuntando a IDs inexistentes
    SELECT COUNT(*) AS referencias_invalidas
    FROM categorias c
-   WHERE c.parent_id IS NOT NULL
+   WHERE c.id_padre IS NOT NULL
      AND NOT EXISTS (
-         SELECT 1 FROM categorias p WHERE p.category_id = c.parent_id
+         SELECT 1 FROM categorias p WHERE p.id_categoria = c.id_padre
      );
    ```
    **Resultado Esperado:** `referencias_invalidas = 0`
@@ -1409,10 +1409,10 @@ ORDER BY categoria_raiz, rank;
    ```sql
    -- Test 3: Distribución de niveles en la jerarquía de categorías
    WITH RECURSIVE jerarquia AS (
-       SELECT category_id, 0 AS nivel FROM categorias WHERE parent_id IS NULL
+       SELECT id_categoria, 0 AS nivel FROM categorias WHERE id_padre IS NULL
        UNION ALL
-       SELECT c.category_id, j.nivel + 1
-       FROM categorias c INNER JOIN jerarquia j ON j.category_id = c.parent_id
+       SELECT c.id_categoria, j.nivel + 1
+       FROM categorias c INNER JOIN jerarquia j ON j.id_categoria = c.id_padre
    )
    SELECT nivel, COUNT(*) AS cantidad
    FROM jerarquia
@@ -1434,20 +1434,20 @@ ORDER BY categoria_raiz, rank;
    ```sql
    -- Test 4: Subconsulta y CTE deben producir el mismo conteo
    WITH avg_cat AS (
-       SELECT category_id, AVG(price) AS avg_price
-       FROM productos GROUP BY category_id
+       SELECT id_categoria, AVG(precio_unitario) AS avg_price
+       FROM productos GROUP BY id_categoria
    )
    SELECT
        (
            SELECT COUNT(*) FROM productos p
-           INNER JOIN avg_cat a ON a.category_id = p.category_id
-           WHERE p.price > a.avg_price
+           INNER JOIN avg_cat a ON a.id_categoria = p.id_categoria
+           WHERE p.precio_unitario > a.avg_price
        ) AS conteo_cte,
        (
            SELECT COUNT(*) FROM productos p
-           WHERE p.price > (
-               SELECT AVG(p2.price) FROM productos p2
-               WHERE p2.category_id = p.category_id
+           WHERE p.precio_unitario > (
+               SELECT AVG(p2.precio_unitario) FROM productos p2
+               WHERE p2.id_categoria = p.id_categoria
            )
        ) AS conteo_subquery;
    ```
@@ -1458,10 +1458,10 @@ ORDER BY categoria_raiz, rank;
    ```sql
    -- Test 5: Verificar 4 niveles en el árbol de empleados
    WITH RECURSIVE arbol AS (
-       SELECT employee_id, 0 AS nivel FROM empleados WHERE manager_id IS NULL
+       SELECT id_empleado, 0 AS nivel FROM empleados WHERE id_manager IS NULL
        UNION ALL
-       SELECT e.employee_id, a.nivel + 1
-       FROM empleados e INNER JOIN arbol a ON a.employee_id = e.manager_id
+       SELECT e.id_empleado, a.nivel + 1
+       FROM empleados e INNER JOIN arbol a ON a.id_empleado = e.id_manager
    )
    SELECT nivel, COUNT(*) AS empleados_en_nivel
    FROM arbol
@@ -1499,28 +1499,28 @@ Los datos contienen un ciclo en la jerarquía (por ejemplo, la categoría A tien
 ```sql
 -- Verificar si existen ciclos en la jerarquía de categorías
 WITH RECURSIVE deteccion_ciclos AS (
-    SELECT category_id, parent_id, ARRAY[category_id] AS visitados, FALSE AS es_ciclo
+    SELECT id_categoria, id_padre, ARRAY[id_categoria] AS visitados, FALSE AS es_ciclo
     FROM categorias
-    WHERE parent_id IS NULL
+    WHERE id_padre IS NULL
 
     UNION ALL
 
-    SELECT c.category_id, c.parent_id,
-           dc.visitados || c.category_id,
-           c.category_id = ANY(dc.visitados)
+    SELECT c.id_categoria, c.id_padre,
+           dc.visitados || c.id_categoria,
+           c.id_categoria = ANY(dc.visitados)
     FROM categorias c
-    INNER JOIN deteccion_ciclos dc ON dc.category_id = c.parent_id
+    INNER JOIN deteccion_ciclos dc ON dc.id_categoria = c.id_padre
     WHERE NOT dc.es_ciclo
 )
-SELECT category_id, visitados
+SELECT id_categoria, visitados
 FROM deteccion_ciclos
 WHERE es_ciclo = TRUE;
 
 -- Si hay ciclos, corregirlos con UPDATE:
--- UPDATE categorias SET parent_id = NULL WHERE category_id = <id_con_ciclo>;
+-- UPDATE categorias SET id_padre = NULL WHERE id_categoria = <id_con_ciclo>;
 
 -- Asegurarse de incluir siempre la cláusula anti-ciclo en CTEs recursivos:
--- WHERE NOT c.category_id = ANY(ids_ruta)  -- o condición equivalente
+-- WHERE NOT c.id_categoria = ANY(ids_ruta)  -- o condición equivalente
 ```
 
 <br/>
@@ -1544,22 +1544,22 @@ Uso incorrecto de `UNION ALL` vs `UNION` en el CTE recursivo, o condición de JO
 -- Diagnóstico: verificar que la parte ancla solo incluye raíces reales
 SELECT COUNT(*) AS total_raices
 FROM categorias
-WHERE parent_id IS NULL;  -- Debe ser 5
+WHERE id_padre IS NULL;  -- Debe ser 5
 
 -- Verificar que UNION ALL no genera duplicados no deseados
 -- Si hay duplicados, usar UNION en lugar de UNION ALL:
 WITH RECURSIVE jerarquia AS (
-    SELECT category_id, category_name, parent_id, 0 AS nivel
-    FROM categorias WHERE parent_id IS NULL
+    SELECT id_categoria, nombre_categoria, id_padre, 0 AS nivel
+    FROM categorias WHERE id_padre IS NULL
     UNION  -- <-- UNION en lugar de UNION ALL elimina duplicados (más lento)
-    SELECT c.category_id, c.category_name, c.parent_id, j.nivel + 1
+    SELECT c.id_categoria, c.nombre_categoria, c.id_padre, j.nivel + 1
     FROM categorias c
-    INNER JOIN jerarquia j ON j.category_id = c.parent_id
+    INNER JOIN jerarquia j ON j.id_categoria = c.id_padre
 )
 SELECT nivel, COUNT(*) FROM jerarquia GROUP BY nivel ORDER BY nivel;
 
 -- Si faltan filas, verificar que el JOIN de la parte recursiva sea correcto:
--- INNER JOIN jerarquia j ON j.category_id = c.parent_id
+-- INNER JOIN jerarquia j ON j.id_categoria = c.id_padre
 -- (el CTE se une a sí mismo por el ID del padre, no del hijo)
 ```
 
@@ -1570,7 +1570,7 @@ SELECT nivel, COUNT(*) FROM jerarquia GROUP BY nivel ORDER BY nivel;
 ### Issue 3: Error "column reference is ambiguous" en CTEs Encadenados
 
 **Síntomas:**
-- `ERROR: column reference "category_id" is ambiguous`
+- `ERROR: column reference "id_categoria" is ambiguous`
 - El error ocurre al referenciar columnas en CTEs que tienen nombres de columna repetidos
 
 **Causa:**
@@ -1581,35 +1581,35 @@ Cuando múltiples CTEs en una cadena tienen columnas con el mismo nombre, y el q
 ```sql
 -- INCORRECTO: ambigüedad por nombres repetidos
 WITH
-cte_a AS (SELECT category_id, category_name FROM categorias),
-cte_b AS (SELECT category_id, parent_id FROM categorias)
-SELECT category_id  -- ¿de cte_a o cte_b?
+cte_a AS (SELECT id_categoria, nombre_categoria FROM categorias),
+cte_b AS (SELECT id_categoria, id_padre FROM categorias)
+SELECT id_categoria  -- ¿de cte_a o cte_b?
 FROM cte_a
-INNER JOIN cte_b ON cte_a.category_id = cte_b.category_id;
+INNER JOIN cte_b ON cte_a.id_categoria = cte_b.id_categoria;
 
 -- CORRECTO: siempre calificar con alias de tabla
 WITH
-cte_a AS (SELECT category_id, category_name FROM categorias),
-cte_b AS (SELECT category_id AS parent_cat_id, parent_id FROM categorias)
+cte_a AS (SELECT id_categoria, nombre_categoria FROM categorias),
+cte_b AS (SELECT id_categoria AS parent_cat_id, id_padre FROM categorias)
 SELECT
-    a.category_id,
-    a.category_name,
+    a.id_categoria,
+    a.nombre_categoria,
     b.parent_cat_id
 FROM cte_a a
-INNER JOIN cte_b b ON a.category_id = b.parent_cat_id;
+INNER JOIN cte_b b ON a.id_categoria = b.parent_cat_id;
 
 -- ALTERNATIVA: renombrar columnas en la definición del CTE
 WITH
 ventas_producto AS (
     SELECT
         id_producto  AS vp_id_producto,   -- prefijo para evitar ambigüedad
-        category_id AS vp_category_id,
-        SUM(quantity * unit_price) AS ingreso
-    FROM order_items oi
-    INNER JOIN orders o ON o.order_id = oi.order_id
-    GROUP BY id_producto, category_id
+        id_categoria AS vp_id_categoria,
+        SUM(cantidad * precio_unitario) AS ingreso
+    FROM detalle_ordenes oi
+    INNER JOIN ordenes o ON o.id_orden = oi.id_orden
+    GROUP BY id_producto, id_categoria
 )
-SELECT vp_id_producto, vp_category_id, ingreso
+SELECT vp_id_producto, vp_id_categoria, ingreso
 FROM ventas_producto;
 ```
 
@@ -1665,32 +1665,32 @@ Las subconsultas correlacionadas se ejecutan una vez por cada fila del query ext
 **Solución:**
 
 ```sql
--- Crear índice en la columna de correlación (category_id en productos)
-CREATE INDEX IF NOT EXISTS idx_productos_category_id
-ON productos(category_id);
+-- Crear índice en la columna de correlación (id_categoria en productos)
+CREATE INDEX IF NOT EXISTS idx_productos_id_categoria
+ON productos(id_categoria);
 
 -- Verificar que el índice existe
 SELECT indexname, indexdef
 FROM pg_indexes
-WHERE tablename = 'productos' AND indexname = 'idx_productos_category_id';
+WHERE tablename = 'productos' AND indexname = 'idx_productos_id_categoria';
 
 -- Alternativa más eficiente: reescribir como JOIN con GROUP BY
 -- En lugar de subconsulta correlacionada:
-SELECT p.id_producto, p.product_name, p.price
+SELECT p.id_producto, p.nombre, p.precio_unitario
 FROM productos p
-WHERE p.price > (
-    SELECT AVG(p2.price) FROM productos p2 WHERE p2.category_id = p.category_id
+WHERE p.precio_unitario > (
+    SELECT AVG(p2.precio_unitario) FROM productos p2 WHERE p2.id_categoria = p.id_categoria
 );
 
 -- Versión eficiente con JOIN:
-SELECT p.id_producto, p.product_name, p.price
+SELECT p.id_producto, p.nombre, p.precio_unitario
 FROM productos p
 INNER JOIN (
-    SELECT category_id, AVG(price) AS avg_price
+    SELECT id_categoria, AVG(precio_unitario) AS avg_price
     FROM productos
-    GROUP BY category_id
-) cat_avg ON cat_avg.category_id = p.category_id
-WHERE p.price > cat_avg.avg_price;
+    GROUP BY id_categoria
+) cat_avg ON cat_avg.id_categoria = p.id_categoria
+WHERE p.precio_unitario > cat_avg.avg_price;
 ```
 
 <br/>
@@ -1704,8 +1704,8 @@ Al finalizar el práctica, los objetos creados deben **mantenerse** ya que será
 -- EJECUTAR SOLO SI NECESITAS REINICIAR LA PRÁTICA DESDE CERO
 -- Estos objetos son necesarios para las prácticas 3.2 en adelante
 
--- Eliminar columna category_id de productos (revertir cambio del Paso 1)
-ALTER TABLE productos DROP COLUMN IF EXISTS category_id;
+-- Eliminar columna id_categoria de productos (revertir cambio del Paso 1)
+ALTER TABLE productos DROP COLUMN IF EXISTS id_categoria;
 
 -- Eliminar tablas nuevas (en orden correcto por dependencias)
 DROP TABLE IF EXISTS empleados CASCADE;
@@ -1719,7 +1719,7 @@ WHERE schemaname = 'public'
 -- Debe devolver 0 filas
 ```
 
-> **Advertencia:** No ejecutes el script de limpieza si planeas continuar con la práctica 3.2. Las tablas `categorias` y `empleados`, y la columna `productos.category_id` son prerrequisitos para todos las prácticas del capítulo 3. Si accidentalmente las eliminas, puedes restaurarlas ejecutando el script de setup: `labs/3-1/setup/3-1-setup.sql` disponible en el repositorio Git del curso.
+> **Advertencia:** No ejecutes el script de limpieza si planeas continuar con la práctica 3.2. Las tablas `categorias` y `empleados`, y la columna `productos.id_categoria` son prerrequisitos para todos las prácticas del capítulo 3. Si accidentalmente las eliminas, puedes restaurarlas ejecutando el script de setup: `labs/3-1/setup/3-1-setup.sql` disponible en el repositorio Git del curso.
 
 
 ```bash
