@@ -1653,17 +1653,13 @@ El contenedor Docker fue detenido o eliminado, o Docker Desktop no está en ejec
 docker info
 
 # Listar todos los contenedores (incluyendo detenidos)
-docker ps -a --filter "name=postgres"
+docker ps -a 
 
 # Si el contenedor existe pero está detenido, iniciarlo
 docker start curso_postgres
 
 # Verificar que PostgreSQL está listo para aceptar conexiones
 docker exec curso_postgres pg_isready -U postgres -d ventas_db
-
-# Si el contenedor fue eliminado, recrearlo con docker-compose
-cd /ruta/al/proyecto
-docker-compose up -d
 
 # Verificar los logs del contenedor para diagnosticar errores
 docker logs curso_postgres --tail 50
