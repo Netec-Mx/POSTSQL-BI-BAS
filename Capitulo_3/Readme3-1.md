@@ -125,48 +125,55 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ('Altavoces',         8,  'Altavoces portátiles y de escritorio');
    ```
 
-4. Crea la tabla `employees` con estructura de reporte jerárquico:
+<br/>
+<p align="center">
+  <img src="../images/i4.png" style="display: block; margin: 0 auto;" width="300"/>
+</p>
+
+<br/>
+
+4. Crea la tabla `empleados` con estructura de reporte jerárquico:
 
    ```sql
    -- Tabla de empleados con jerarquía de reporte
-   CREATE TABLE IF NOT EXISTS employees (
+   CREATE TABLE IF NOT EXISTS empleados (
        employee_id   SERIAL PRIMARY KEY,
        first_name    VARCHAR(50)  NOT NULL,
        last_name     VARCHAR(50)  NOT NULL,
        job_title     VARCHAR(100) NOT NULL,
        department    VARCHAR(50)  NOT NULL,
-       manager_id    INTEGER REFERENCES employees(employee_id),
+       manager_id    INTEGER REFERENCES empleados(employee_id),
        hire_date     DATE         NOT NULL,
        salary        NUMERIC(10,2) NOT NULL,
        email         VARCHAR(100) UNIQUE NOT NULL
    );
 
-   COMMENT ON TABLE employees IS 'Estructura organizacional con jerarquía de reporte manager-subordinado';
-   COMMENT ON COLUMN employees.manager_id IS 'NULL indica que el empleado es CEO o director sin jefe directo';
+   COMMENT ON TABLE empleados IS 'Estructura organizacional con jerarquía de reporte manager-subordinado';
+   COMMENT ON COLUMN empleados.manager_id IS 'NULL indica que el empleado es CEO o director sin jefe directo';
    ```
 
 5. Inserta los datos de empleados con cuatro niveles organizacionales:
 
    ```sql
    -- Nivel 1: CEO
-   INSERT INTO employees (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
+   INSERT INTO empleados (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
    ('Carlos',    'Mendoza',   'CEO',                      'Dirección',   NULL, '2015-01-15', 95000.00, 'c.mendoza@empresa.com');
 
    -- Nivel 2: Directores (reportan al CEO, employee_id=1)
-   INSERT INTO employees (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
+   INSERT INTO empleados (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
    ('Ana',       'Rodríguez', 'Directora de Ventas',      'Ventas',         1, '2016-03-01', 72000.00, 'a.rodriguez@empresa.com'),
    ('Luis',      'García',    'Director de Marketing',    'Marketing',      1, '2016-06-15', 68000.00, 'l.garcia@empresa.com'),
    ('Sofía',     'López',     'Directora de Operaciones', 'Operaciones',    1, '2017-01-10', 70000.00, 's.lopez@empresa.com');
 
    -- Nivel 3: Gerentes (reportan a directores)
-   INSERT INTO employees (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
+   INSERT INTO empleados (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
    ('Pedro',     'Martínez',  'Gerente de Ventas Norte',  'Ventas',         2, '2018-02-20', 52000.00, 'p.martinez@empresa.com'),
    ('Laura',     'Sánchez',   'Gerente de Ventas Sur',    'Ventas',         2, '2018-05-10', 51000.00, 'l.sanchez@empresa.com'),
    ('Diego',     'Torres',    'Gerente de Campañas',      'Marketing',      3, '2019-01-08', 48000.00, 'd.torres@empresa.com'),
    ('Valentina', 'Flores',    'Gerente de Logística',     'Operaciones',    4, '2018-11-15', 50000.00, 'v.flores@empresa.com');
 
    -- Nivel 4: Analistas y ejecutivos (reportan a gerentes)
-   INSERT INTO employees (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
+   INSERT INTO empleados (first_name, last_name, job_title, department, manager_id, hire_date, salary, email) VALUES
    ('Marcos',    'Jiménez',   'Ejecutivo de Ventas',      'Ventas',         5, '2020-03-01', 38000.00, 'm.jimenez@empresa.com'),
    ('Camila',    'Ruiz',      'Ejecutiva de Ventas',      'Ventas',         5, '2020-07-15', 37500.00, 'c.ruiz@empresa.com'),
    ('Andrés',    'Morales',   'Ejecutivo de Ventas',      'Ventas',         6, '2021-01-10', 36000.00, 'a.morales@empresa.com'),
@@ -228,7 +235,7 @@ LIMIT 10;
 -- Verificar estructura de empleados
 SELECT employee_id, first_name || ' ' || last_name AS nombre,
        job_title, manager_id
-FROM employees
+FROM empleados
 ORDER BY manager_id NULLS FIRST, employee_id;
 ```
 
@@ -817,7 +824,7 @@ WHERE p.price > (
            0                                   AS nivel_jerarquico,
            (first_name || ' ' || last_name)::TEXT AS cadena,
            salary
-       FROM employees
+       FROM empleados
        WHERE manager_id IS NULL   -- CEO: no tiene manager
 
        UNION ALL
@@ -832,7 +839,7 @@ WHERE p.price > (
            cm.nivel_jerarquico + 1,
            (cm.cadena || ' → ' || e.first_name || ' ' || e.last_name)::TEXT,
            e.salary
-       FROM employees e
+       FROM empleados e
        INNER JOIN cadena_de_mando cm ON cm.employee_id = e.manager_id
    )
    SELECT
@@ -855,7 +862,7 @@ WHERE p.price > (
    -- Primero, identificar su employee_id
 
    SELECT employee_id, first_name, last_name, job_title
-   FROM employees
+   FROM empleados
    WHERE first_name = 'Ana' AND last_name = 'Rodríguez';
 
    ```
@@ -872,7 +879,7 @@ WHERE p.price > (
            job_title,
            manager_id,
            0 AS nivel_bajo_manager
-       FROM employees
+       FROM empleados
        WHERE employee_id = 2   -- Ana Rodríguez
 
        UNION ALL
@@ -884,7 +891,7 @@ WHERE p.price > (
            e.job_title,
            e.manager_id,
            s.nivel_bajo_manager + 1
-       FROM employees e
+       FROM empleados e
        INNER JOIN subordinados s ON s.employee_id = e.manager_id
    )
    SELECT
@@ -1362,7 +1369,7 @@ ORDER BY categoria_raiz, rank;
 ### Criterios de Éxito
 
 - [ ] La tabla `categorias` existe con 21 filas y relación padre-hijo correcta (5 raíz, 10 nivel-2, 6 nivel-3)
-- [ ] La tabla `employees` existe con 13 filas y 4 niveles jerárquicos
+- [ ] La tabla `empleados` existe con 13 filas y 4 niveles jerárquicos
 - [ ] La columna `productos.category_id` está poblada sin valores NULL
 - [ ] Las subconsultas correlacionadas en `SELECT` y `WHERE` devuelven resultados consistentes con los JOINs equivalentes
 - [ ] El CTE recursivo de categorías devuelve exactamente 21 filas con rutas completas
@@ -1379,7 +1386,7 @@ ORDER BY categoria_raiz, rank;
    -- Test 1: Contar filas en tablas nuevas
    SELECT
        (SELECT COUNT(*) FROM categorias)  AS total_categorias,
-       (SELECT COUNT(*) FROM employees)   AS total_empleados,
+       (SELECT COUNT(*) FROM empleados)   AS total_empleados,
        (SELECT COUNT(*) FROM productos WHERE category_id IS NOT NULL) AS productos_con_cat;
    ```
    **Resultado Esperado:** `total_categorias = 21`, `total_empleados = 13`, `productos_con_cat = total de productos`
@@ -1451,10 +1458,10 @@ ORDER BY categoria_raiz, rank;
    ```sql
    -- Test 5: Verificar 4 niveles en el árbol de empleados
    WITH RECURSIVE arbol AS (
-       SELECT employee_id, 0 AS nivel FROM employees WHERE manager_id IS NULL
+       SELECT employee_id, 0 AS nivel FROM empleados WHERE manager_id IS NULL
        UNION ALL
        SELECT e.employee_id, a.nivel + 1
-       FROM employees e INNER JOIN arbol a ON a.employee_id = e.manager_id
+       FROM empleados e INNER JOIN arbol a ON a.employee_id = e.manager_id
    )
    SELECT nivel, COUNT(*) AS empleados_en_nivel
    FROM arbol
@@ -1701,25 +1708,25 @@ Al finalizar el práctica, los objetos creados deben **mantenerse** ya que será
 ALTER TABLE productos DROP COLUMN IF EXISTS category_id;
 
 -- Eliminar tablas nuevas (en orden correcto por dependencias)
-DROP TABLE IF EXISTS employees CASCADE;
+DROP TABLE IF EXISTS empleados CASCADE;
 DROP TABLE IF EXISTS categorias CASCADE;
 
 -- Verificar que las tablas fueron eliminadas
 SELECT tablename
 FROM pg_tables
 WHERE schemaname = 'public'
-  AND tablename IN ('categorias', 'employees');
+  AND tablename IN ('categorias', 'empleados');
 -- Debe devolver 0 filas
 ```
 
-> **Advertencia:** No ejecutes el script de limpieza si planeas continuar con la práctica 3.2. Las tablas `categorias` y `employees`, y la columna `productos.category_id` son prerrequisitos para todos las prácticas del capítulo 3. Si accidentalmente las eliminas, puedes restaurarlas ejecutando el script de setup: `labs/3-1/setup/3-1-setup.sql` disponible en el repositorio Git del curso.
+> **Advertencia:** No ejecutes el script de limpieza si planeas continuar con la práctica 3.2. Las tablas `categorias` y `empleados`, y la columna `productos.category_id` son prerrequisitos para todos las prácticas del capítulo 3. Si accidentalmente las eliminas, puedes restaurarlas ejecutando el script de setup: `labs/3-1/setup/3-1-setup.sql` disponible en el repositorio Git del curso.
 
 
 ```bash
 # Para verificar el estado actual del esquema sin modificarlo:
 docker exec -it curso_postgres psql -U postgres -d ventas_db -c "\dt"
 docker exec -it curso_postgres psql -U postgres -d ventas_db \
-  -c "SELECT COUNT(*) FROM categorias; SELECT COUNT(*) FROM employees;"
+  -c "SELECT COUNT(*) FROM categorias; SELECT COUNT(*) FROM empleados;"
 ```
 
 <br/>
