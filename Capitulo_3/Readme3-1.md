@@ -145,7 +145,7 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
        id_manager    INTEGER REFERENCES empleados(id_empleado),
        fecha_contratacion     DATE         NOT NULL,
        salary        NUMERIC(10,2) NOT NULL,
-       email         VARCHAR(100) UNIQUE NOT NULL
+       correo         VARCHAR(100) UNIQUE NOT NULL
    );
 
    COMMENT ON TABLE empleados IS 'Estructura organizacional con jerarquía de reporte manager-subordinado';
@@ -156,24 +156,24 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
 
    ```sql
    -- Nivel 1: CEO
-   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, email) VALUES
+   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, correo) VALUES
    ('Carlos',    'Mendoza',   'CEO',                      'Dirección',   NULL, '2015-01-15', 95000.00, 'c.mendoza@empresa.com');
 
    -- Nivel 2: Directores (reportan al CEO, id_empleado=1)
-   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, email) VALUES
+   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, correo) VALUES
    ('Ana',       'Rodríguez', 'Directora de Ventas',      'Ventas',         1, '2016-03-01', 72000.00, 'a.rodriguez@empresa.com'),
    ('Luis',      'García',    'Director de Marketing',    'Marketing',      1, '2016-06-15', 68000.00, 'l.garcia@empresa.com'),
    ('Sofía',     'López',     'Directora de Operaciones', 'Operaciones',    1, '2017-01-10', 70000.00, 's.lopez@empresa.com');
 
    -- Nivel 3: Gerentes (reportan a directores)
-   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, email) VALUES
+   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, correo) VALUES
    ('Pedro',     'Martínez',  'Gerente de Ventas Norte',  'Ventas',         2, '2018-02-20', 52000.00, 'p.martinez@empresa.com'),
    ('Laura',     'Sánchez',   'Gerente de Ventas Sur',    'Ventas',         2, '2018-05-10', 51000.00, 'l.sanchez@empresa.com'),
    ('Diego',     'Torres',    'Gerente de Campañas',      'Marketing',      3, '2019-01-08', 48000.00, 'd.torres@empresa.com'),
    ('Valentina', 'Flores',    'Gerente de Logística',     'Operaciones',    4, '2018-11-15', 50000.00, 'v.flores@empresa.com');
 
    -- Nivel 4: Analistas y ejecutivos (reportan a gerentes)
-   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, email) VALUES
+   INSERT INTO empleados (nombre, apellido, puesto, departamento, id_manager, fecha_contratacion, salary, correo) VALUES
    ('Marcos',    'Jiménez',   'Ejecutivo de Ventas',      'Ventas',         5, '2020-03-01', 38000.00, 'm.jimenez@empresa.com'),
    ('Camila',    'Ruiz',      'Ejecutiva de Ventas',      'Ventas',         5, '2020-07-15', 37500.00, 'c.ruiz@empresa.com'),
    ('Andrés',    'Morales',   'Ejecutivo de Ventas',      'Ventas',         6, '2021-01-10', 36000.00, 'a.morales@empresa.com'),
@@ -252,6 +252,9 @@ ORDER BY id_manager NULLS FIRST, id_empleado;
 1. Escribe una subconsulta no correlacionada en `WHERE` para encontrar productos con precio superior al promedio global:
 
    ```sql
+   -- Subconsulta
+    SELECT AVG(precio_unitario) FROM productos;
+
    -- Subconsulta no correlacionada en WHERE
    -- La subconsulta se ejecuta UNA SOLA VEZ y devuelve un escalar
    SELECT
@@ -271,6 +274,12 @@ ORDER BY id_manager NULLS FIRST, id_empleado;
 2. Usa una subconsulta en `WHERE` con `IN` para obtener productos que han generado más de 50 ventas:
 
    ```sql
+   -- Subconsulta
+   SELECT oi.id_producto
+       FROM detalle_ordenes oi
+       GROUP BY oi.id_producto
+       HAVING SUM(oi.cantidad) > 5;
+
    -- Subconsulta no correlacionada con IN
    -- Devuelve un conjunto de valores (no un escalar)
    SELECT
@@ -282,14 +291,25 @@ ORDER BY id_manager NULLS FIRST, id_empleado;
        SELECT oi.id_producto
        FROM detalle_ordenes oi
        GROUP BY oi.id_producto
-       HAVING SUM(oi.cantidad) > 50
+       HAVING SUM(oi.cantidad) > 5
    )
    ORDER BY p.nombre;
    ```
 
 3. Construye una tabla derivada en la cláusula `FROM` (subconsulta como tabla virtual):
 
-   ```sqlcc
+   ```sql
+   -- Subconsulta
+    SELECT
+        p.id_categoria,
+        COUNT(*)            AS total_productos,
+        ROUND(AVG(p.precio_unitario), 2) AS precio_promedio,
+        MAX(p.precio_unitario)        AS precio_maximo,
+        MIN(p.precio_unitario)        AS precio_minimo
+    FROM productos p
+    WHERE p.id_categoria IS NOT NULL
+    GROUP BY p.id_categoria;
+
    -- Subconsulta en FROM (tabla derivada / derived table)
    -- La subconsulta genera un conjunto de resultados que se trata como tabla
    SELECT
@@ -321,7 +341,7 @@ ORDER BY id_manager NULLS FIRST, id_empleado;
    SELECT
        cu.id_cliente,
        cu.nombre || ' ' || cu.apellido AS cliente,
-       cu.email
+       cu.correo
    FROM clientes cu
    WHERE EXISTS (
        SELECT 1
