@@ -334,7 +334,7 @@ ORDER BY id_manager NULLS FIRST, id_empleado;
    ORDER BY resumen.precio_promedio DESC;
    ```
 
-4. Usa `EXISTS` con una subconsulta para encontrar clientes que han realizado al menos un pedido en los últimos 6 meses:
+4. Usa `EXISTS` con una subconsulta para encontrar clientes que han realizado al menos un pedido en los últimos 60 meses:
 
    ```sql
    -- Subconsulta con EXISTS (más eficiente que IN para conjuntos grandes)
@@ -347,30 +347,12 @@ ORDER BY id_manager NULLS FIRST, id_empleado;
        SELECT 1
        FROM ordenes o
        WHERE o.id_cliente = cu.id_cliente
-         AND o.fecha >= CURRENT_DATE - INTERVAL '6 months'
+         AND o.fecha_orden >= CURRENT_DATE - INTERVAL '60 months'
    )
    ORDER BY cu.apellido, cu.nombre
    LIMIT 10;
 
    ```
-
-<br/>
-
-**Salida Esperada:**
-
-```
--- Consulta 1: productos sobre el promedio
- id_producto | nombre | precio_unitario | diferencia_vs_promedio
-------------+--------------+-------+------------------------
- ...        | ...          | ...   | ...
-(N rows)
-
--- Consulta 3: resumen por categoría
- id_categoria | nombre_categoria  | total_productos | precio_promedio | precio_maximo | precio_minimo
--------------+----------------+-----------------+-----------------+---------------+--------------
- ...         | ...            | ...             | ...             | ...           | ...
-(N rows)
-```
 
 <br/>
 
