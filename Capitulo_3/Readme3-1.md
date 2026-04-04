@@ -131,7 +131,7 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db -c "\dt"
 
 <br/>
 <p align="center">
-  <img src="../images/i4.png" style="display: block; margin: 0 auto;" width="300"/>
+  <img src="../images/i4.png"  />
 </p>
 
 <br/>
