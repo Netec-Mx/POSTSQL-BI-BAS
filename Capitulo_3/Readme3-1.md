@@ -629,11 +629,11 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
    metricas_cliente AS (
        SELECT
            cu.id_cliente,
-           cu.nombre || ' ' || cu.apellido          AS cliente,
-           COUNT(DISTINCT o.id_orden)                    AS frecuencia,
-           SUM(oi.cantidad * oi.precio_unitario)              AS valor_total,
-           MAX(o.fecha_orden)                             AS ultima_compra,
-           CURRENT_DATE - MAX(o.fecha_orden)              AS dias_desde_ultima
+           cu.nombre || ' ' || cu.apellido AS cliente,
+           COUNT(DISTINCT o.id_orden) AS frecuencia,
+           SUM(oi.cantidad * oi.precio_venta) AS valor_total,
+           MAX(o.fecha_orden) AS ultima_compra,
+           CURRENT_DATE - MAX(o.fecha_orden) AS dias_desde_ultima
        FROM clientes cu
        LEFT JOIN ordenes o    ON o.id_cliente = cu.id_cliente
                              AND o.estado != 'cancelled'
@@ -654,10 +654,10 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
    )
    SELECT
        segmento,
-       COUNT(*)                          AS num_clientes,
-       ROUND(AVG(frecuencia), 1)         AS frecuencia_promedio,
-       ROUND(AVG(valor_total), 2)        AS valor_promedio,
-       ROUND(AVG(dias_desde_ultima), 0)  AS dias_promedio
+       COUNT(*) AS num_clientes,
+       ROUND(AVG(frecuencia), 1) AS frecuencia_promedio,
+       ROUND(AVG(valor_total), 2) AS valor_promedio,
+       ROUND(AVG(dias_desde_ultima), 0) AS dias_promedio
    FROM clientes_segmentados
    GROUP BY segmento
    ORDER BY num_clientes DESC;
@@ -696,20 +696,20 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
 -- Versión con CTE
 
 WITH resumen AS (
-    SELECT id_categoria, ROUND(AVG(precio_unitario), 2) AS avg_price
+    SELECT id_categoria, ROUND(AVG(precio_venta), 2) AS avg_price
     FROM productos GROUP BY id_categoria
 )
 SELECT COUNT(*) AS total_cte
 FROM productos p
 INNER JOIN resumen r ON r.id_categoria = p.id_categoria
-WHERE p.precio_unitario > r.avg_price;
+WHERE p.precio_venta > r.avg_price;
 
 -- Versión con subconsulta (debe dar el mismo número)
 
 SELECT COUNT(*) AS total_subquery
 FROM productos p
-WHERE p.precio_unitario > (
-    SELECT AVG(p2.precio_unitario) FROM productos p2 WHERE p2.id_categoria = p.id_categoria
+WHERE p.precio_venta > (
+    SELECT AVG(p2.precio_venta) FROM productos p2 WHERE p2.id_categoria = p.id_categoria
 );
 
 ```
@@ -929,7 +929,7 @@ WHERE p.precio_unitario > (
    ventas_categoria AS (
        SELECT
            p.id_categoria,
-           SUM(oi.cantidad * oi.precio_unitario) AS ventas_directas
+           SUM(oi.cantidad * oi.precio_venta) AS ventas_directas
        FROM productos p
        INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
        INNER JOIN ordenes o       ON o.id_orden = oi.id_orden
@@ -1016,7 +1016,7 @@ ORDER BY nivel;
        ROUND(
            prod_ranking.ingreso_producto * 100.0 /
            (
-               SELECT SUM(oi2.cantidad * oi2.precio_unitario)
+               SELECT SUM(oi2.cantidad * oi2.precio_venta)
                FROM detalle_ordenes oi2
                INNER JOIN ordenes o2       ON o2.id_orden = oi2.id_orden
                INNER JOIN productos p2     ON p2.id_producto = oi2.id_producto
@@ -1038,10 +1038,10 @@ ORDER BY nivel;
            p.id_producto,
            p.nombre,
            p.id_categoria,
-           SUM(oi.cantidad * oi.precio_unitario)   AS ingreso_producto,
+           SUM(oi.cantidad * oi.precio_venta)   AS ingreso_producto,
            RANK() OVER (
                PARTITION BY p.id_categoria
-               ORDER BY SUM(oi.cantidad * oi.precio_unitario) DESC
+               ORDER BY SUM(oi.cantidad * oi.precio_venta) DESC
            )                                  AS rank_en_categoria
        FROM productos p
        INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
@@ -1070,7 +1070,7 @@ ORDER BY nivel;
            p.id_producto,
            p.nombre,
            p.id_categoria,
-           SUM(oi.cantidad * oi.precio_unitario) AS ingreso_producto
+           SUM(oi.cantidad * oi.precio_venta) AS ingreso_producto
        FROM productos p
        INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
        INNER JOIN ordenes o       ON o.id_orden = oi.id_orden
@@ -1137,10 +1137,10 @@ ORDER BY nivel;
            p.id_producto,
            p.nombre,
            p.id_categoria,
-           SUM(oi.cantidad * oi.precio_unitario) AS ingreso_producto,
+           SUM(oi.cantidad * oi.precio_venta) AS ingreso_producto,
            RANK() OVER (
                PARTITION BY p.id_categoria
-               ORDER BY SUM(oi.cantidad * oi.precio_unitario) DESC
+               ORDER BY SUM(oi.cantidad * oi.precio_venta) DESC
            ) AS rank_en_categoria
        FROM productos p
        INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
@@ -1164,7 +1164,7 @@ ORDER BY nivel;
            p.id_producto,
            p.nombre,
            p.id_categoria,
-           SUM(oi.cantidad * oi.precio_unitario) AS ingreso_producto
+           SUM(oi.cantidad * oi.precio_venta) AS ingreso_producto
        FROM productos p
        INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
        INNER JOIN ordenes o       ON o.id_orden = oi.id_orden
@@ -1211,7 +1211,7 @@ ORDER BY nivel;
            p.id_producto,
            p.nombre,
            p.id_categoria,
-           SUM(oi.cantidad * oi.precio_unitario) AS ingreso_producto
+           SUM(oi.cantidad * oi.precio_venta) AS ingreso_producto
        FROM productos p
        INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
        INNER JOIN ordenes o       ON o.id_orden = oi.id_orden
@@ -1258,7 +1258,7 @@ FROM (
     WITH
     ventas_producto AS (
         SELECT p.id_producto, p.nombre, p.id_categoria,
-               SUM(oi.cantidad * oi.precio_unitario) AS ingreso_producto
+               SUM(oi.cantidad * oi.precio_venta) AS ingreso_producto
         FROM productos p
         INNER JOIN detalle_ordenes oi ON oi.id_producto = p.id_producto
         INNER JOIN ordenes o ON o.id_orden = oi.id_orden
@@ -1430,19 +1430,19 @@ ORDER BY categoria_raiz, rank;
    ```sql
    -- Test 4: Subconsulta y CTE deben producir el mismo conteo
    WITH avg_cat AS (
-       SELECT id_categoria, AVG(precio_unitario) AS avg_price
+       SELECT id_categoria, AVG(precio_venta) AS avg_price
        FROM productos GROUP BY id_categoria
    )
    SELECT
        (
            SELECT COUNT(*) FROM productos p
            INNER JOIN avg_cat a ON a.id_categoria = p.id_categoria
-           WHERE p.precio_unitario > a.avg_price
+           WHERE p.precio_venta > a.avg_price
        ) AS conteo_cte,
        (
            SELECT COUNT(*) FROM productos p
-           WHERE p.precio_unitario > (
-               SELECT AVG(p2.precio_unitario) FROM productos p2
+           WHERE p.precio_venta > (
+               SELECT AVG(p2.precio_venta) FROM productos p2
                WHERE p2.id_categoria = p.id_categoria
            )
        ) AS conteo_subquery;
@@ -1600,7 +1600,7 @@ ventas_producto AS (
     SELECT
         id_producto  AS vp_id_producto,   -- prefijo para evitar ambigüedad
         id_categoria AS vp_id_categoria,
-        SUM(cantidad * precio_unitario) AS ingreso
+        SUM(cantidad * precio_venta) AS ingreso
     FROM detalle_ordenes oi
     INNER JOIN ordenes o ON o.id_orden = oi.id_orden
     GROUP BY id_producto, id_categoria
@@ -1668,21 +1668,21 @@ WHERE tablename = 'productos' AND indexname = 'idx_productos_id_categoria';
 
 -- Alternativa más eficiente: reescribir como JOIN con GROUP BY
 -- En lugar de subconsulta correlacionada:
-SELECT p.id_producto, p.nombre, p.precio_unitario
+SELECT p.id_producto, p.nombre, p.precio_venta
 FROM productos p
-WHERE p.precio_unitario > (
-    SELECT AVG(p2.precio_unitario) FROM productos p2 WHERE p2.id_categoria = p.id_categoria
+WHERE p.precio_venta > (
+    SELECT AVG(p2.precio_venta) FROM productos p2 WHERE p2.id_categoria = p.id_categoria
 );
 
 -- Versión eficiente con JOIN:
-SELECT p.id_producto, p.nombre, p.precio_unitario
+SELECT p.id_producto, p.nombre, p.precio_venta
 FROM productos p
 INNER JOIN (
-    SELECT id_categoria, AVG(precio_unitario) AS avg_price
+    SELECT id_categoria, AVG(precio_venta) AS avg_price
     FROM productos
     GROUP BY id_categoria
 ) cat_avg ON cat_avg.id_categoria = p.id_categoria
-WHERE p.precio_unitario > cat_avg.avg_price;
+WHERE p.precio_venta > cat_avg.avg_price;
 ```
 
 <br/>
