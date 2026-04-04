@@ -369,7 +369,7 @@ WHERE EXISTS (SELECT 1 FROM ordenes o WHERE o.id_cliente = cu.id_cliente
               AND o.fecha >= CURRENT_DATE - INTERVAL '60 months');
 
 SELECT COUNT(DISTINCT o.id_cliente) FROM ordenes o
-WHERE o.fecha >= CURRENT_DATE - INTERVAL '60 months';
+WHERE o.fecha_orden >= CURRENT_DATE - INTERVAL '60 months';
 ```
 
 - Ambos `COUNT` deben devolver el mismo número
