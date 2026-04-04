@@ -391,19 +391,18 @@ WHERE o.fecha_orden >= CURRENT_DATE - INTERVAL '60 months';
    SELECT
        p.id_producto,
        p.nombre,
-       p.precio_unitario                                                    AS precio_producto,
+       p.precio_unitario  AS precio_producto,
        (
            SELECT ROUND(AVG(p2.precio_unitario), 2)
            FROM productos p2
            WHERE p2.id_categoria = p.id_categoria   -- <-- correlación
-       )                                                          AS promedio_categoria,
+       ) AS promedio_categoria,
        ROUND(
            p.precio_unitario - (
                SELECT AVG(p2.precio_unitario)
                FROM productos p2
                WHERE p2.id_categoria = p.id_categoria
-           ),
-       2)                                                         AS diferencia_vs_cat
+           ),2) AS diferencia_vs_cat
    FROM productos p
    WHERE p.id_categoria IS NOT NULL
    ORDER BY ABS(
