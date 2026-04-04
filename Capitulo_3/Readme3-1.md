@@ -1833,9 +1833,8 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db \
 
 ## Recursos Adicionales
 
-- [Documentación oficial PostgreSQL 16 – Queries WITH (CTEs)](https://www.postgresql.org/docs/16/queries-with.html) – Referencia completa de sintaxis y comportamiento de CTEs, incluyendo materialización y recursión
-- [Documentación oficial PostgreSQL 16 – Subconsultas](https://www.postgresql.org/docs/16/functions-subquery.html) – Referencia de operadores `EXISTS`, `IN`, `ANY`, `ALL` con subconsultas
-- [Use The Index, Luke – SQL Performance Explained](https://use-the-index-luke.com/) – Guía práctica sobre optimización de consultas SQL, incluyendo subconsultas correlacionadas e índices
-- [PostgreSQL EXPLAIN Visualizer (explain.dalibo.com)](https://explain.dalibo.com/) – Herramienta web para visualizar y analizar planes de ejecución de PostgreSQL de forma gráfica
-- [Recursive SQL Queries – PostgreSQL Wiki](https://wiki.postgresql.org/wiki/Recursive_Query_Examples) – Ejemplos adicionales de CTEs recursivos para diferentes casos de uso (grafos, árboles, secuencias)
-- Repositorio Git del curso – Directorio `labs/03-00-01/` contiene: script de setup (`setup.sql`), script de validación (`validate.sql`) y solución del reto (`solutions/reto_solucion.sql`)
+- [Documentación oficial PostgreSQL 16 – Queries WITH (CTEs)](https://www.postgresql.org/docs/16/queries-with.html) – Referencia completa de sintaxis y comportamiento de CTEs, incluyendo materialización y recursión.
+- [Documentación oficial PostgreSQL 16 – Subconsultas](https://www.postgresql.org/docs/16/functions-subquery.html) – Referencia de operadores `EXISTS`, `IN`, `ANY`, `ALL` con subconsultas.
+- [Use The Index, Luke – SQL Performance Explained](https://use-the-index-luke.com/) – Guía práctica sobre optimización de consultas SQL, incluyendo subconsultas correlacionadas e índices.
+- [PostgreSQL EXPLAIN Visualizer (explain.dalibo.com)](https://explain.dalibo.com/) – Herramienta web para visualizar y analizar planes de ejecución de PostgreSQL de forma gráfica.
+- [Recursive SQL Queries – PostgreSQL Wiki](https://wiki.postgresql.org/wiki/Recursive_Query_Examples) – Ejemplos adicionales de CTEs recursivos para diferentes casos de uso (grafos, árboles, secuencias).
