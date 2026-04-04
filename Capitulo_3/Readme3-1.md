@@ -366,10 +366,10 @@ SELECT ROUND(AVG(precio_unitario), 2) AS promedio_global FROM productos;
 -- Confirmar que EXISTS y IN producen el mismo resultado (deben coincidir)
 SELECT COUNT(*) FROM clientes cu
 WHERE EXISTS (SELECT 1 FROM ordenes o WHERE o.id_cliente = cu.id_cliente
-              AND o.fecha >= CURRENT_DATE - INTERVAL '6 months');
+              AND o.fecha >= CURRENT_DATE - INTERVAL '60 months');
 
 SELECT COUNT(DISTINCT o.id_cliente) FROM ordenes o
-WHERE o.fecha >= CURRENT_DATE - INTERVAL '6 months';
+WHERE o.fecha >= CURRENT_DATE - INTERVAL '60 months';
 ```
 
 - Ambos `COUNT` deben devolver el mismo número
