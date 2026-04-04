@@ -486,24 +486,11 @@ WHERE o.fecha_orden >= CURRENT_DATE - INTERVAL '60 months';
 
 **Salida Esperada:**
 
+
 <br/>
-
-```sql
-
--- Consulta 2: productos sobre el promedio de su categoría
- id_producto | nombre | nombre_categoria | precio_unitario
-------------+--------------+---------------+-------
- ...        | ...          | Smartphones   | ...
- ...        | ...          | Laptops       | ...
-(N rows)
-
--- Plan de ejecución (fragmento)
-Seq Scan on productos p  (cost=... rows=... width=...)
-  SubPlan 1
-    ->  Aggregate  (cost=... rows=1 width=32)
-          ->  Seq Scan on productos p2  (cost=... rows=... width=...)
-                Filter: (id_categoria = p.id_categoria)
-```
+<p align="center">
+  <img src="../images/i6.png" style="display: block; margin: 0 auto;" width="600"/>
+</p>
 
 <br/>
 
