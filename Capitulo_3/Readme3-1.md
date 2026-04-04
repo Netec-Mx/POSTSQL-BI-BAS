@@ -1259,15 +1259,19 @@ ORDER BY nivel;
 
 4. Documenta tus observaciones sobre legibilidad y rendimiento:
 
-   ```sql
-   -- Consulta de resumen: comparar tiempos de ejecución
-   -- Ejecutar cada versión 3 veces y anotar el tiempo promedio de EXPLAIN ANALYZE
-   -- Buscar en la salida: "Execution Time: X.XXX ms"
+   - Consulta de resumen: comparar tiempos de ejecución
+   - Ejecutar cada versión 3 veces y anotar el tiempo promedio de EXPLAIN ANALYZE
+   - Buscar en la salida: "Execution Time: X.XXX ms"
+   - Por defecto, los CTEs NO son "optimization fences" desde PostgreSQL 12
+   - El planificador puede "inlinear" el CTE si lo considera más eficiente
+   - Para forzar materialización (útil para CTEs costosos reutilizados).
 
-   -- Nota importante sobre CTEs en PostgreSQL 12+:
-   -- Por defecto, los CTEs NO son "optimization fences" desde PostgreSQL 12
-   -- El planificador puede "inlinear" el CTE si lo considera más eficiente
-   -- Para forzar materialización (útil para CTEs costosos reutilizados):
+
+<br/>
+
+
+   ```sql
+
 
    WITH ventas_producto AS MATERIALIZED (
        SELECT
@@ -1286,28 +1290,6 @@ ORDER BY nivel;
    ```
 
 <br/>
-
-**Salida Esperada:**
-
-```sql
--- Comparación de planes (fragmento)
--- Subconsultas: el planificador puede mostrar más pasos anidados
-Hash Join  (cost=... rows=... width=...)
-  ->  WindowAgg  (cost=... rows=... width=...)
-        ->  HashAggregate  (cost=... rows=... width=...)
-  ->  Hash  (cost=... rows=... width=...)
-
--- CTEs: puede mostrar "CTE Scan" o inlining del CTE
-CTE ventas_producto
-  ->  HashAggregate  (cost=... rows=... width=...)
-CTE productos_rankeados
-  ->  WindowAgg  (cost=... rows=...)
-
-Execution Time: X.XXX ms   <-- comparar entre versiones
-```
-
-<br/>
-
 
 **Verificación:**
 
@@ -1352,30 +1334,28 @@ FROM (
 
 ### Paso 7: Reto – Pipeline Analítico Completo
 
-Construye un reporte analítico completo que responda la siguiente pregunta de negocio:
+Construye un reporte analítico SQL completo que responda la siguiente pregunta de negocio:
 
-Para cada categoría raíz, muestra el top 3 de clientes con mayor gasto total, indicando: nombre del cliente, categoría raíz, total gastado, número de órdenes, ticket promedio, y el porcentaje que representa su gasto sobre el total de ventas de esa categoría raíz. Incluye solo clientes activos (con al menos una orden en los últimos 12 meses) y categorías con al menos 5 clientes distintos."*
+Para cada categoría raíz, muestra el top 3 de clientes con mayor gasto total, indicando: nombre del cliente, categoría raíz, total gastado, número de órdenes, ticket promedio, y el porcentaje que representa su gasto sobre el total de ventas de esa categoría raíz. Incluye solo clientes activos (con al menos una orden en los últimos 12 meses) y categorías con al menos 5 clientes distintos.
 
 <br/>
 
 
 **Requisitos técnicos del reto:**
 
-```sql
--- Tu solución debe:
--- 1. Usar AL MENOS 4 CTEs encadenados con nombres descriptivos
--- 2. Incluir un CTE que calcule la jerarquía de categorías (raíz → hoja)
---    usando WITH RECURSIVE (o una versión simplificada con JOIN de dos niveles)
--- 3. Filtrar clientes activos usando una subconsulta o CTE separado
--- 4. Calcular el porcentaje del gasto del cliente sobre el total de la categoría
--- 5. Usar RANK() o ROW_NUMBER() para obtener el top 3 por categoría
--- 6. El resultado final debe tener estas columnas:
---    categoria_raiz | rank | cliente | total_gastado | num_ordenes |
---    ticket_promedio | pct_sobre_categoria
+Tu solución debe:
+1. Usar AL MENOS 4 CTEs encadenados con nombres descriptivos
+2. Incluir un CTE que calcule la jerarquía de categorías (raíz → hoja) usando WITH RECURSIVE (o una versión simplificada con JOIN de dos niveles)
+3. Filtrar clientes activos usando una subconsulta o CTE separado
+4. Calcular el porcentaje del gasto del cliente sobre el total de la categoría
+5. Usar RANK() o ROW_NUMBER() para obtener el top 3 por categoría
+6. El resultado final debe tener estas columnas: categoria_raiz, rank, cliente, total_gastado, num_ordenes, ticket_promedio,pct_sobre_categoria
 
--- Estructura sugerida (completa el contenido de cada CTE):
 
 <br/>
+
+```sql
+-- Estructura sugerida (completa el contenido de cada CTE):
 
 WITH
 clientes_activos AS (
@@ -1405,8 +1385,6 @@ ORDER BY categoria_raiz, rank;
 ```
 
 <br/>
-<br/>
-
 
 **Criterios de Evaluación:**
 
@@ -1428,15 +1406,13 @@ ORDER BY categoria_raiz, rank;
 
 ## Validación y Pruebas
 
-### Criterios de Éxito
-
-- [ ] La tabla `categorias` existe con 21 filas y relación padre-hijo correcta (5 raíz, 10 nivel-2, 6 nivel-3)
-- [ ] La tabla `empleados` existe con 13 filas y 4 niveles jerárquicos
-- [ ] La columna `productos.id_categoria` está poblada sin valores NULL
-- [ ] Las subconsultas correlacionadas en `SELECT` y `WHERE` devuelven resultados consistentes con los JOINs equivalentes
-- [ ] El CTE recursivo de categorías devuelve exactamente 21 filas con rutas completas
-- [ ] El CTE recursivo de empleados devuelve exactamente 13 filas con cadenas de reporte correctas
-- [ ] El ejercicio comparativo muestra que CTE y subconsulta producen el mismo número de filas
+- [ ] La tabla `categorias` existe con 21 filas y relación padre-hijo correcta (5 raíz, 15 nivel-2, 6 nivel-3).
+- [ ] La tabla `empleados` existe con 13 filas y 4 niveles jerárquicos.
+- [ ] La columna `productos.id_categoria` está poblada sin valores NULL.
+- [ ] Las subconsultas correlacionadas en `SELECT` y `WHERE` devuelven resultados consistentes con los JOINs equivalentes.
+- [ ] El CTE recursivo de categorías devuelve exactamente 21 filas con rutas completas.
+- [ ] El CTE recursivo de empleados devuelve exactamente 13 filas con cadenas de reporte correctas.
+- [ ] El ejercicio comparativo muestra que CTE y subconsulta producen el mismo número de filas.
 
 <br/>
 
@@ -1451,7 +1427,10 @@ ORDER BY categoria_raiz, rank;
        (SELECT COUNT(*) FROM empleados)   AS total_empleados,
        (SELECT COUNT(*) FROM productos WHERE id_categoria IS NOT NULL) AS productos_con_cat;
    ```
-   **Resultado Esperado:** `total_categorias = 21`, `total_empleados = 13`, `productos_con_cat = total de productos`
+
+<br/>
+
+>**Resultado Esperado:** `total_categorias = 26`, `total_empleados = 13`, `productos_con_cat = total de productos`
 
 <br/>
 
@@ -1466,7 +1445,10 @@ ORDER BY categoria_raiz, rank;
          SELECT 1 FROM categorias p WHERE p.id_categoria = c.id_padre
      );
    ```
-   **Resultado Esperado:** `referencias_invalidas = 0`
+
+<br/>
+
+>**Resultado Esperado:** `referencias_invalidas = 0`
 
 <br/>
 
@@ -1485,7 +1467,11 @@ ORDER BY categoria_raiz, rank;
    GROUP BY nivel
    ORDER BY nivel;
    ```
-   **Resultado Esperado:**
+
+<br/>
+   
+> **Resultado Esperado:**
+  
    ```
     nivel | cantidad
    -------+----------
@@ -1519,7 +1505,10 @@ ORDER BY categoria_raiz, rank;
            )
        ) AS conteo_subquery;
    ```
-   **Resultado Esperado:** `conteo_cte = conteo_subquery` (mismos valores)
+   
+<br/>
+
+>**Resultado Esperado:** `conteo_cte = conteo_subquery` (mismos valores)
 
 <br/>
 
@@ -1538,7 +1527,11 @@ ORDER BY categoria_raiz, rank;
    GROUP BY nivel
    ORDER BY nivel;
    ```
-   **Resultado Esperado:**
+
+<br/>
+
+>**Resultado Esperado:**
+ 
    ```
     nivel | empleados_en_nivel
    -------+--------------------
@@ -1765,6 +1758,9 @@ WHERE p.precio_venta > cat_avg.avg_price;
 ## Limpieza
 
 Al finalizar el práctica, los objetos creados deben **mantenerse** ya que serán utilizados en los prácticas siguientes Sin embargo, si necesitas reiniciar la práctica desde cero, ejecuta el siguiente script de limpieza:
+
+<br/>
+
 
 ```sql
 -- EJECUTAR SOLO SI NECESITAS REINICIAR LA PRÁTICA DESDE CERO
