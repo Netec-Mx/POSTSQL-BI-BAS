@@ -994,7 +994,7 @@ GROUP BY nivel
 ORDER BY nivel;
 ```
 
-- Debe mostrar: nivel 0 → 5 categorías, nivel 1 → 10 categorías, nivel 2 → 6 categorías (total: 21)
+- Debe mostrar: nivel 0 → 5 categorías, nivel 1 → 15 categorías, nivel 2 → 6 categorías (total: 26)
 - El árbol de empleados debe mostrar exactamente 13 filas con 4 niveles (0 a 3)
 
 <br/>
