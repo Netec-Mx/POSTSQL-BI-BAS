@@ -449,15 +449,15 @@ WHERE o.fecha_orden >= CURRENT_DATE - INTERVAL '60 months';
        cu.id_cliente,
        cu.nombre || ' ' || cu.apellido AS cliente,
        (
-           SELECT MAX(o.fecha)
+           SELECT MAX(o.fecha_orden)
            FROM ordenes o
            WHERE o.id_cliente = cu.id_cliente   -- <-- correlación
-       )                                           AS ultimo_pedido,
+       ) AS ultimo_pedido,
        (
            SELECT COUNT(*)
            FROM ordenes o
            WHERE o.id_cliente = cu.id_cliente
-       )                                           AS total_pedidos
+       ) AS total_pedidos
    FROM clientes cu
    ORDER BY ultimo_pedido DESC NULLS LAST
    LIMIT 10;
@@ -637,8 +637,8 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
            cu.nombre || ' ' || cu.apellido          AS cliente,
            COUNT(DISTINCT o.id_orden)                    AS frecuencia,
            SUM(oi.cantidad * oi.precio_unitario)              AS valor_total,
-           MAX(o.fecha)                             AS ultima_compra,
-           CURRENT_DATE - MAX(o.fecha)              AS dias_desde_ultima
+           MAX(o.fecha_orden)                             AS ultima_compra,
+           CURRENT_DATE - MAX(o.fecha_orden)              AS dias_desde_ultima
        FROM clientes cu
        LEFT JOIN ordenes o    ON o.id_cliente = cu.id_cliente
                              AND o.estado != 'cancelled'
