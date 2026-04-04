@@ -696,20 +696,20 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
 -- Versión con CTE
 
 WITH resumen AS (
-    SELECT id_categoria, ROUND(AVG(precio_venta), 2) AS avg_price
+    SELECT id_categoria, ROUND(AVG(precio_unitario), 2) AS avg_price
     FROM productos GROUP BY id_categoria
 )
 SELECT COUNT(*) AS total_cte
 FROM productos p
 INNER JOIN resumen r ON r.id_categoria = p.id_categoria
-WHERE p.precio_venta > r.avg_price;
+WHERE p.precio_unitario > r.avg_price;
 
 -- Versión con subconsulta (debe dar el mismo número)
 
 SELECT COUNT(*) AS total_subquery
 FROM productos p
-WHERE p.precio_venta > (
-    SELECT AVG(p2.precio_venta) FROM productos p2 WHERE p2.id_categoria = p.id_categoria
+WHERE p.precio_unitario > (
+    SELECT AVG(p2.precio_unitario) FROM productos p2 WHERE p2.id_categoria = p.id_categoria
 );
 
 ```
