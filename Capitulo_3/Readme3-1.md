@@ -129,11 +129,11 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db -c "\dt"
    ('Altavoces',         8,  'Altavoces portátiles y de escritorio');
    ```
 
-<br/>
-<p align="center">
-  <img src="../images/i4.png"  />
-</p>
+<br/><br/>
 
+<p align="center">
+  <img src="../images/i4.png" style="width: 100%; max-width: 1200px;" />
+</p>
 <br/>
 
 4. Crea la tabla `empleados` con estructura de reporte jerárquico:
@@ -185,6 +185,13 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db -c "\dt"
    ('Isabella',  'Castro',    'Analista de Marketing',    'Marketing',      7, '2021-04-20', 35000.00, 'i.castro@empresa.com'),
    ('Sebastián', 'Vargas',    'Analista de Logística',    'Operaciones',    8, '2022-02-28', 34000.00, 'se.vargas@empresa.com');
    ```
+
+
+<br/><br/>
+
+<p align="center">
+  <img src="../images/i11.png"  />
+</p>
 
 <br/>
 
