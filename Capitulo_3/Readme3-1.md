@@ -55,7 +55,7 @@ docker start curso_postgres
 docker exec -it curso_postgres psql -U postgres -d ventas_db -c "\dt"
 ```
 
-Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `detalle_ordenes`, el entorno está listo. En caso contrario, consulta la sección **Solución de Problemas** al final de esta práctica.
+>**Nota:** Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `detalle_ordenes`, el entorno está listo. En caso contrario, consulta la sección **Solución de Problemas** al final de esta práctica.
 
 <br/><br/>
 
@@ -68,6 +68,8 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ```bash
    docker exec -it curso_postgres psql -U postgres -d ventas_db
    ```
+
+<br/>
 
 2. Crea la tabla `categorias` con soporte de jerarquía padre-hijo:
 
@@ -85,6 +87,8 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    COMMENT ON TABLE categorias IS 'Jerarquía de categorías de productos (padre-hijo)';
    COMMENT ON COLUMN categorias.id_padre IS 'NULL indica categoría raíz; referencia a id_categoria del padre';
    ```
+
+<br/>
 
 3. Inserta los datos de categorías con tres niveles jerárquicos:
 
@@ -151,6 +155,7 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    COMMENT ON TABLE empleados IS 'Estructura organizacional con jerarquía de reporte manager-subordinado';
    COMMENT ON COLUMN empleados.id_manager IS 'NULL indica que el empleado es CEO o director sin jefe directo';
    ```
+<br/>
 
 5. Inserta los datos de empleados con cuatro niveles organizacionales:
 
@@ -180,6 +185,8 @@ Si el comando anterior muestra las tablas `productos`, `clientes`, `ordenes` y `
    ('Isabella',  'Castro',    'Analista de Marketing',    'Marketing',      7, '2021-04-20', 35000.00, 'i.castro@empresa.com'),
    ('Sebastián', 'Vargas',    'Analista de Logística',    'Operaciones',    8, '2022-02-28', 34000.00, 'se.vargas@empresa.com');
    ```
+
+<br/>
 
 6. Agrega la columna `id_categoria` a la tabla `productos` y actualiza los datos:
 
@@ -271,6 +278,8 @@ ORDER BY id_manager NULLS FIRST, id_empleado;
    LIMIT 10;
    ```
 
+<br/>
+
 2. Usa una subconsulta en `WHERE` con `IN` para obtener productos que han generado más de 50 ventas:
 
    ```sql
@@ -295,6 +304,8 @@ ORDER BY id_manager NULLS FIRST, id_empleado;
    )
    ORDER BY p.nombre;
    ```
+
+<br/>
 
 3. Construye una tabla derivada en la cláusula `FROM` (subconsulta como tabla virtual):
 
@@ -333,6 +344,8 @@ ORDER BY id_manager NULLS FIRST, id_empleado;
    INNER JOIN categorias c ON c.id_categoria = resumen.id_categoria
    ORDER BY resumen.precio_promedio DESC;
    ```
+
+<br/>
 
 4. Usa `EXISTS` con una subconsulta para encontrar clientes que han realizado al menos un pedido en los últimos 60 meses:
 
@@ -416,6 +429,8 @@ WHERE o.fecha_orden >= CURRENT_DATE - INTERVAL '60 months';
 
    ```
 
+<br/>
+
 2. Subconsulta correlacionada en `WHERE` para encontrar productos cuyo precio supera el promedio de su propia categoría:
 
    ```sql
@@ -438,6 +453,8 @@ WHERE o.fecha_orden >= CURRENT_DATE - INTERVAL '60 months';
    ORDER BY c.nombre_categoria, p.precio_unitario DESC;
 
    ```
+
+<br/>
 
 3. Subconsulta correlacionada para obtener el pedido más reciente de cada cliente:
 
@@ -463,6 +480,8 @@ WHERE o.fecha_orden >= CURRENT_DATE - INTERVAL '60 months';
    LIMIT 10;
 
    ```
+
+<br/>
 
 4. Observa el plan de ejecución de la subconsulta correlacionada para entender su costo:
 
@@ -565,6 +584,14 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
    ORDER BY rc.precio_promedio DESC;
    ```
 
+<br/>
+
+<p align="center">
+  <img src="../images/i7.png" style="display: block; margin: 0 auto;" width="800"/>
+</p>
+
+<br/>
+
 2. Crea un CTE encadenado (múltiples CTEs en secuencia) para construir un pipeline analítico de ventas:
 
    ```sql
@@ -620,6 +647,14 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
    ORDER BY nombre_categoria, rank_en_categoria; 
    
    ```
+
+<br/>
+
+<p align="center">
+  <img src="../images/i8.png" style="display: block; margin: 0 auto;" width="800"/>
+</p>
+
+<br/>
 
 3. Usa un CTE para calcular métricas de clientes y luego segmentarlos:
 
@@ -759,6 +794,8 @@ WHERE p.precio_unitario > (
 
    ```
 
+<br/>
+
 2. Escribe el CTE recursivo para recorrer toda la jerarquía de categorías:
 
    ```sql
@@ -802,6 +839,14 @@ WHERE p.precio_unitario > (
    ORDER BY ruta_completa;
 
    ```
+
+<br/>
+
+<p align="center">
+  <img src="../images/i9.png" style="display: block; margin: 0 auto;" width="800"/>
+</p>
+
+<br/>
 
 3. Escribe el CTE recursivo para el árbol de empleados (cadena de mando):
 
@@ -849,6 +894,14 @@ WHERE p.precio_unitario > (
    ORDER BY cadena;
 
    ```
+
+<br/>
+
+<p align="center">
+  <img src="../images/i10.png" style="display: block; margin: 0 auto;" width="800"/>
+</p>
+
+<br/>
 
 4. Usa el CTE recursivo para encontrar todos los subordinados de un manager específico:
 
@@ -899,6 +952,8 @@ WHERE p.precio_unitario > (
    ORDER BY nivel_bajo_manager, nombre;
 
    ```
+
+<br/>
 
 5. Calcula el total de ventas agregado por rama de la jerarquía de categorías:
 
@@ -1059,6 +1114,8 @@ ORDER BY nivel;
    ORDER BY cat_raiz.nombre_categoria, prod_ranking.rank_en_categoria;
    ```
 
+<br/>
+
 2. Reescribe la misma consulta usando CTEs encadenados (versión legible):
 
    ```sql
@@ -1122,6 +1179,8 @@ ORDER BY nivel;
    ORDER BY pr.cat_raiz_nombre, pr.rank_en_categoria;
    ```
 
+<br/>
+
 3. Compara los planes de ejecución de ambas versiones:
 
    ```sql
@@ -1154,6 +1213,8 @@ ORDER BY nivel;
      AND prod_ranking.rank_en_categoria <= 5
    ORDER BY cat_raiz.nombre_categoria, prod_ranking.rank_en_categoria;
    ```
+
+<br/>
 
    ```sql
    -- Plan de ejecución: Versión con CTEs
@@ -1193,6 +1254,8 @@ ORDER BY nivel;
    WHERE pr.rank_en_categoria <= 5
    ORDER BY c_raiz.nombre_categoria, pr.rank_en_categoria;
    ```
+
+<br/>
 
 4. Documenta tus observaciones sobre legibilidad y rendimiento:
 
@@ -1291,7 +1354,7 @@ FROM (
 
 Construye un reporte analítico completo que responda la siguiente pregunta de negocio:
 
-> *"Para cada categoría raíz, muestra el top 3 de clientes con mayor gasto total, indicando: nombre del cliente, categoría raíz, total gastado, número de órdenes, ticket promedio, y el porcentaje que representa su gasto sobre el total de ventas de esa categoría raíz. Incluye solo clientes activos (con al menos una orden en los últimos 12 meses) y categorías con al menos 5 clientes distintos."*
+Para cada categoría raíz, muestra el top 3 de clientes con mayor gasto total, indicando: nombre del cliente, categoría raíz, total gastado, número de órdenes, ticket promedio, y el porcentaje que representa su gasto sobre el total de ventas de esa categoría raíz. Incluye solo clientes activos (con al menos una orden en los últimos 12 meses) y categorías con al menos 5 clientes distintos."*
 
 <br/>
 
@@ -1311,6 +1374,8 @@ Construye un reporte analítico completo que responda la siguiente pregunta de n
 --    ticket_promedio | pct_sobre_categoria
 
 -- Estructura sugerida (completa el contenido de cada CTE):
+
+<br/>
 
 WITH
 clientes_activos AS (
@@ -1340,6 +1405,7 @@ ORDER BY categoria_raiz, rank;
 ```
 
 <br/>
+<br/>
 
 
 **Criterios de Evaluación:**
@@ -1354,7 +1420,7 @@ ORDER BY categoria_raiz, rank;
 | **Total** | **100 pts** |
 
 
-**Nivel de Dificultad:** Intermedio-Alto
+> **Nivel de Dificultad:** Intermedio-Alto
 
 <br/>
 <br/>
@@ -1387,6 +1453,8 @@ ORDER BY categoria_raiz, rank;
    ```
    **Resultado Esperado:** `total_categorias = 21`, `total_empleados = 13`, `productos_con_cat = total de productos`
 
+<br/>
+
 2. Verificar la integridad referencial de la jerarquía:
 
    ```sql
@@ -1399,6 +1467,8 @@ ORDER BY categoria_raiz, rank;
      );
    ```
    **Resultado Esperado:** `referencias_invalidas = 0`
+
+<br/>
 
 3. Verificar que el CTE recursivo recorre todos los niveles:
 
@@ -1425,6 +1495,8 @@ ORDER BY categoria_raiz, rank;
    (3 rows)
    ```
 
+<br/>
+
 4. Verificar equivalencia entre subconsulta y CTE:
 
    ```sql
@@ -1448,6 +1520,8 @@ ORDER BY categoria_raiz, rank;
        ) AS conteo_subquery;
    ```
    **Resultado Esperado:** `conteo_cte = conteo_subquery` (mismos valores)
+
+<br/>
 
 5. Verificar el árbol de empleados:
 
@@ -1710,9 +1784,11 @@ WHERE schemaname = 'public'
   AND tablename IN ('categorias', 'empleados');
 -- Debe devolver 0 filas
 ```
+<br/>
 
 > **Advertencia:** No ejecutes el script de limpieza si planeas continuar con la práctica 3.2. Las tablas `categorias` y `empleados`, y la columna `productos.id_categoria` son prerrequisitos para todos las prácticas del capítulo 3. Si accidentalmente las eliminas, puedes restaurarlas ejecutando el script de setup: `labs/3-1/setup/3-1-setup.sql` disponible en el repositorio Git del curso.
 
+<br/>
 
 ```bash
 # Para verificar el estado actual del esquema sin modificarlo:
