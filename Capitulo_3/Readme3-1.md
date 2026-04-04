@@ -574,9 +574,9 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
    ventas_por_producto AS (
        SELECT
            oi.id_producto,
-           SUM(oi.cantidad)                    AS unidades_vendidas,
-           SUM(oi.cantidad * oi.precio_unitario)    AS ingreso_total,
-           COUNT(DISTINCT oi.id_orden)         AS num_pedidos
+           SUM(oi.cantidad) AS unidades_vendidas,
+           SUM(oi.cantidad * oi.precio_venta) AS ingreso_total,
+           COUNT(DISTINCT oi.id_orden) AS num_pedidos
        FROM detalle_ordenes oi
        INNER JOIN ordenes o ON o.id_orden = oi.id_orden
        WHERE o.estado != 'cancelled'
@@ -588,7 +588,7 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
            p.id_producto,
            p.nombre,
            p.id_categoria,
-           p.precio_unitario                         AS precio_actual,
+           p.precio_unitario AS precio_actual,
            vp.unidades_vendidas,
            vp.ingreso_total,
            vp.num_pedidos
@@ -617,7 +617,8 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
        ROUND(ingreso_total, 2) AS ingreso_total
    FROM ranking_por_categoria
    WHERE rank_en_categoria <= 3
-   ORDER BY nombre_categoria, rank_en_categoria;
+   ORDER BY nombre_categoria, rank_en_categoria; 
+   
    ```
 
 3. Usa un CTE para calcular métricas de clientes y luego segmentarlos:
