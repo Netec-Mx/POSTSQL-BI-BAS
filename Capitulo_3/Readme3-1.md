@@ -489,7 +489,7 @@ WHERE o.fecha_orden >= CURRENT_DATE - INTERVAL '60 months';
 
 <br/>
 <p align="center">
-  <img src="../images/i6.png" style="display: block; margin: 0 auto;" width="600"/>
+  <img src="../images/i6.png" style="display: block; margin: 0 auto;" width="800"/>
 </p>
 
 <br/>
@@ -518,9 +518,16 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
 
 <br/>
 
-
 - Ambos `COUNT` deben devolver el mismo número, confirmando equivalencia lógica
-- Observa en el plan de ejecución la aparición de `SubPlan` o `InitPlan` que indica subconsulta correlacionada
+- Observa en el plan de ejecución la aparición de `SubPlan` que indica subconsulta correlacionada.
+- PostgreSQL está haciendo un escaneo secuencial completo de la tabla productos, no está usando índices, está leyendo todas las 33 filas.
+- Toma en cuenta que la tabla es pequqña, por eso el optimizador decide que leer todos es más barato que usar un índice.
+- La subconsulta correlacionada, se ejecuta 33 veces, una por cada fila de productos (loops=33). 
+- Si tuvieras 10,000 productos esto se haría 10,000 scans.
+- También se calcula AVG() en cada ejecución del subquery. También se repite 33 veces.
+- Buffers: shared hit=34, todo se leyó desde memoria (cache), no hubo lecturas a disco.
+- Si ves `loops` alto en un SubPlan, probablemente tienes una subconsulta correlacionada que no escala.
+
 
 <br/>
 <br/>
