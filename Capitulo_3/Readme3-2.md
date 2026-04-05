@@ -1314,9 +1314,12 @@ LIMIT 5;
    GROUP BY cuartil
    ORDER BY cuartil;
    ```
- <br/>
+
+<br/>
 
  >**Resultado Esperado:** Los 4 cuartiles deben tener el mismo número de clientes (±1).
+
+<br/>
 
 4. Validar que los promedios móviles de 3 meses son correctos:
 
@@ -1342,9 +1345,11 @@ LIMIT 5;
    GROUP BY nombre_vendedor
    ORDER BY nombre_vendedor;
    ```
- <br/>
+<br/>
 
  >**Resultado Esperado:** Cada vendedor debe tener exactamente 1 mes con 1 fila, 1 mes con 2 filas, y el resto con 3 filas.
+
+<br/>
 
 5. Validar la consistencia de la cláusula `WINDOW`:
 
