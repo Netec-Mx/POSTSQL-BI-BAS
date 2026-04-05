@@ -1555,14 +1555,18 @@ ORDER BY categoria_raiz, rank;
 
 ## Solución de Problemas
 
-### Issue 1: Error "infinite recursion detected in rules for relation" en CTE Recursivo
+### Problema 1: Error "infinite recursion detected in rules for relation" en CTE Recursivo
 
 **Síntomas:**
 - PostgreSQL lanza `ERROR: infinite recursion detected in rules for relation "categorias"` o similar
 - La consulta `WITH RECURSIVE` no termina y debe cancelarse con `Ctrl+C`
 
+<br/>
+
 **Causa:**
 Los datos contienen un ciclo en la jerarquía (por ejemplo, la categoría A tiene como padre a B, y B tiene como padre a A), o falta la condición de terminación en la parte recursiva del CTE.
+
+<br/>
 
 **Solución:**
 
@@ -1598,15 +1602,21 @@ WHERE es_ciclo = TRUE;
 
 
 
-### Issue 2: El CTE No Produce el Resultado Esperado (Filas Duplicadas o Faltantes)
+### Problema 2: El CTE No Produce el Resultado Esperado (Filas Duplicadas o Faltantes)
 
 **Síntomas:**
 - El CTE devuelve más filas de las esperadas (duplicados)
 - Algunas categorías o empleados no aparecen en el resultado del CTE recursivo
 - Los conteos no coinciden con las tablas base
 
+<br/>
+
+
 **Causa:**
 Uso incorrecto de `UNION ALL` vs `UNION` en el CTE recursivo, o condición de JOIN incorrecta en la parte recursiva. También puede ocurrir si la parte ancla incluye filas que no son verdaderas raíces.
+
+<br/>
+
 
 **Solución:**
 
@@ -1637,14 +1647,18 @@ SELECT nivel, COUNT(*) FROM jerarquia GROUP BY nivel ORDER BY nivel;
 <br/>
 
 
-### Issue 3: Error "column reference is ambiguous" en CTEs Encadenados
+### Problema 3: Error "column reference is ambiguous" en CTEs Encadenados
 
 **Síntomas:**
 - `ERROR: column reference "id_categoria" is ambiguous`
 - El error ocurre al referenciar columnas en CTEs que tienen nombres de columna repetidos
 
+<br/>
+
 **Causa:**
 Cuando múltiples CTEs en una cadena tienen columnas con el mismo nombre, y el query final o un CTE posterior no especifica a cuál CTE pertenece cada columna.
+
+<br/>
 
 **Solución:**
 
@@ -1687,14 +1701,18 @@ FROM ventas_producto;
 <br/>
 
 
-### Issue 4: Contenedor Docker de PostgreSQL No Responde
+### Problema 4: Contenedor Docker de PostgreSQL No Responde
 
 **Síntomas:**
 - `docker exec -it curso_postgres psql ...` devuelve `Error: No such container: curso_postgres`
 - Las consultas SQL tardan mucho o se cuelgan sin respuesta
 
+<br/>
+
 **Causa:**
 El contenedor Docker fue detenido o eliminado, o Docker Desktop no está en ejecución.
+
+<br/>
 
 **Solución:**
 
@@ -1719,14 +1737,19 @@ docker logs curso_postgres --tail 50
 <br/>
 
 
-### Issue 5: Subconsulta Correlacionada Muy Lenta
+### Problema 5: Subconsulta Correlacionada Muy Lenta
 
 **Síntomas:**
 - La consulta con subconsulta correlacionada tarda más de 30 segundos
 - `EXPLAIN ANALYZE` muestra `Rows Removed by Filter` muy alto o muchos `Seq Scan`
 
+<br/>
+
+
 **Causa:**
 Las subconsultas correlacionadas se ejecutan una vez por cada fila del query externo. Sin índices en las columnas de correlación, PostgreSQL realiza un `Seq Scan` completo en cada iteración.
+
+<br/>
 
 **Solución:**
 

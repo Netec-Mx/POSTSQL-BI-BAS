@@ -29,8 +29,6 @@ Este laboratorio es el punto de partida del dataset de ventas que se reutilizar�
 
 ### [Práctica 3.1 Creación de Consultas con Subconsultas y CTEs](Capitulo_3/Readme3-1.md)
 
-## Descripción General
-
 En este práctica ampliarás el esquema del dataset de ventas incorporando una tabla de categorías jerárquica (relación padre-hijo) y una tabla de empleados con estructura de reporte (manager-subordinado). A partir de ese esquema enriquecido, aprenderás a escribir subconsultas no correlacionadas y correlacionadas en las cláusulas `WHERE`, `FROM` y `SELECT`, para luego refactorizar esas mismas consultas utilizando CTEs (`WITH`) y CTEs recursivos (`WITH RECURSIVE`). La práctica culmina con un ejercicio comparativo que te permitirá evaluar la legibilidad y el plan de ejecución de ambos enfoques, consolidando criterios prácticos para elegir la técnica más adecuada en cada situación analítica.
 
 
@@ -38,11 +36,13 @@ En este práctica ampliarás el esquema del dataset de ventas incorporando una t
 
 
 
-### [Práctica 3. Nombre de la práctica](CHAPTER_04/ch04-smart-savings-goals/README.md)
+### [Práctica 3.2 Aplicación de Funciones de Ventana](Capitulo_3/Readme3-2.md)
 
-  - **Descripción**: xxx.
+En este laboratorio aplicarás las funciones de ventana (window functions) de PostgreSQL, una de las herramientas más poderosas del SQL analítico moderno. A diferencia de las funciones de agregación tradicionales con `GROUP BY`, las funciones de ventana calculan valores sobre un conjunto de filas relacionadas **sin colapsar el resultado**, permitiéndote combinar detalle y agregación en una sola consulta.
 
-  - ⏱️**Duración estimada**: xx min.
+Trabajarás con el dataset de ventas enriquecido con 24 meses de datos temporales construido en el laboratorio anterior. Aplicarás funciones de ranking para clasificar productos y vendedores, calcularás variaciones porcentuales mes a mes con `LAG()` y `LEAD()`, implementarás promedios móviles con la sintaxis `ROWS BETWEEN`, segmentarás clientes en cuartiles con `NTILE(4)`, y aprenderás a reutilizar definiciones de ventana con la cláusula `WINDOW`. Estas técnicas son fundamentales en análisis financiero, reportes de KPIs y dashboards de Business Intelligence.
+
+  - **Duración estimada**: 60 min.
 
 
 
