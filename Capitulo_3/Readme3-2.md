@@ -688,29 +688,14 @@ ORDER BY mes;
    ORDER BY mes;
 
    ```
-
-<br/>
-
-**Salida Esperada:**
-
-```
-    mes     | ventas_totales | promedio_movil_3m | promedio_movil_6m | ventas_acumuladas_anio
-------------+----------------+-------------------+-------------------+------------------------
- 2023-01-01 |      45230.00  |         45230.00  |         45230.00  |              45230.00
- 2023-02-01 |      52180.50  |         48705.25  |         48705.25  |              97410.50
- 2023-03-01 |      48920.75  |         48777.08  |         48777.08  |             146331.25
- 2023-04-01 |      61450.00  |         54183.75  |         51945.31  |             207781.25
- ...
-```
-
 <br/>
 
 **Verificación:**
 
-- En el primer mes, los tres promedios móviles deben ser iguales a `ventas_totales` (solo hay una fila disponible)
-- En el segundo mes, el promedio de 3 meses y 6 meses deben ser iguales (solo hay 2 filas)
-- A partir del séptimo mes, el promedio de 6 meses debe ser diferente al de 3 meses
-- `ventas_acumuladas_anio` debe reiniciarse a 0 al cambiar de año
+- En el primer mes, los tres promedios móviles deben ser iguales a `ventas_totales`.
+- En el segundo mes, el promedio de 3 meses y 6 meses deben ser iguales.
+- A partir del séptimo mes, el promedio de 6 meses debe ser diferente al de 3 meses.
+- `ventas_acumuladas_anio` debe reiniciarse a 0 al cambiar de año.
 
 <br/>
 <br/>
@@ -722,20 +707,19 @@ ORDER BY mes;
 
    ```sql
    -- Vista de resumen de compras por cliente
-   CREATE OR REPLACE VIEW v_resumen_clientes AS
-   SELECT 
-       c.cliente_id,
-       c.nombre_cliente,
-       c.ciudad,
-       c.segmento,
-       COUNT(v.venta_id)                         AS total_compras,
-       ROUND(SUM(v.monto_total)::NUMERIC, 2)     AS total_gastado,
-       ROUND(AVG(v.monto_total)::NUMERIC, 2)     AS ticket_promedio,
-       MAX(v.fecha_venta)                         AS ultima_compra,
-       MIN(v.fecha_venta)                         AS primera_compra
-   FROM clientes c
-   LEFT JOIN ventas v ON c.cliente_id = v.cliente_id
-   GROUP BY c.cliente_id, c.nombre_cliente, c.ciudad, c.segmento;
+    CREATE OR REPLACE VIEW v_resumen_clientes AS
+    SELECT 
+        c.id_cliente as cliente_id,
+        c.nombre || ' ' || c.apellido as nombre_cliente,
+        c.ciudad,
+        COUNT(v.venta_id)                         AS total_compras,
+        ROUND(SUM(v.monto_total)::NUMERIC, 2)     AS total_gastado,
+        ROUND(AVG(v.monto_total)::NUMERIC, 2)     AS ticket_promedio,
+        MAX(v.fecha_venta)                         AS ultima_compra,
+        MIN(v.fecha_venta)                         AS primera_compra
+    FROM clientes c
+    LEFT JOIN ventas v ON c.id_cliente = v.cliente_id
+    GROUP BY c.id_cliente, c.nombre, c.ciudad;
    ```
 
 <br/>
@@ -871,20 +855,6 @@ ORDER BY mes;
    GROUP BY cuartil
    ORDER BY cuartil;
    ```
-
-<br/>
-
-**Salida Esperada:**
-
-```
- cuartil |       segmento       | num_clientes | min_gasto  | max_gasto  | promedio_gasto | gasto_total_segmento
----------+----------------------+--------------+------------+------------+----------------+---------------------
-       1 | Platinum (Top 25%)   |           25 |   8450.00  |  42300.00  |      18920.50  |          473012.50
-       2 | Gold (25-50%)        |           25 |   4200.00  |   8449.00  |       6180.25  |          154506.25
-       3 | Silver (50-75%)      |           25 |   1850.00  |   4199.00  |       2940.75  |           73518.75
-       4 | Bronze (Bottom 25%)  |           25 |     120.00 |   1849.00  |        820.30  |           20507.50
-(4 rows)
-```
 
 <br/>
 
