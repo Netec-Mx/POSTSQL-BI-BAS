@@ -20,7 +20,7 @@ Al completar esta práctica, serás capaz de:
 <br/>
 
 <p align="center">
-  <img src="../images/i14.png" width="80%" />
+  <img src="../images/i15.png" width="80%" />
 </p>
 
 <br/>
