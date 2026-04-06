@@ -223,7 +223,17 @@ docker start curso_postgres
    WHERE table_schema = 'public'
      AND table_name IN ('ventas', 'clientes', 'vendedores', 'productos')
    ORDER BY table_name, ordinal_position;
+
+   -- Resumen de cobertura temporal del dataset
+    SELECT 
+        MIN(fecha_venta)                          AS fecha_inicio,
+        MAX(fecha_venta)                          AS fecha_fin,
+        COUNT(DISTINCT DATE_TRUNC('month', fecha_venta)) AS meses_disponibles,
+        COUNT(*)                                  AS total_registros
+    FROM ventas;
+
    ```
+
 <br/>
 
 **Verificación:**
