@@ -126,7 +126,7 @@ docker start curso_postgres
     FROM productos p
     JOIN categorias c ON p.id_categoria = c.id_categoria;
 
-    -- Inserta ordenes
+    -- Inserta ordenes solo si es un número menor a 2030
     INSERT INTO ordenes (
         id_cliente,
         id_vendedor,
@@ -138,7 +138,7 @@ docker start curso_postgres
         CURRENT_DATE - (RANDOM() * 730)::INT * INTERVAL '1 day'
     FROM generate_series(1, 2000);
 
-    -- Inserta detalle de ordenes
+    -- Inserta detalle de ordenes solo si es menor a 5614
 
     INSERT INTO detalle_ordenes (
         id_orden,
@@ -155,6 +155,11 @@ docker start curso_postgres
     ORDER BY RANDOM()
     LIMIT 5000;
 
+    -- Verificación
+
+    SELECT count(*) from detalle_ordenes;
+
+  -- Inserta detalle de ordenes solo si es menor a 5614
 
     INSERT INTO detalle_ordenes (
         id_orden,
@@ -171,6 +176,12 @@ docker start curso_postgres
     ORDER BY RANDOM()
     LIMIT 3000;
 
+    -- Verificación
+    
+    SELECT count(*) from detalle_ordenes;
+  
+    -- Inserta detalle de ordenes solo si es menor a 5614
+
     INSERT INTO detalle_ordenes (
         id_orden,
         id_producto,
@@ -186,6 +197,9 @@ docker start curso_postgres
     ORDER BY RANDOM()
     LIMIT 1500;
 
+    -- Verificación
+    SELECT count(*) from detalle_ordenes;
+  
    ```
 
 
