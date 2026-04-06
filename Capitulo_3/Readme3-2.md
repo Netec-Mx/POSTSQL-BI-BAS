@@ -99,6 +99,94 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT COUNT(*)
    FROM ventas;
    ```
 
+4. En caso de no tener la tabla o vista ventas o productos, crea las vistas con las siguientes instrucciones.
+
+    ```sql
+    CREATE OR REPLACE VIEW ventas AS
+    SELECT
+        d.id_detalle        AS venta_id,
+        o.id_cliente        AS cliente_id,
+        o.id_vendedor       AS vendedor_id,
+        d.id_producto       AS producto_id,
+        o.fecha_orden       AS fecha_venta,
+        d.cantidad,
+        d.precio_venta,
+        (d.cantidad * d.precio_venta) AS monto_total
+    FROM detalle_ordenes d
+    JOIN ordenes o ON d.id_orden = o.id_orden;
+
+    -- Vista v_productos
+    CREATE OR REPLACE VIEW v_productos AS
+    SELECT
+        p.id_producto AS producto_id,
+        p.nombre AS nombre_producto,
+        c.nombre_categoria AS categoria
+    FROM productos p
+    JOIN categorias c ON p.id_categoria = c.id_categoria;
+
+    -- Inserta ordenes
+    INSERT INTO ordenes (
+        id_cliente,
+        id_vendedor,
+        fecha_orden
+    )
+    SELECT
+        (SELECT id_cliente FROM clientes ORDER BY RANDOM() LIMIT 1),
+        (SELECT id_vendedor FROM vendedores ORDER BY RANDOM() LIMIT 1),
+        CURRENT_DATE - (RANDOM() * 730)::INT * INTERVAL '1 day'
+    FROM generate_series(1, 2000);
+
+    -- Inserta detalle de ordenes
+
+    INSERT INTO detalle_ordenes (
+        id_orden,
+        id_producto,
+        cantidad,
+        precio_venta
+    )
+    SELECT
+        o.id_orden,
+        (SELECT id_producto FROM productos ORDER BY RANDOM() LIMIT 1),
+        (RANDOM() * 10 + 1)::INT,
+        ROUND((RANDOM() * 500 + 50)::NUMERIC, 2)
+    FROM ordenes o
+    ORDER BY RANDOM()
+    LIMIT 5000;
+
+
+    INSERT INTO detalle_ordenes (
+        id_orden,
+        id_producto,
+        cantidad,
+        precio_venta
+    )
+    SELECT
+        o.id_orden,
+        (SELECT id_producto FROM productos ORDER BY RANDOM() LIMIT 1),
+        (RANDOM() * 10 + 1)::INT,
+        ROUND((RANDOM() * 500 + 50)::NUMERIC, 2)
+    FROM ordenes o
+    ORDER BY RANDOM()
+    LIMIT 3000;
+
+    INSERT INTO detalle_ordenes (
+        id_orden,
+        id_producto,
+        cantidad,
+        precio_venta
+    )
+    SELECT
+        o.id_orden,
+        (SELECT id_producto FROM productos ORDER BY RANDOM() LIMIT 1),
+        (RANDOM() * 10 + 1)::INT,
+        ROUND((RANDOM() * 500 + 50)::NUMERIC, 2)
+    FROM ordenes o
+    ORDER BY RANDOM()
+    LIMIT 1500;
+
+   ```
+
+
 <br/>
 
 4. Si tienes menos de 24 meses de datos, ejecuta el siguiente script para enriquecer el dataset con datos temporales adicionales:
@@ -1537,6 +1625,8 @@ Al finalizar la práctica, las vistas creadas son parte del dataset que se reuti
 -- DROP VIEW IF EXISTS v_resumen_clientes;
 -- DROP VIEW IF EXISTS v_ventas_mensuales_vendedor;
 -- DROP VIEW IF EXISTS v_ventas_por_producto;
+-- DROP VIEW IF EXISTS v_productos;
+-- DROP VIEW IF EXISTS ventas;
 
 -- Verificar qué vistas existen actualmente
 SELECT table_name, table_type
