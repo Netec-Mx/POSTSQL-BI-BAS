@@ -1208,13 +1208,22 @@ ORDER BY mes;
 
    ```sql
    -- Test: verificar que RANK salta números y DENSE_RANK no
-   SELECT 
-       MAX(RANK()       OVER (PARTITION BY categoria ORDER BY total_ventas DESC)) AS max_rank,
-       MAX(DENSE_RANK() OVER (PARTITION BY categoria ORDER BY total_ventas DESC)) AS max_dense_rank,
-       COUNT(*) AS total_productos
-   FROM v_ventas_por_producto
-   GROUP BY categoria
-   LIMIT 5;
+    WITH ranking_calculado AS (
+        SELECT 
+            id_categoria as categoria,
+            total_ventas,
+            RANK() OVER (PARTITION BY id_categoria ORDER BY total_ventas DESC) AS rank_val,
+            DENSE_RANK() OVER (PARTITION BY id_categoria ORDER BY total_ventas DESC) AS dense_rank_val
+        FROM v_ventas_por_producto
+    )
+    SELECT 
+        categoria,
+        MAX(rank_val) AS max_rank,
+        MAX(dense_rank_val) AS max_dense_rank,
+        COUNT(*) AS total_productos
+    FROM ranking_calculado
+    GROUP BY categoria
+    LIMIT 5;
    ```
 <br/>
 
@@ -1226,19 +1235,43 @@ ORDER BY mes;
 
    ```sql
    -- Test: verificar distribución equitativa de cuartiles
-   SELECT 
-       NTILE(4) OVER (ORDER BY total_gastado DESC) AS cuartil,
-       COUNT(*) AS clientes_en_cuartil
-   FROM v_resumen_clientes
-   WHERE total_gastado IS NOT NULL
-   GROUP BY cuartil
-   ORDER BY cuartil;
+    WITH clientes_cuartil AS (
+        SELECT
+            NTILE(4) OVER (ORDER BY total_gastado DESC) AS cuartil
+        FROM v_resumen_clientes
+        WHERE total_gastado IS NOT NULL
+    )
+    SELECT
+        cuartil,
+        COUNT(*) AS clientes_en_cuartil
+    FROM clientes_cuartil
+    GROUP BY cuartil
+    ORDER BY cuartil;
+   ```
+
+<br/>
+
+   ```sql
+    SELECT
+        cuartil,
+        COUNT(*) AS clientes_en_cuartil
+    FROM (
+        SELECT
+            NTILE(4) OVER (ORDER BY total_gastado DESC) AS cuartil
+        FROM v_resumen_clientes
+        WHERE total_gastado IS NOT NULL
+    ) t
+    GROUP BY cuartil
+    ORDER BY cuartil;
    ```
 
 <br/>
 
  >**Resultado Esperado:** Los 4 cuartiles deben tener el mismo número de clientes (±1).
-
+ >**Nota:** 
+ > Las funciones de ventana no pueden utilizarse directamente en cláusulas GROUP BY.
+ > Para realizar agregaciones sobre resultados de funciones de ventana, se debe usar una CTE o subconsulta.
+ 
 <br/>
 
 4. Validar que los promedios móviles de 3 meses son correctos:
