@@ -15,6 +15,17 @@ Al completar esta práctica, serás capaz de:
 <br/>
 <br/>
 
+## Objetivo Visual
+
+<br/>
+
+<p align="center">
+  <img src="../images/i14.png" width="80%" />
+</p>
+
+<br/>
+<br/>
+
 ## Prerrequisitos
 
 ### Conocimientos Requeridos
@@ -1079,15 +1090,6 @@ docker ps --filter "name=postgres" --format "table {{.Names}}\t{{.Status}}"
 - **`CORR()`** implementa el coeficiente de correlación de Pearson y requiere al menos 2 pares de valores no-NULL con varianza no-cero para producir un resultado
 
 <br/>
-<br/>
-
-### Próximos Pasos
-
-- Completa el **ejercicio de reto** a continuación antes de avanzar a la práctica 3.4
-- En el **Práctica 3.4** (TimescaleDB) aplicarás estas técnicas de agregación en el contexto de series de tiempo con extensiones especializadas de PostgreSQL.
-- Considera explorar `GROUPING SETS` combinado con funciones de ventana (`OVER`) para análisis aún más sofisticados, como calcular el porcentaje de cada categoría respecto al subtotal de su región.
-
-
 <br/>
 
 ### Ejercicio de Reto 
