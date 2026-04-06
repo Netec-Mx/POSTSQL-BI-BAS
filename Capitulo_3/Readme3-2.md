@@ -20,10 +20,11 @@ Al completar esta práctica, serás capaz de:
 
 <br/>
 
+<br/>
+<br/>
 <p align="center">
-  <img src="../images/i12.png" width="80%" />
+  <img src="../images/i13.png" width="80%" />
 </p>
-
 
 <br/>
 <br/>
