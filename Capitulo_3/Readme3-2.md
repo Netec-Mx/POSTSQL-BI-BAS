@@ -66,21 +66,6 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT COUNT(*)
 ```
 
 <br/>
-
-```bash
-# Verificar que existen datos temporales de al menos 24 meses
-docker exec -it curso_postgres psql -U postgres -d ventas_db -c "
-SELECT 
-    DATE_TRUNC('month', fecha_venta) AS mes,
-    COUNT(*) AS total_ventas
-FROM ventas
-GROUP BY mes
-ORDER BY mes
-LIMIT 5;
-"
-```
-
-<br/>
 <br/>
 
 ## Instrucciones
