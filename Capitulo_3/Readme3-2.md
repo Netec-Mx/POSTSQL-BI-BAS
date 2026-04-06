@@ -96,9 +96,12 @@ docker start curso_postgres
        COUNT(DISTINCT DATE_TRUNC('month', fecha_venta)) AS meses_disponibles,
        COUNT(*)                                  AS total_registros
    FROM ventas;
+
+   -- Resumen de productos
+   SELECT count(*) from v_productos;
    ```
 
-4. En caso de no tener la tabla o vista ventas o productos, crea las vistas con las siguientes instrucciones.
+4. En caso de no tener las tablas o vista ventas o productos, crea las vistas con las siguientes instrucciones.
 
     ```sql
     CREATE OR REPLACE VIEW ventas AS
