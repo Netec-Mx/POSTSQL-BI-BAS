@@ -151,17 +151,6 @@ LIMIT 5;
    ```
 <br/>
 
-**Salida Esperada:**
-
-```
- fecha_inicio | fecha_fin  | meses_disponibles | total_registros
---------------+------------+-------------------+-----------------
- 2023-01-01   | 2024-12-31 |                24 |           15000
-(1 row)
-```
-
-<br/>
-
 **Verificación:**
 
 - La columna `meses_disponibles` debe mostrar al menos 24
@@ -259,15 +248,29 @@ LIMIT 5;
 
 <br/>
 
-**Salida Esperada:**
+5. Observa el `pct_del_mes` 
 
-```
- venta_id | fecha_venta | monto_total | total_mes_completo | suma_acumulada
-----------+-------------+-------------+--------------------+----------------
-     1023 | 2024-11-03  |      450.00 |          52340.75  |         450.00
-     1024 | 2024-11-05  |      820.50 |          52340.75  |        1270.50
-     1025 | 2024-11-07  |      215.00 |          52340.75  |        1485.50
-     ...
+```sql
+WITH detalle AS (
+    SELECT 
+        DATE_TRUNC('month', fecha_venta) AS mes,
+        venta_id,
+        monto_total,
+        ROUND(
+            monto_total / SUM(monto_total) OVER (
+                PARTITION BY DATE_TRUNC('month', fecha_venta)
+            ) * 100, 2
+        ) AS pct_del_mes
+    FROM ventas
+)
+SELECT
+    mes,
+    COUNT(*) AS num_ventas,
+    ROUND(SUM(monto_total), 2) AS total_monto,
+    SUM(pct_del_mes) AS suma_pct
+FROM detalle
+GROUP BY mes
+ORDER BY mes;
 ```
 
 <br/>
@@ -290,18 +293,19 @@ LIMIT 5;
    ```sql
    -- Vista de ventas por producto  
    CREATE OR REPLACE VIEW v_ventas_por_producto AS
-   SELECT 
-       p.producto_id,
-       p.nombre_producto,
-       p.categoria,
-       COUNT(v.venta_id)       AS total_transacciones,
-       SUM(v.monto_total)      AS total_ventas,
-       AVG(v.monto_total)      AS ticket_promedio,
-       SUM(v.cantidad)         AS unidades_vendidas
-   FROM ventas v
-   JOIN productos p ON v.producto_id = p.producto_id
-   GROUP BY p.producto_id, p.nombre_producto, p.categoria;
+    SELECT 
+        p.id_producto,
+        p.nombre,
+        p.id_categoria,
+        COUNT(v.venta_id)       AS total_transacciones,
+        SUM(v.monto_total)      AS total_ventas,
+        AVG(v.monto_total)      AS ticket_promedio,
+        SUM(v.cantidad)         AS unidades_vendidas
+    FROM ventas v
+    JOIN productos p ON v.producto_id = p.id_producto
+    GROUP BY p.id_producto, p.nombre, p.id_categoria;
    ```
+
 <br/>
 
 2. Aplica `ROW_NUMBER()` para obtener un ranking único por categoría (sin empates posibles):
@@ -309,16 +313,16 @@ LIMIT 5;
    ```sql
    -- ROW_NUMBER: ranking único, no permite empates
    -- Útil cuando necesitas exactamente los top-N sin repeticiones
-   SELECT 
-       categoria,
-       nombre_producto,
-       total_ventas,
-       ROW_NUMBER() OVER (
-           PARTITION BY categoria 
-           ORDER BY total_ventas DESC
-       ) AS ranking_unico
-   FROM v_ventas_por_producto
-   ORDER BY categoria, ranking_unico;
+    SELECT 
+        id_categoria,
+        nombre,
+        total_ventas,
+        ROW_NUMBER() OVER (
+            PARTITION BY id_categoria 
+            ORDER BY total_ventas DESC
+        ) AS ranking_unico
+    FROM v_ventas_por_producto
+    ORDER BY id_categoria, ranking_unico;
    ```
 <br/>
 
@@ -327,15 +331,15 @@ LIMIT 5;
    ```sql
    -- Comparación de ROW_NUMBER vs RANK vs DENSE_RANK
    -- Observa la diferencia cuando hay valores iguales de total_ventas
-   SELECT 
-       categoria,
-       nombre_producto,
-       ROUND(total_ventas::NUMERIC, 2) AS total_ventas,
-       ROW_NUMBER()  OVER (PARTITION BY categoria ORDER BY total_ventas DESC) AS row_num,
-       RANK()        OVER (PARTITION BY categoria ORDER BY total_ventas DESC) AS rank_val,
-       DENSE_RANK()  OVER (PARTITION BY categoria ORDER BY total_ventas DESC) AS dense_rank_val
-   FROM v_ventas_por_producto
-   ORDER BY categoria, total_ventas DESC;
+    SELECT 
+        id_categoria,
+        nombre,
+        ROUND(total_ventas::NUMERIC, 2) AS total_ventas,
+        ROW_NUMBER()  OVER (PARTITION BY id_categoria ORDER BY total_ventas DESC) AS row_num,
+        RANK()        OVER (PARTITION BY id_categoria ORDER BY total_ventas DESC) AS rank_val,
+        DENSE_RANK()  OVER (PARTITION BY id_categoria ORDER BY total_ventas DESC) AS dense_rank_val
+    FROM v_ventas_por_producto
+    ORDER BY id_categoria, total_ventas DESC;
    ```
 <br/>
 
@@ -344,29 +348,29 @@ LIMIT 5;
    ```sql
    -- Top 3 productos por categoría usando CTE + ROW_NUMBER
    -- Esta es una de las combinaciones más poderosas en SQL analítico
-   WITH productos_rankeados AS (
-       SELECT 
-           categoria,
-           nombre_producto,
-           ROUND(total_ventas::NUMERIC, 2)     AS total_ventas,
-           ROUND(ticket_promedio::NUMERIC, 2)  AS ticket_promedio,
-           unidades_vendidas,
-           ROW_NUMBER() OVER (
-               PARTITION BY categoria 
-               ORDER BY total_ventas DESC
-           ) AS ranking
-       FROM v_ventas_por_producto
-   )
-   SELECT 
-       categoria,
-       ranking,
-       nombre_producto,
-       total_ventas,
-       ticket_promedio,
-       unidades_vendidas
-   FROM productos_rankeados
-   WHERE ranking <= 3
-   ORDER BY categoria, ranking;
+    WITH productos_rankeados AS (
+        SELECT 
+            id_categoria,
+            nombre,
+            ROUND(total_ventas::NUMERIC, 2)     AS total_ventas,
+            ROUND(ticket_promedio::NUMERIC, 2)  AS ticket_promedio,
+            unidades_vendidas,
+            ROW_NUMBER() OVER (
+                PARTITION BY id_categoria 
+                ORDER BY total_ventas DESC
+            ) AS ranking
+        FROM v_ventas_por_producto
+    )
+    SELECT 
+        id_categoria,
+        ranking,
+        nombre,
+        total_ventas,
+        ticket_promedio,
+        unidades_vendidas
+    FROM productos_rankeados
+    WHERE ranking <= 3
+    ORDER BY id_categoria, ranking;
    ```
 
 <br/>
@@ -376,43 +380,28 @@ LIMIT 5;
    ```sql
    -- Ejemplo que ilustra la diferencia entre RANK y DENSE_RANK
    -- Creamos un escenario con valores idénticos de ventas para ver el comportamiento
-   WITH ejemplo_empates AS (
-       SELECT 
-           categoria,
-           nombre_producto,
-           -- Redondeamos a miles para forzar algunos empates artificiales
-           ROUND(total_ventas / 1000) * 1000 AS ventas_redondeadas
-       FROM v_ventas_por_producto
-   )
-   SELECT 
-       categoria,
-       nombre_producto,
-       ventas_redondeadas,
-       RANK()       OVER (PARTITION BY categoria ORDER BY ventas_redondeadas DESC) AS rank_con_salto,
-       DENSE_RANK() OVER (PARTITION BY categoria ORDER BY ventas_redondeadas DESC) AS rank_sin_salto
-   FROM ejemplo_empates
-   ORDER BY categoria, ventas_redondeadas DESC
-   LIMIT 20;
-   ```
-<br/>
-
-**Salida Esperada:**
-
-```
-   categoria    |    nombre_producto    | total_ventas | row_num | rank_val | dense_rank_val
-----------------+-----------------------+--------------+---------+----------+----------------
- Electrónica    | Laptop Pro 15"        |    45230.00  |       1 |        1 |              1
- Electrónica    | Smartphone X12        |    38750.00  |       2 |        2 |              2
- Electrónica    | Tablet Ultra          |    38750.00  |       3 |        2 |              2
- Electrónica    | Monitor 4K            |    29100.00  |       4 |        4 |              3
- Ropa           | Chaqueta Invierno     |    22400.00  |       1 |        1 |              1
- ...
-```
+    WITH ejemplo_empates AS (
+        SELECT 
+            id_categoria,
+            nombre,
+            -- Redondeamos a miles para forzar algunos empates artificiales
+            ROUND(total_ventas / 1000) * 1000 AS ventas_redondeadas
+        FROM v_ventas_por_producto
+    )
+    SELECT 
+        id_categoria,
+        nombre,
+        ventas_redondeadas,
+        RANK()       OVER (PARTITION BY id_categoria ORDER BY ventas_redondeadas DESC) AS rank_con_salto,
+        DENSE_RANK() OVER (PARTITION BY id_categoria ORDER BY ventas_redondeadas DESC) AS rank_sin_salto
+    FROM ejemplo_empates
+    ORDER BY id_categoria, ventas_redondeadas DESC
+    LIMIT 20;
 <br/>
 
 **Verificación:**
 
-- `ROW_NUMBER()` nunca repite valores dentro de una partición
+- `ROW_NUMBER()` nunca repite valores dentro de una partición.
 - `RANK()` repite el número cuando hay empates y salta el siguiente (ej: 1, 2, 2, 4)
 - `DENSE_RANK()` repite el número cuando hay empates pero NO salta (ej: 1, 2, 2, 3)
 - El Top 3 por categoría debe mostrar exactamente 3 productos por cada categoría disponible
