@@ -61,7 +61,6 @@ docker ps --filter "name=curso_postgres"
 # Si el contenedor no está activo, iniciarlo
 docker start curso_postgres
 
-
 ```
 
 <br/>
@@ -81,8 +80,12 @@ docker start curso_postgres
 2. Verifica la estructura del esquema disponible:
 
    ```sql
-   -- Listar tablas disponibles en el esquema público
+   -- Lista tablas disponibles en el esquema público
    \dt public.*
+
+   -- Lista views disponible en el esquema público
+   \dv public.*
+   
    ```
 <br/>
 
