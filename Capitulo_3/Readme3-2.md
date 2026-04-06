@@ -416,18 +416,18 @@ ORDER BY mes;
 
    ```sql
    -- Vista de ventas mensuales por vendedor
-   CREATE OR REPLACE VIEW v_ventas_mensuales_vendedor AS
-   SELECT 
-       ve.vendedor_id,
-       ve.nombre_vendedor,
-       DATE_TRUNC('month', v.fecha_venta)::DATE AS mes,
-       COUNT(v.venta_id)                         AS total_transacciones,
-       ROUND(SUM(v.monto_total)::NUMERIC, 2)     AS total_ventas,
-       ROUND(AVG(v.monto_total)::NUMERIC, 2)     AS ticket_promedio
-   FROM ventas v
-   JOIN vendedores ve ON v.vendedor_id = ve.vendedor_id
-   GROUP BY ve.vendedor_id, ve.nombre_vendedor, DATE_TRUNC('month', v.fecha_venta)
-   ORDER BY ve.vendedor_id, mes;
+    CREATE OR REPLACE VIEW v_ventas_mensuales_vendedor AS
+    SELECT 
+        ve.id_vendedor AS vendedor_id,
+        ve.nombre || ' ' || ve.apellido AS nombre_vendedor,
+        DATE_TRUNC('month', v.fecha_venta)::DATE AS mes,
+        COUNT(v.venta_id)                         AS total_transacciones,
+        ROUND(SUM(v.monto_total)::NUMERIC, 2)     AS total_ventas,
+        ROUND(AVG(v.monto_total)::NUMERIC, 2)     AS ticket_promedio
+    FROM ventas v
+    JOIN vendedores ve ON v.vendedor_id = ve.id_vendedor
+    GROUP BY ve.id_vendedor, ve.nombre, DATE_TRUNC('month', v.fecha_venta)
+    ORDER BY ve.id_vendedor, mes;
    ```
 <br/>
 
@@ -542,19 +542,6 @@ ORDER BY mes;
      AND total_ventas    > mes_siguiente
    ORDER BY nombre_vendedor, mes;
    ```
-<br/>
-
-**Salida Esperada:**
-
-```
- nombre_vendedor |    mes     | total_ventas | ventas_mes_anterior | variacion_pct |    tendencia
------------------+------------+--------------+---------------------+---------------+-----------------
- Ana García      | 2023-01-01 |     8450.00  |              NULL   |          NULL | — (primer mes)
- Ana García      | 2023-02-01 |     9120.50  |            8450.00  |          7.94 | ▲ Crecimiento
- Ana García      | 2023-03-01 |     7830.25  |            9120.50  |        -14.15 | ▼ Decrecimiento
- ...
-```
-
 <br/>
 
 **Verificación:**
