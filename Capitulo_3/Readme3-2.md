@@ -210,37 +210,7 @@ docker start curso_postgres
 
 <br/>
 
-4. Si tienes menos de 24 meses de datos, ejecuta el siguiente script para enriquecer el dataset con datos temporales adicionales:
-
-   ```sql
-   -- Script de enriquecimiento temporal: genera ventas para completar 24 meses
-   -- EJECUTAR SOLO SI meses_disponibles < 24
-   INSERT INTO ventas (
-       cliente_id,
-       vendedor_id,
-       producto_id,
-       fecha_venta,
-       cantidad,
-       precio_unitario,
-       monto_total
-   )
-   SELECT
-       (RANDOM() * 99 + 1)::INT                          AS cliente_id,
-       (RANDOM() * 9 + 1)::INT                           AS vendedor_id,
-       (RANDOM() * 49 + 1)::INT                          AS producto_id,
-       CURRENT_DATE - (RANDOM() * 730)::INT * INTERVAL '1 day' AS fecha_venta,
-       (RANDOM() * 10 + 1)::INT                          AS cantidad,
-       ROUND((RANDOM() * 500 + 50)::NUMERIC, 2)          AS precio_unitario,
-       ROUND(((RANDOM() * 10 + 1) * (RANDOM() * 500 + 50))::NUMERIC, 2) AS monto_total
-   FROM generate_series(1, 5000);
-
-   -- Confirmar la inserción
-   SELECT COUNT(*) AS total_registros FROM ventas;
-   ```
-
-<br/>
-
-5. Verifica la estructura de las tablas relacionadas que usaremos:
+4. Verifica la estructura de las tablas relacionadas que usaremos:
 
    ```sql
    -- Verificar estructura de tablas de dimensión
