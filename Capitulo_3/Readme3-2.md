@@ -1597,13 +1597,15 @@ ORDER BY table_name;
 
 Sin consultar la solución del instructor, escribe una consulta SQL que responda la siguiente pregunta de negocio:
 
-**"¿Cuáles son los 3 vendedores con mayor crecimiento acumulado en los últimos 6 meses disponibles del dataset? Para cada vendedor, muestra: su ranking de crecimiento, el total de ventas en los últimos 6 meses, el total de ventas en los 6 meses anteriores, la variación porcentual entre ambos períodos, y su posición percentil respecto a todos los vendedores."**
+¿Cuáles son los 3 vendedores con mayor crecimiento acumulado en los últimos 6 meses disponibles del dataset? Para cada vendedor, muestra: su ranking de crecimiento, el total de ventas en los últimos 6 meses, el total de ventas en los 6 meses anteriores, la variación porcentual entre ambos períodos, y su posición percentil respecto a todos los vendedores.
 
-Restricciones:
-- Debes usar al menos una CTE y al menos una función de ventana
-- No puedes usar subconsultas anidadas en el `WHERE`
-- El resultado debe estar ordenado de mayor a menor crecimiento
-- Debes manejar correctamente el caso de vendedores sin ventas en alguno de los períodos
+
+
+**Restricciones:**
+- Debes usar al menos una CTE y al menos una función de ventana.
+- No puedes usar subconsultas anidadas en el `WHERE`.
+- El resultado debe estar ordenado de mayor a menor crecimiento.
+- Debes manejar correctamente el caso de vendedores sin ventas en alguno de los períodos.
 
 
 <br/>
