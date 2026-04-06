@@ -1,7 +1,6 @@
 # Práctica 3.2 Aplicación de Funciones de Ventana
 
 <br/>
-<br/>
 
 ## Objetivos
 
@@ -17,6 +16,17 @@ Al completar esta práctica, serás capaz de:
 <br/>
 <br/>
 
+## Objetivo Visual
+
+<br/>
+
+<p align="center">
+  <img src="../images/i12.png" width="80%" />
+</p>
+
+
+<br/>
+<br/>
 
 ## Prerrequisitos
 
