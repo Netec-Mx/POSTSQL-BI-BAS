@@ -1037,70 +1037,70 @@ ORDER BY mes;
    -- CONSULTA INTEGRADORA: Reporte ejecutivo de ventas
    -- Combina: ranking de productos, variación temporal, promedios móviles y segmentación
    
-   WITH 
-   -- CTE 1: Ventas mensuales por categoría de producto
-   ventas_categoria_mes AS (
-       SELECT 
-           p.categoria,
-           DATE_TRUNC('month', v.fecha_venta)::DATE AS mes,
-           ROUND(SUM(v.monto_total)::NUMERIC, 2)    AS total_ventas,
-           COUNT(DISTINCT v.cliente_id)              AS clientes_unicos,
-           COUNT(v.venta_id)                         AS num_transacciones
-       FROM ventas v
-       JOIN productos p ON v.producto_id = p.producto_id
-       GROUP BY p.categoria, DATE_TRUNC('month', v.fecha_venta)
-   ),
-   -- CTE 2: Métricas con funciones de ventana aplicadas
-   metricas_ventana AS (
-       SELECT 
-           categoria,
-           mes,
-           total_ventas,
-           clientes_unicos,
-           num_transacciones,
-           -- Ranking de categoría por mes
-           RANK() OVER (PARTITION BY mes ORDER BY total_ventas DESC)              AS ranking_categoria_mes,
-           -- Variación respecto al mes anterior
-           LAG(total_ventas) OVER (PARTITION BY categoria ORDER BY mes)           AS ventas_mes_anterior,
-           -- Promedio móvil de 3 meses
-           ROUND(AVG(total_ventas) OVER (
-               PARTITION BY categoria ORDER BY mes 
-               ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
-           )::NUMERIC, 2)                                                          AS promedio_movil_3m,
-           -- Participación en ventas totales del mes
-           ROUND(total_ventas / SUM(total_ventas) OVER (PARTITION BY mes) * 100, 2) AS market_share_pct,
-           -- Ventas acumuladas del año por categoría
-           SUM(total_ventas) OVER (
-               PARTITION BY categoria, EXTRACT(YEAR FROM mes)
-               ORDER BY mes
-               ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-           )                                                                        AS ventas_acumuladas_anio,
-           -- Percentil de la categoría en el mes
-           ROUND(PERCENT_RANK() OVER (PARTITION BY mes ORDER BY total_ventas)::NUMERIC * 100, 1) AS percentil_mes
-       FROM ventas_categoria_mes
-   )
-   -- Consulta final: selección y formateo de resultados
-   SELECT 
-       categoria,
-       TO_CHAR(mes, 'YYYY-MM')                                AS periodo,
-       total_ventas,
-       ranking_categoria_mes,
-       market_share_pct,
-       -- Variación porcentual mes a mes
-       CASE 
-           WHEN ventas_mes_anterior IS NULL THEN 'N/A'
-           ELSE CONCAT(
-               ROUND((total_ventas - ventas_mes_anterior) / ventas_mes_anterior * 100, 2)::TEXT,
-               '%'
-           )
-       END                                                     AS variacion_mom,
-       promedio_movil_3m,
-       ROUND(ventas_acumuladas_anio::NUMERIC, 2)               AS ventas_ytd,
-       clientes_unicos,
-       num_transacciones,
-       percentil_mes
-   FROM metricas_ventana
-   ORDER BY mes, ranking_categoria_mes;
+    WITH 
+    -- CTE 1: Ventas mensuales por categoría de producto
+    ventas_categoria_mes AS (
+        SELECT 
+            p.id_categoria as categoria,
+            DATE_TRUNC('month', v.fecha_venta)::DATE AS mes,
+            ROUND(SUM(v.monto_total)::NUMERIC, 2)    AS total_ventas,
+            COUNT(DISTINCT v.cliente_id)              AS clientes_unicos,
+            COUNT(v.venta_id)                         AS num_transacciones
+        FROM ventas v
+        JOIN productos p ON v.producto_id = p.id_producto
+        GROUP BY p.id_categoria, DATE_TRUNC('month', v.fecha_venta)
+    ),
+    -- CTE 2: Métricas con funciones de ventana aplicadas
+    metricas_ventana AS (
+        SELECT 
+            categoria,
+            mes,
+            total_ventas,
+            clientes_unicos,
+            num_transacciones,
+            -- Ranking de categoría por mes
+            RANK() OVER (PARTITION BY mes ORDER BY total_ventas DESC)              AS ranking_categoria_mes,
+            -- Variación respecto al mes anterior
+            LAG(total_ventas) OVER (PARTITION BY categoria ORDER BY mes)           AS ventas_mes_anterior,
+            -- Promedio móvil de 3 meses
+            ROUND(AVG(total_ventas) OVER (
+                PARTITION BY categoria ORDER BY mes 
+                ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+            )::NUMERIC, 2)                                                          AS promedio_movil_3m,
+            -- Participación en ventas totales del mes
+            ROUND(total_ventas / SUM(total_ventas) OVER (PARTITION BY mes) * 100, 2) AS market_share_pct,
+            -- Ventas acumuladas del año por categoría
+            SUM(total_ventas) OVER (
+                PARTITION BY categoria, EXTRACT(YEAR FROM mes)
+                ORDER BY mes
+                ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+            )                                                                        AS ventas_acumuladas_anio,
+            -- Percentil de la categoría en el mes
+            ROUND(PERCENT_RANK() OVER (PARTITION BY mes ORDER BY total_ventas)::NUMERIC * 100, 1) AS percentil_mes
+        FROM ventas_categoria_mes
+    )
+    -- Consulta final: selección y formateo de resultados
+    SELECT 
+        categoria,
+        TO_CHAR(mes, 'YYYY-MM')                                AS periodo,
+        total_ventas,
+        ranking_categoria_mes,
+        market_share_pct,
+        -- Variación porcentual mes a mes
+        CASE 
+            WHEN ventas_mes_anterior IS NULL THEN 'N/A'
+            ELSE CONCAT(
+                ROUND((total_ventas - ventas_mes_anterior) / ventas_mes_anterior * 100, 2)::TEXT,
+                '%'
+            )
+        END                                                     AS variacion_mom,
+        promedio_movil_3m,
+        ROUND(ventas_acumuladas_anio::NUMERIC, 2)               AS ventas_ytd,
+        clientes_unicos,
+        num_transacciones,
+        percentil_mes
+    FROM metricas_ventana
+    ORDER BY mes, ranking_categoria_mes;
    ```
 
 <br/>
