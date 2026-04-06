@@ -1488,10 +1488,12 @@ Genera una serie completa de meses con `generate_series()` y usa `LEFT JOIN` par
 
 ```sql
 -- Generar serie completa de meses para evitar gaps en LAG()
+
+-- Generar serie completa de meses para evitar gaps en LAG()
 WITH meses_completos AS (
     SELECT 
-        ve.vendedor_id,
-        ve.nombre_vendedor,
+        ve.id_vendedor,
+        ve.nombre || ' ' || ve.apellido AS nombre_vendedor,
         gs.mes::DATE AS mes
     FROM vendedores ve
     CROSS JOIN generate_series(
@@ -1513,11 +1515,11 @@ SELECT
     mc.mes,
     COALESCE(vr.total_ventas, 0) AS total_ventas,
     LAG(COALESCE(vr.total_ventas, 0)) OVER (
-        PARTITION BY mc.vendedor_id ORDER BY mc.mes
+        PARTITION BY mc.id_vendedor ORDER BY mc.mes
     ) AS ventas_mes_anterior
 FROM meses_completos mc
-LEFT JOIN ventas_reales vr ON mc.vendedor_id = vr.vendedor_id AND mc.mes = vr.mes
-ORDER BY mc.vendedor_id, mc.mes;
+LEFT JOIN ventas_reales vr ON mc.id_vendedor = vr.vendedor_id AND mc.mes = vr.mes
+ORDER BY mc.id_vendedor, mc.mes;
 ```
 
 <br/>
