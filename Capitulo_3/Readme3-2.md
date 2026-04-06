@@ -204,6 +204,7 @@ docker start curso_postgres
 
     -- Verificación
     SELECT count(*) from detalle_ordenes;
+    SELECT count(*) from ventas;
   
    ```
 
