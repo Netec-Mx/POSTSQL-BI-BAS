@@ -1018,19 +1018,6 @@ ORDER BY mes;
 
 <br/>
 
-**Salida Esperada:**
-
-```
- nombre_vendedor | periodo | total_ventas | ranking_mes | variacion_pct | promedio_movil_3m | pct_total_empresa
------------------+---------+--------------+-------------+---------------+-------------------+-------------------
- Carlos López    | 2023-01 |     9850.00  |           1 |          NULL |          9850.00  |             21.78
- Ana García      | 2023-01 |     8450.00  |           2 |          NULL |          8450.00  |             18.68
- María Torres    | 2023-01 |     7920.50  |           3 |          NULL |          7920.50  |             17.51
- ...
-```
-
-<br/>
-
 **Verificación:**
 
 - La cláusula `WINDOW` debe definirse al final de la consulta, antes de `ORDER BY`
@@ -1123,54 +1110,41 @@ ORDER BY mes;
    ```sql
    -- Guardar el reporte ejecutivo como vista para Power BI
    CREATE OR REPLACE VIEW v_reporte_ejecutivo_ventas AS
-   WITH ventas_categoria_mes AS (
-       SELECT 
-           p.categoria,
-           DATE_TRUNC('month', v.fecha_venta)::DATE AS mes,
-           ROUND(SUM(v.monto_total)::NUMERIC, 2)    AS total_ventas,
-           COUNT(DISTINCT v.cliente_id)              AS clientes_unicos,
-           COUNT(v.venta_id)                         AS num_transacciones
-       FROM ventas v
-       JOIN productos p ON v.producto_id = p.producto_id
-       GROUP BY p.categoria, DATE_TRUNC('month', v.fecha_venta)
-   )
-   SELECT 
-       categoria,
-       mes,
-       total_ventas,
-       clientes_unicos,
-       num_transacciones,
-       RANK() OVER (PARTITION BY mes ORDER BY total_ventas DESC)                   AS ranking_categoria_mes,
-       LAG(total_ventas) OVER (PARTITION BY categoria ORDER BY mes)                AS ventas_mes_anterior,
-       ROUND(AVG(total_ventas) OVER (
-           PARTITION BY categoria ORDER BY mes 
-           ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
-       )::NUMERIC, 2)                                                               AS promedio_movil_3m,
-       ROUND(total_ventas / SUM(total_ventas) OVER (PARTITION BY mes) * 100, 2)   AS market_share_pct,
-       SUM(total_ventas) OVER (
-           PARTITION BY categoria, EXTRACT(YEAR FROM mes)
-           ORDER BY mes
-           ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-       )                                                                             AS ventas_ytd
-   FROM ventas_categoria_mes;
+    WITH ventas_categoria_mes AS (
+        SELECT 
+            p.id_categoria as categoria,
+            DATE_TRUNC('month', v.fecha_venta)::DATE AS mes,
+            ROUND(SUM(v.monto_total)::NUMERIC, 2)    AS total_ventas,
+            COUNT(DISTINCT v.cliente_id)              AS clientes_unicos,
+            COUNT(v.venta_id)                         AS num_transacciones
+        FROM ventas v
+        JOIN productos p ON v.producto_id = p.id_producto
+        GROUP BY p.id_categoria, DATE_TRUNC('month', v.fecha_venta)
+    )
+    SELECT 
+        categoria,
+        mes,
+        total_ventas,
+        clientes_unicos,
+        num_transacciones,
+        RANK() OVER (PARTITION BY mes ORDER BY total_ventas DESC)                   AS ranking_categoria_mes,
+        LAG(total_ventas) OVER (PARTITION BY categoria ORDER BY mes)                AS ventas_mes_anterior,
+        ROUND(AVG(total_ventas) OVER (
+            PARTITION BY categoria ORDER BY mes 
+            ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+        )::NUMERIC, 2)                                                               AS promedio_movil_3m,
+        ROUND(total_ventas / SUM(total_ventas) OVER (PARTITION BY mes) * 100, 2)   AS market_share_pct,
+        SUM(total_ventas) OVER (
+            PARTITION BY categoria, EXTRACT(YEAR FROM mes)
+            ORDER BY mes
+            ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+        )                                                                             AS ventas_ytd
+    FROM ventas_categoria_mes;
+
 
    -- Verificar la vista
    SELECT * FROM v_reporte_ejecutivo_ventas ORDER BY mes, ranking_categoria_mes LIMIT 12;
    ```
-
-<br/>
-
-**Salida Esperada:**
-
-```
-   categoria    | periodo | total_ventas | ranking_categoria_mes | market_share_pct | variacion_mom | promedio_movil_3m
-----------------+---------+--------------+-----------------------+------------------+---------------+------------------
- Electrónica    | 2023-01 |    28450.00  |                     1 |            45.23 | N/A           |         28450.00
- Hogar          | 2023-01 |    18920.50  |                     2 |            30.07 | N/A           |         18920.50
- Ropa           | 2023-01 |    15630.25  |                     3 |            24.84 | N/A           |         15630.25
- Electrónica    | 2023-02 |    31200.75  |                     1 |            46.81 | 9.67%         |         29825.38
- ...
-```
 
 <br/>
 
