@@ -24,7 +24,6 @@ Al completar esta práctica, serás capaz de:
 </p>
 
 <br/>
-<br/>
 
 ## Prerrequisitos
 
