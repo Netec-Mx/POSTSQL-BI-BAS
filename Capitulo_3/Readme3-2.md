@@ -1271,7 +1271,7 @@ ORDER BY mes;
  >**Nota:** 
  > Las funciones de ventana no pueden utilizarse directamente en cláusulas GROUP BY.
  > Para realizar agregaciones sobre resultados de funciones de ventana, se debe usar una CTE o subconsulta.
- 
+
 <br/>
 
 4. Validar que los promedios móviles de 3 meses son correctos:
@@ -1575,6 +1575,7 @@ ORDER BY table_name;
 - Creaste 5 vistas analíticas que serán reutilizadas en prácticas posteriores, incluyendo el práctica de Power BI.
 
 <br/>
+<br/>
 
 ### Conceptos Clave
 
@@ -1592,17 +1593,17 @@ ORDER BY table_name;
 
 ### Reto Final 
 
-> **Nivel de Dificultad: Intermedio-Avanzado**
->
-> Sin consultar la solución del instructor, escribe una consulta SQL que responda la siguiente pregunta de negocio:
->
-> **"¿Cuáles son los 3 vendedores con mayor crecimiento acumulado en los últimos 6 meses disponibles del dataset? Para cada vendedor, muestra: su ranking de crecimiento, el total de ventas en los últimos 6 meses, el total de ventas en los 6 meses anteriores, la variación porcentual entre ambos períodos, y su posición percentil respecto a todos los vendedores."**
->
-> Restricciones:
-> - Debes usar al menos una CTE y al menos una función de ventana
-> - No puedes usar subconsultas anidadas en el `WHERE`
-> - El resultado debe estar ordenado de mayor a menor crecimiento
-> - Debes manejar correctamente el caso de vendedores sin ventas en alguno de los períodos
+**Nivel de Dificultad: Intermedio-Avanzado**
+
+Sin consultar la solución del instructor, escribe una consulta SQL que responda la siguiente pregunta de negocio:
+
+**"¿Cuáles son los 3 vendedores con mayor crecimiento acumulado en los últimos 6 meses disponibles del dataset? Para cada vendedor, muestra: su ranking de crecimiento, el total de ventas en los últimos 6 meses, el total de ventas en los 6 meses anteriores, la variación porcentual entre ambos períodos, y su posición percentil respecto a todos los vendedores."**
+
+Restricciones:
+- Debes usar al menos una CTE y al menos una función de ventana
+- No puedes usar subconsultas anidadas en el `WHERE`
+- El resultado debe estar ordenado de mayor a menor crecimiento
+- Debes manejar correctamente el caso de vendedores sin ventas en alguno de los períodos
 
 
 <br/>
