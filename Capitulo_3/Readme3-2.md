@@ -61,8 +61,7 @@ docker ps --filter "name=curso_postgres"
 # Si el contenedor no está activo, iniciarlo
 docker start curso_postgres
 
-# Verificar conectividad a la base de datos
-docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT COUNT(*) FROM ventas;"
+
 ```
 
 <br/>
