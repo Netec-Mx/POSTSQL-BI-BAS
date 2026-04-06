@@ -4,8 +4,6 @@
 
 # Nombre del curso
 
-
-
 ### [Práctica 1.1 Instalación de imagen PostgreSQL en Docker](Capitulo_1/Readme1-1.md) 
 
 En este laboratorio configurarás desde cero el entorno de desarrollo que utilizarás durante todo el curso. Levantarás un contenedor PostgreSQL 16 junto con pgAdmin 4 usando Docker Compose, realizarás tus primeras conexiones al motor de base de datos y explorarás los comandos fundamentales del cliente psql. Este entorno es la base sobre la que construirás todos los ejercicios de SQL avanzado, optimización e integración con Power BI de los módulos siguientes.
@@ -13,7 +11,6 @@ En este laboratorio configurarás desde cero el entorno de desarrollo que utiliz
 La relevancia práctica de este laboratorio va más allá del curso: saber levantar un entorno PostgreSQL reproducible con Docker es una habilidad directamente aplicable en equipos de desarrollo y análisis de datos del mundo real, donde la consistencia del entorno entre desarrolladores es crítica.
 
 - **Duración estimada**: 60 min.
-
 
 <br/><br/>
 
@@ -25,7 +22,7 @@ Este laboratorio es el punto de partida del dataset de ventas que se reutilizar�
 
   - **Duración estimada**: 60 min.
 
-
+<br/><br/>
 
 ### [Práctica 3.1 Creación de Consultas con Subconsultas y CTEs](Capitulo_3/Readme3-1.md)
 
@@ -34,7 +31,7 @@ En este práctica ampliarás el esquema del dataset de ventas incorporando una t
 
   - **Duración estimada**: 60 min.
 
-
+<br/><br/>
 
 ### [Práctica 3.2 Aplicación de Funciones de Ventana](Capitulo_3/Readme3-2.md)
 
@@ -44,21 +41,23 @@ Trabajarás con el dataset de ventas enriquecido con 24 meses de datos temporale
 
   - **Duración estimada**: 60 min.
 
+<br/><br/>
 
+### [Práctica 3.3 Uso de Agrupaciones Avanzadas](Capitulo_3/Readme3-3.md)
 
-### [Práctica 3. Nombre de la práctica](CHAPTER_05/ch05-p2p-lending-federation/README.md)
+En esta prática explorarás las capacidades de agregación avanzada de PostgreSQL para construir análisis multidimensionales sobre el dataset de ventas. Aprenderás a generar múltiples niveles de resumen en una sola consulta usando `GROUPING SETS`, `ROLLUP` y `CUBE`, evitando la necesidad de ejecutar múltiples consultas separadas y unirlas con `UNION ALL`. Adicionalmente, utilizarás la cláusula `FILTER` para calcular métricas condicionales en una sola pasada, y aplicarás funciones estadísticas avanzadas como `STDDEV()`, `VARIANCE()`, `CORR()` y `PERCENTILE_CONT()` para derivar KPIs financieros significativos.
+
+Estas técnicas son fundamentales en entornos de Business Intelligence donde los reportes requieren subtotales, totales generales y análisis cruzados por múltiples dimensiones simultáneamente, como los que se construyen en herramientas como Power BI o Tableau.
+
+  - **Duración estimada**: 60 min.
+
+<br/><br/>
+
+### [Práctica 3.4 Nombre de la práctica](CHAPTER_06/ch06-fraud-detection-subscriptions/README.md)
 
   - **Descripción**: xxx.
 
-  - ⏱️**Duración estimada**: xx min.
-
-
-
-### [Práctica 3. Nombre de la práctica](CHAPTER_06/ch06-fraud-detection-subscriptions/README.md)
-
-  - **Descripción**: xxx.
-
-  - ⏱️**Duración estimada**: xx min.
+  - **Duración estimada**: xx min.
 
 
 
@@ -66,7 +65,7 @@ Trabajarás con el dataset de ventas enriquecido con 24 meses de datos temporale
 
   - **Descripción**: xxx.
 
-  - ⏱️**Duración estimada**: xx min.
+  - **Duración estimada**: xx min.
 
 
 
@@ -74,7 +73,7 @@ Trabajarás con el dataset de ventas enriquecido con 24 meses de datos temporale
 
   - **Descripción**: xxx.
 
-  - ⏱️**Duración estimada**: xx min.
+  - **Duración estimada**: xx min.
 
 
 
