@@ -85,7 +85,7 @@ docker start curso_postgres
 
    -- Lista views disponible en el esquema público
    \dv public.*
-   
+
    ```
 <br/>
 
@@ -149,7 +149,6 @@ docker start curso_postgres
     SELECT count(*) from detalle_ordenes;
 
     -- Inserta detalle de ordenes solo si es menor a 5614
-
     INSERT INTO detalle_ordenes (
         id_orden,
         id_producto,
@@ -166,11 +165,9 @@ docker start curso_postgres
     LIMIT 5000;
 
     -- Verificación
-
     SELECT count(*) from detalle_ordenes;
 
-  -- Inserta detalle de ordenes solo si es menor a 5614
-
+    -- Inserta detalle de ordenes solo si es menor a 5614
     INSERT INTO detalle_ordenes (
         id_orden,
         id_producto,
@@ -187,11 +184,9 @@ docker start curso_postgres
     LIMIT 3000;
 
     -- Verificación
-    
     SELECT count(*) from detalle_ordenes;
   
     -- Inserta detalle de ordenes solo si es menor a 5614
-
     INSERT INTO detalle_ordenes (
         id_orden,
         id_producto,
