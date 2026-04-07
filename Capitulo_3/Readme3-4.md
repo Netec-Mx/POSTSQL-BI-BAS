@@ -67,7 +67,7 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT 'ventas'
 
 <br/>
 
-> **Nota sobre TimescaleDB:** La sección final de esta práctica (Paso 7) requiere un contenedor Docker diferente al PostgreSQL estándar. Se utilizará la imagen `timescale/timescaledb-ha:pg16`. Puedes tener ambos contenedores ejecutándose simultáneamente en puertos diferentes. El contenedor TimescaleDB usará el puerto `5433`.
+> **Nota sobre TimescaleDB:** La sección final de esta práctica (Paso 7) requiere un contenedor Docker diferente al PostgreSQL estándar. Se utilizará la imagen `timescale/timescaledb:2.15.3-pg16`. Puedes tener ambos contenedores ejecutándose simultáneamente en puertos diferentes. El contenedor TimescaleDB usará el puerto `5433`.
 
 
 <br/>
@@ -84,19 +84,40 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT 'ventas'
 2. Verifica la estructura temporal actual del dataset:
 
 ```sql
--- Verificar estructura de la tabla sales
+-- Verificar estructura de la tabla ventas
 SELECT 
     column_name,
     data_type,
     is_nullable
 FROM information_schema.columns
-WHERE table_name = 'sales'
+WHERE table_name = 'ventas'
   AND table_schema = 'public'
 ORDER BY ordinal_position;
 ```
 <br/>
 
-3. Analiza el rango temporal de los datos existentes:
+3. Si la columna `sale_date` es de tipo `DATE` y no `TIMESTAMP`, ejecuta la siguiente actualización para agregar precisión horaria (necesaria para análisis intradiario):
+
+```sql
+-- Agregar columna de timestamp si no existe
+DROP TABLE IF EXISTS sales;
+
+CREATE TABLE sales AS
+SELECT 
+    v.venta_id        AS sale_id,
+    v.fecha_venta     AS sale_date,
+    v.id_cliente      AS customer_id,
+    v.monto_total     AS total_amount,
+    v.fecha_venta::TIMESTAMPTZ
+        + (FLOOR(RANDOM() * 8 + 8) || ' hours')::INTERVAL
+        + (FLOOR(RANDOM() * 60) || ' minutes')::INTERVAL
+        AS sale_timestamp
+FROM ventas v;
+```
+
+<br/>
+
+4. Analiza el rango temporal de los datos existentes:
 
 ```sql
 -- Rango temporal y distribución básica
@@ -107,32 +128,6 @@ SELECT
     COUNT(*)                                AS total_ventas,
     COUNT(DISTINCT DATE_TRUNC('month', sale_date)) AS meses_con_ventas
 FROM sales;
-```
-
-<br/>
-
-4. Si la columna `sale_date` es de tipo `DATE` y no `TIMESTAMP`, ejecuta la siguiente actualización para agregar precisión horaria (necesaria para análisis intradiario):
-
-```sql
--- Agregar columna de timestamp si no existe
-ALTER TABLE sales 
-ADD COLUMN IF NOT EXISTS sale_timestamp TIMESTAMPTZ;
-
--- Poblar con timestamps simulados (hora aleatoria dentro del día de venta)
-UPDATE sales
-SET sale_timestamp = sale_date::TIMESTAMPTZ 
-    + (FLOOR(RANDOM() * 8 + 8) || ' hours')::INTERVAL
-    + (FLOOR(RANDOM() * 60) || ' minutes')::INTERVAL
-WHERE sale_timestamp IS NULL;
-
--- Verificar la actualización
-SELECT 
-    sale_id,
-    sale_date,
-    sale_timestamp,
-    EXTRACT(HOUR FROM sale_timestamp) AS hora_venta
-FROM sales
-LIMIT 10;
 ```
 
 <br/>
