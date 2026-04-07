@@ -62,9 +62,10 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db -c "\dt"
 set DOCKER_CLI_HINTS=false
 
 # Verificar cantidad de registros disponibles
-docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT 'ventas' AS tabla, COUNT(*) AS registros FROM ventas UNION ALL SELECT 'clientes', COUNT(*) FROM clientes UNION ALL SELECT 'detalle_ordenes', COUNT(*) FROM detalle_ordenes;
-"
+docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT 'ventas' AS tabla, COUNT(*) AS registros FROM ventas UNION ALL SELECT 'clientes', COUNT(*) FROM clientes UNION ALL SELECT 'detalle_ordenes', COUNT(*) FROM detalle_ordenes;"
 ```
+
+<br/>
 
 > **Nota sobre TimescaleDB:** La sección final de esta práctica (Paso 7) requiere un contenedor Docker diferente al PostgreSQL estándar. Se utilizará la imagen `timescale/timescaledb-ha:pg16`. Puedes tener ambos contenedores ejecutándose simultáneamente en puertos diferentes. El contenedor TimescaleDB usará el puerto `5433`.
 
