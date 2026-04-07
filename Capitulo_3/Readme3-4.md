@@ -28,7 +28,7 @@ Al completar esta práctica, serás capaz de:
 
 ### Acceso Requerido
 
-- Contenedor Docker de PostgreSQL 16 ejecutándose (configurado en Lab 01-00-01)
+- Contenedor Docker de PostgreSQL 16 ejecutándose (configurado en práctica 1.1)
 - Acceso a pgAdmin 4 (http://localhost:8080) o cliente `psql`
 - Permisos de superusuario en la base de datos `ventas_db` (usuario `postgres`)
 - Conexión a internet para descargar la imagen Docker de TimescaleDB (o imagen pre-descargada disponible)
@@ -57,14 +57,12 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db -c "\dt"
 ```
 
 ```bash
+# Variable de entorno
+
+set DOCKER_CLI_HINTS=false
+
 # Verificar cantidad de registros disponibles
-docker exec -it curso_postgres psql -U postgres -d ventas_db -c "
-SELECT 
-    'sales' AS tabla, COUNT(*) AS registros FROM sales
-UNION ALL
-SELECT 'customers', COUNT(*) FROM customers
-UNION ALL
-SELECT 'order_items', COUNT(*) FROM order_items;
+docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT 'ventas' AS tabla, COUNT(*) AS registros FROM ventas UNION ALL SELECT 'clientes', COUNT(*) FROM clientes UNION ALL SELECT 'detalle_ordenes', COUNT(*) FROM detalle_ordenes;
 "
 ```
 
