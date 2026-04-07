@@ -6,11 +6,11 @@
 
 Al completar esta práctica, serás capaz de:
 
-- Implementar `GROUPING SETS` para generar múltiples niveles de agregación en una sola consulta SQL
-- Usar `ROLLUP` para generar subtotales y totales generales en reportes jerárquicos por año, trimestre y mes
-- Aplicar `CUBE` para obtener todas las combinaciones posibles de dimensiones de análisis en una tabla de contingencia
-- Usar la cláusula `FILTER` en agregaciones para calcular métricas condicionales en una sola pasada sobre los datos
-- Calcular KPIs estadísticos con `STDDEV()`, `VARIANCE()`, `CORR()` y `PERCENTILE_CONT()` para análisis financiero
+- Implementar `GROUPING SETS` para generar múltiples niveles de agregación en una sola consulta SQL.
+- Usar `ROLLUP` para generar subtotales y totales generales en reportes jerárquicos por año, trimestre y mes.
+- Aplicar `CUBE` para obtener todas las combinaciones posibles de dimensiones de análisis en una tabla de contingencia.
+- Usar la cláusula `FILTER` en agregaciones para calcular métricas condicionales en una sola pasada sobre los datos.
+- Calcular KPIs estadísticos con `STDDEV()`, `VARIANCE()`, `CORR()` y `PERCENTILE_CONT()` para análisis financiero.
 
 <br/>
 <br/>
@@ -29,10 +29,10 @@ Al completar esta práctica, serás capaz de:
 
 ### Conocimientos Requeridos
 
-- Práctica 3.2 completado exitosamente (el dataset de ventas debe estar poblado y las consultas de subconsultas/CTEs de la práctica anterior deben haber funcionado correctamente)
-- Dominio de `GROUP BY` y funciones agregadas básicas (`SUM`, `COUNT`, `AVG`, `MIN`, `MAX`)
-- Comprensión del concepto de análisis multidimensional (dimensiones, métricas, granularidad)
-- Familiaridad con pgAdmin 4 para ejecutar consultas SQL
+- Práctica 3.2 completado exitosamente (el dataset de ventas debe estar poblado y las consultas de subconsultas/CTEs de la práctica anterior deben haber funcionado correctamente).
+- Dominio de `GROUP BY` y funciones agregadas básicas (`SUM`, `COUNT`, `AVG`, `MIN`, `MAX`).
+- Comprensión del concepto de análisis multidimensional (dimensiones, métricas, granularidad).
+- Familiaridad con pgAdmin 4 para ejecutar consultas SQL.
 
 <br/>
 
@@ -40,7 +40,7 @@ Al completar esta práctica, serás capaz de:
 
 - Contenedor Docker de PostgreSQL 16 en ejecución iniciado en la práctica 1.1.
 - Acceso a pgAdmin 4 (http://localhost:8080) con las credenciales configuradas.
-- Dataset de ventas creado en la práctica 2.1 con al menos 10,000 registros
+- Dataset de ventas creado en la práctica 2.1 con al menos 5,000 registros
 
 <br/>
 
@@ -55,12 +55,12 @@ docker ps --filter "name=postgres" --format "table {{.Names}}\t{{.Status}}\t{{.P
 
 ```bash
 # Verificar conectividad con psql
-docker exec -it postgres_db psql -U postgres -d sales_db -c "SELECT COUNT(*) AS total_ventas FROM ventas;"
+docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT COUNT(*) AS total_ventas FROM ventas;"
 ```
 
 ```bash
 # Verificar que pgAdmin está accesible
-curl -s -o /dev/null -w "%{http_code}" http://localhost:5050
+curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/browser/
 # Debe retornar: 200
 ```
 
@@ -77,104 +77,95 @@ docker compose up -d
 
 ### Paso 1: Verificar el Estado del Dataset y Preparar la Sesión de Trabajo
 
-1. Abre pgAdmin 4 en tu navegador (http://localhost:5050) e inicia sesión con las credenciales configuradas en el práctica 1.1.
+1. Abre pgAdmin 4 en tu navegador (http://localhost:8080) e inicia sesión con las credenciales configuradas en el práctica 1.1.
 
 <br/>
 
-2. En el panel izquierdo, expande **Servers → PostgreSQL 16 → Databases → sales_db**. Haz clic derecho sobre `sales_db` y selecciona **Query Tool**.
+2. En el panel izquierdo, expande **Servers → PostgreSQL 16 → Databases → ventas_db**. Haz clic derecho sobre `ventas_db` y selecciona **Query Tool**.
 
 <br/>
 
 3. Ejecuta la siguiente consulta de diagnóstico para verificar el estado del dataset:
 
    ```sql
-   -- Diagnóstico del dataset: verificar tablas, registros y dimensiones disponibles
-   SELECT
-       'ventas'          AS tabla,
-       COUNT(*)          AS total_registros,
-       MIN(fecha_venta)  AS fecha_min,
-       MAX(fecha_venta)  AS fecha_max,
-       COUNT(DISTINCT region)     AS regiones,
-       COUNT(DISTINCT categoria)  AS categorias,
-       COUNT(DISTINCT cliente_id) AS clientes_unicos
-   FROM ventas;
+   -- Verificación
+   select count(*) from ventas;
+   select * from ventas limit 1;
+   select * from clientes limit 1;
+   select * from productos limit 1;
    ```
 
 <br/>
 
-4. Verifica que el resultado muestre al menos 10,000 registros. Si tienes menos de 10,000 registros, consulta con tu instructor para ejecutar el script de generación de datos.
-
-<br/>
-
-5. Ahora crea una **vista de apoyo** que enriquece los datos de ventas con columnas de tiempo calculadas. Esta vista se usará en los pasos siguientes:
+4. Ahora crea una **vista de apoyo** que enriquece los datos de ventas con columnas de tiempo calculadas. Esta vista se usará en los pasos siguientes:
 
    ```sql
-   -- Crear vista enriquecida con dimensiones de tiempo para análisis multidimensional
-   CREATE OR REPLACE VIEW v_ventas_enriquecida AS
-   SELECT
-       v.venta_id,
-       v.fecha_venta,
-       EXTRACT(YEAR  FROM v.fecha_venta)::INTEGER                    AS anio,
-       EXTRACT(QUARTER FROM v.fecha_venta)::INTEGER                  AS trimestre,
-       EXTRACT(MONTH FROM v.fecha_venta)::INTEGER                    AS mes,
-       TO_CHAR(v.fecha_venta, 'YYYY-MM')                             AS anio_mes,
-       v.region,
-       v.categoria,
-       v.cliente_id,
-       v.tipo_cliente,      -- 'nuevo' o 'recurrente'
-       v.monto,
-       v.cantidad,
-       v.descuento,
-       v.precio_unitario
-   FROM ventas v;
-   ```
-<br/>
+    -- Crear vista enriquecida con dimensiones de tiempo para análisis multidimensional
+    CREATE OR REPLACE VIEW v_ventas_enriquecida AS
+    SELECT
+        v.venta_id,
+        v.fecha_venta,
+        -- Dimensión tiempo
+        EXTRACT(YEAR FROM v.fecha_venta)    AS anio,
+        EXTRACT(QUARTER FROM v.fecha_venta) AS trimestre,
+        EXTRACT(MONTH FROM v.fecha_venta)   AS mes,
+        -- Dimensión geográfica (derivada)
+        CASE
+            WHEN c.pais IN ('Chile','Argentina','Colombia','Perú') THEN 'Latam'
+            WHEN c.pais IN ('España','Francia') THEN 'Europa'
+            WHEN c.pais IN ('México','Canada','U.S.A') THEN 'North America'
+            ELSE 'Otros'
+        END AS region,
+        -- Dimensión producto
+        p.id_categoria as categoria,
+        -- Métrica derivada (descuento simulado)
+        CASE
+            WHEN v.monto_total > 200 THEN 0.15
+            WHEN v.monto_total > 100 THEN 0.10
+            ELSE 0
+        END AS descuento,
+        -- Segmentación de cliente (analítica)
+        CASE
+            WHEN COUNT(*) OVER (PARTITION BY v.cliente_id) > 1 THEN 'recurrente'
+            ELSE 'nuevo'
+        END AS tipo_cliente,
+        -- Identificadores
+        v.cliente_id,
+        v.vendedor_id,
+        v.producto_id,
+        -- Métricas base
+        v.cantidad,
+        v.precio_venta,
+        v.monto_total AS monto
+    FROM ventas v
+    JOIN clientes c   ON v.cliente_id = c.id_cliente
+    JOIN productos p  ON v.producto_id = p.id_producto;
 
-   > **Nota:** Si la columna `tipo_cliente` no existe en tu tabla `ventas`, ejecuta primero el siguiente bloque para agregarla:
-
-   ```sql
-   -- Agregar columna tipo_cliente si no existe (ejecutar solo si es necesario)
-   DO $$
-   BEGIN
-       IF NOT EXISTS (
-           SELECT 1 FROM information_schema.columns
-           WHERE table_name = 'ventas' AND column_name = 'tipo_cliente'
-       ) THEN
-           ALTER TABLE ventas ADD COLUMN tipo_cliente VARCHAR(20);
-           -- Clasificar clientes: los que tienen más de 1 compra son recurrentes
-           UPDATE ventas v
-           SET tipo_cliente = CASE
-               WHEN (
-                   SELECT COUNT(*) FROM ventas v2
-                   WHERE v2.cliente_id = v.cliente_id
-               ) > 1 THEN 'recurrente'
-               ELSE 'nuevo'
-           END;
-           RAISE NOTICE 'Columna tipo_cliente agregada y poblada exitosamente.';
-       ELSE
-           RAISE NOTICE 'La columna tipo_cliente ya existe.';
-       END IF;
-   END $$;
    ```
 
-<br/>
+5. Verifica la información sobre la nueva vista, v_ventas_enriquecida
 
-**Salida Esperada:**
+    ```sql
+    -- Diagnóstico del dataset: verificar tablas, registros y dimensiones disponibles
+    SELECT
+        'ventas'          AS tabla,
+        COUNT(*)          AS total_registros,
+        MIN(fecha_venta)  AS fecha_min,
+        MAX(fecha_venta)  AS fecha_max,
+        COUNT(DISTINCT region)     AS regiones,
+        COUNT(DISTINCT categoria)  AS categorias,
+        COUNT(DISTINCT cliente_id) AS clientes_unicos
+    FROM v_ventas_enriquecida;
 
-```
- tabla  | total_registros | fecha_min  | fecha_max  | regiones | categorias | clientes_unicos
---------+-----------------+------------+------------+----------+------------+----------------
- ventas |           15420 | 2022-01-01 | 2024-12-31 |        4 |          5 |           2847
-(1 fila)
-
-CREATE VIEW
-```
+    SELECT count(*) from v_ventas_enriquecida;
+    SELECT count(*) from ventas;
+    ```
 
 <br/>
 
 **Verificación:**
 
-- El campo `total_registros` debe ser ≥ 10,000.
+- El campo `total_registros` debe ser ≥ 5,000.
 - La vista `v_ventas_enriquecida` debe aparecer en el panel izquierdo de pgAdmin bajo **Views**.
 - Ejecuta `SELECT COUNT(*) FROM v_ventas_enriquecida;` para confirmar que retorna el mismo número de registros que la tabla `ventas`.
 
@@ -188,17 +179,34 @@ CREATE VIEW
    ```sql
    -- Enfoque tradicional SIN GROUPING SETS (4 consultas con UNION ALL)
    -- Este enfoque es verbose y menos eficiente
-   SELECT region, NULL::VARCHAR AS categoria, SUM(monto) AS total_ventas, 'por_region' AS nivel
-   FROM ventas GROUP BY region
-   UNION ALL
-   SELECT NULL, categoria, SUM(monto), 'por_categoria'
-   FROM ventas GROUP BY categoria
-   UNION ALL
-   SELECT region, categoria, SUM(monto), 'region_categoria'
-   FROM ventas GROUP BY region, categoria
-   UNION ALL
-   SELECT NULL, NULL, SUM(monto), 'total_general'
-   FROM ventas;
+    SELECT 
+        region, 
+        NULL::VARCHAR AS categoria, 
+        SUM(monto) AS total_ventas, 
+        'por_region' AS nivel
+    FROM v_ventas_enriquecida 
+    GROUP BY region
+    UNION ALL
+    SELECT 
+        NULL, 
+        categoria::VARCHAR, 
+        SUM(monto), 
+        'por_categoria'
+    FROM v_ventas_enriquecida 
+    GROUP BY categoria
+    UNION ALL
+    SELECT 
+        region, 
+        categoria::VARCHAR, 
+        SUM(monto), 
+        'region_categoria'
+    FROM v_ventas_enriquecida 
+    GROUP BY region, categoria;
+
+    -- Tipo de categoria
+    SELECT pg_typeof(categoria)
+    FROM v_ventas_enriquecida
+    LIMIT 1;
    ```
 
 <br/>
@@ -209,27 +217,27 @@ CREATE VIEW
    -- Solución óptima con GROUPING SETS
    -- Genera los 4 niveles de agregación en una sola consulta
    SELECT
-       region,
-       categoria,
-       SUM(monto)          AS total_ventas,
-       COUNT(*)            AS num_transacciones,
-       ROUND(AVG(monto), 2) AS ticket_promedio,
-       -- GROUPING() retorna 1 si la columna fue agrupada (es NULL de agregación)
-       -- y 0 si es un valor real de la dimensión
-       GROUPING(region)    AS es_subtotal_region,
-       GROUPING(categoria) AS es_subtotal_categoria
-   FROM ventas
-   GROUP BY GROUPING SETS (
-       (region, categoria),   -- Nivel 1: combinación región + categoría
-       (region),              -- Nivel 2: solo por región
-       (categoria),           -- Nivel 3: solo por categoría
-       ()                     -- Nivel 4: total general (sin dimensiones)
-   )
-   ORDER BY
-       GROUPING(region),
-       GROUPING(categoria),
-       region NULLS LAST,
-       categoria NULLS LAST;
+    region,
+    categoria,
+    SUM(monto)          AS total_ventas,
+    COUNT(*)            AS num_transacciones,
+    ROUND(AVG(monto), 2) AS ticket_promedio,
+    -- GROUPING() retorna 1 si la columna fue agrupada (es NULL de agregación)
+    -- y 0 si es un valor real de la dimensión
+    GROUPING(region)    AS es_subtotal_region,
+    GROUPING(categoria) AS es_subtotal_categoria
+    FROM v_ventas_enriquecida 
+    GROUP BY GROUPING SETS (
+        (region, categoria),   -- Nivel 1: combinación región + categoría
+        (region),              -- Nivel 2: solo por región
+        (categoria),           -- Nivel 3: solo por categoría
+        ()                     -- Nivel 4: total general (sin dimensiones)
+    )
+    ORDER BY
+        GROUPING(region),
+        GROUPING(categoria),
+        region NULLS LAST,
+        categoria NULLS LAST;
    ```
 
 <br/>
@@ -238,44 +246,26 @@ CREATE VIEW
 
    ```sql
    -- Versión mejorada con etiquetas descriptivas para los subtotales
-   SELECT
-       COALESCE(region,   '>>> TODAS LAS REGIONES')    AS region,
-       COALESCE(categoria,'>>> TODAS LAS CATEGORÍAS')  AS categoria,
-       SUM(monto)                                       AS total_ventas,
-       COUNT(*)                                         AS num_transacciones,
-       ROUND(AVG(monto), 2)                             AS ticket_promedio,
-       ROUND(SUM(monto) * 100.0 / SUM(SUM(monto)) OVER (), 2) AS pct_del_total
-   FROM ventas
-   GROUP BY GROUPING SETS (
-       (region, categoria),
-       (region),
-       (categoria),
-       ()
-   )
-   ORDER BY
-       GROUPING(region),
-       GROUPING(categoria),
-       region NULLS LAST,
-       categoria NULLS LAST;
+    SELECT
+        COALESCE(region,   '>>> TODAS LAS REGIONES')    AS region,
+        COALESCE(categoria::TEXT,'>>> TODAS LAS CATEGORÍAS')  AS categoria,
+        SUM(monto)                                       AS total_ventas,
+        COUNT(*)                                         AS num_transacciones,
+        ROUND(AVG(monto), 2)                             AS ticket_promedio,
+        ROUND(SUM(monto) * 100.0 / SUM(SUM(monto)) OVER (), 2) AS pct_del_total
+    FROM v_ventas_enriquecida 
+    GROUP BY GROUPING SETS (
+        (region, categoria),
+        (region),
+        (categoria),
+        ()
+    )
+    ORDER BY
+        GROUPING(region),
+        GROUPING(categoria),
+        region NULLS LAST,
+        categoria NULLS LAST;
    ```
-
-<br/>
-
-**Salida Esperada:**
-
-```
-          region           |         categoria          | total_ventas | num_transacciones | ticket_promedio | pct_del_total
----------------------------+----------------------------+--------------+-------------------+-----------------+---------------
- Norte                     | Electrónica                |    245830.50 |              1823 |          134.85 |          8.23
- Norte                     | Ropa                       |    189420.75 |              2104 |           90.03 |          6.34
- ...                       | ...                        |          ... |               ... |             ... |           ...
- >>> TODAS LAS REGIONES    | Electrónica                |    892340.00 |              6721 |          132.77 |         29.87
- ...
- Norte                     | >>> TODAS LAS CATEGORÍAS   |    698450.25 |              5834 |          119.72 |         23.38
- ...
- >>> TODAS LAS REGIONES    | >>> TODAS LAS CATEGORÍAS   |   2987650.00 |             15420 |          193.75 |        100.00
-(24 filas)
-```
 
 <br/>
 
@@ -294,27 +284,27 @@ CREATE VIEW
 
    ```sql
    -- Reporte jerárquico de ventas con ROLLUP: Año > Trimestre > Mes
-   SELECT
-       anio,
-       trimestre,
-       mes,
-       SUM(monto)            AS total_ventas,
-       COUNT(*)              AS num_transacciones,
-       COUNT(DISTINCT cliente_id) AS clientes_activos,
-       ROUND(AVG(monto), 2)  AS ticket_promedio,
-       -- Identificar el nivel de la fila en la jerarquía
-       CASE
-           WHEN GROUPING(anio) = 1                              THEN 'GRAN TOTAL'
-           WHEN GROUPING(trimestre) = 1 AND GROUPING(mes) = 1  THEN 'SUBTOTAL AÑO'
-           WHEN GROUPING(mes) = 1                               THEN 'SUBTOTAL TRIMESTRE'
-           ELSE                                                      'DETALLE MES'
-       END AS nivel_jerarquia
-   FROM v_ventas_enriquecida
-   GROUP BY ROLLUP(anio, trimestre, mes)
-   ORDER BY
-       anio   NULLS LAST,
-       trimestre NULLS LAST,
-       mes    NULLS LAST;
+    SELECT
+        anio,
+        trimestre,
+        mes,
+        SUM(monto)            AS total_ventas,
+        COUNT(*)              AS num_transacciones,
+        COUNT(DISTINCT cliente_id) AS clientes_activos,
+        ROUND(AVG(monto), 2)  AS ticket_promedio,
+        -- Identificar el nivel de la fila en la jerarquía
+        CASE
+            WHEN GROUPING(anio) = 1                              THEN 'GRAN TOTAL'
+            WHEN GROUPING(trimestre) = 1 AND GROUPING(mes) = 1   THEN 'SUBTOTAL AÑO'
+            WHEN GROUPING(mes) = 1                               THEN 'SUBTOTAL TRIMESTRE'
+            ELSE                                                      'DETALLE MES'
+        END AS nivel_jerarquia
+    FROM v_ventas_enriquecida
+    GROUP BY ROLLUP(anio, trimestre, mes)
+    ORDER BY
+        anio   NULLS LAST,
+        trimestre NULLS LAST,
+        mes    NULLS LAST;
    ```
 
 <br/>
@@ -323,30 +313,30 @@ CREATE VIEW
 
    ```sql
    -- Filtrar solo subtotales trimestrales y el gran total
-   SELECT
-       COALESCE(anio::TEXT, 'GRAN TOTAL')           AS anio,
-       CASE
-           WHEN trimestre IS NULL AND anio IS NOT NULL
-               THEN 'SUBTOTAL AÑO'
-           WHEN trimestre IS NOT NULL
-               THEN 'Q' || trimestre::TEXT
-           ELSE '-'
-       END                                           AS trimestre_label,
-       SUM(monto)                                    AS total_ventas,
-       COUNT(*)                                      AS transacciones,
-       ROUND(
-           (SUM(monto) - LAG(SUM(monto)) OVER (
-               PARTITION BY anio
-               ORDER BY trimestre NULLS LAST
-           )) * 100.0
-           / NULLIF(LAG(SUM(monto)) OVER (
-               PARTITION BY anio
-               ORDER BY trimestre NULLS LAST
-           ), 0),
-       2)                                            AS variacion_pct_vs_trimestre_anterior
-   FROM v_ventas_enriquecida
-   GROUP BY ROLLUP(anio, trimestre)
-   ORDER BY anio NULLS LAST, trimestre NULLS LAST;
+  SELECT
+    COALESCE(anio::TEXT, 'GRAN TOTAL')           AS anio,
+    CASE
+        WHEN trimestre IS NULL AND anio IS NOT NULL
+            THEN 'SUBTOTAL AÑO'
+        WHEN trimestre IS NOT NULL
+            THEN 'Q' || trimestre::TEXT
+        ELSE '-'
+    END                                           AS trimestre_label,
+    SUM(monto)                                    AS total_ventas,
+    COUNT(*)                                      AS transacciones,
+    ROUND(
+        (SUM(monto) - LAG(SUM(monto)) OVER (
+            PARTITION BY anio
+            ORDER BY trimestre NULLS LAST
+        )) * 100.0
+        / NULLIF(LAG(SUM(monto)) OVER (
+            PARTITION BY anio
+            ORDER BY trimestre NULLS LAST
+        ), 0),
+    2)                                            AS variacion_pct_vs_trimestre_anterior
+    FROM v_ventas_enriquecida
+    GROUP BY ROLLUP(anio, trimestre)
+    ORDER BY anio NULLS LAST, trimestre NULLS LAST;
    ```
 
 <br/>
@@ -355,46 +345,29 @@ CREATE VIEW
 
    ```sql
    -- ROLLUP aplicado a dimensiones de negocio: región > categoría
-   SELECT
-       COALESCE(region,   'TOTAL GENERAL')    AS region,
-       COALESCE(categoria,'SUBTOTAL REGIÓN')  AS categoria,
-       SUM(monto)                              AS total_ventas,
-       ROUND(AVG(monto), 2)                   AS ticket_promedio,
-       COUNT(DISTINCT cliente_id)             AS clientes,
-       -- Porcentaje respecto al total de la región (usando window function)
-       ROUND(
-           SUM(monto) * 100.0
-           / SUM(SUM(monto)) OVER (PARTITION BY region),
-       2)                                      AS pct_en_region
-   FROM ventas
-   GROUP BY ROLLUP(region, categoria)
-   ORDER BY region NULLS LAST, categoria NULLS LAST;
+    SELECT
+        COALESCE(region,   'TOTAL GENERAL')    AS region,
+        COALESCE(categoria::TEXT,'SUBTOTAL REGIÓN')  AS categoria,
+        SUM(monto)                              AS total_ventas,
+        ROUND(AVG(monto), 2)                   AS ticket_promedio,
+        COUNT(DISTINCT cliente_id)             AS clientes,
+        -- Porcentaje respecto al total de la región (usando window function)
+        ROUND(
+            SUM(monto) * 100.0
+            / SUM(SUM(monto)) OVER (PARTITION BY region),
+        2)                                      AS pct_en_region
+    FROM v_ventas_enriquecida
+    GROUP BY ROLLUP(region, categoria)
+    ORDER BY region NULLS LAST, categoria NULLS LAST;
    ```
 
 <br/>
-
-**Salida Esperada:**
-
-```
-    anio    | trimestre_label | total_ventas | transacciones | variacion_pct_vs_trimestre_anterior
-------------+-----------------+--------------+---------------+-------------------------------------
- 2022       | Q1              |    312450.00 |          1205 |                                    
- 2022       | Q2              |    298760.50 |          1189 |                               -4.38
- 2022       | Q3              |    334210.75 |          1267 |                               11.84
- 2022       | Q4              |    401320.25 |          1543 |                               20.09
- 2022       | SUBTOTAL AÑO    |   1346741.50 |          5204 |                                    
- 2023       | Q1              |    328940.00 |          1312 |                                    
- ...
- GRAN TOTAL | -               |   2987650.00 |         15420 |                                    
-```
-
-<br/>
-
+                            
 **Verificación:**
 
-- Cada fila `SUBTOTAL AÑO` debe ser igual a la suma de los 4 trimestres del mismo año
-- La fila `GRAN TOTAL` debe coincidir con `SELECT SUM(monto) FROM ventas;`
-- La columna `variacion_pct_vs_trimestre_anterior` debe ser `NULL` para el primer trimestre de cada año
+- Cada fila `SUBTOTAL AÑO` debe ser igual a la suma de los 4 trimestres del mismo año.
+- La fila `GRAN TOTAL` debe coincidir con `SELECT SUM(monto) FROM ventas;`.
+- La columna `variacion_pct_vs_trimestre_anterior` debe ser `NULL` para el primer trimestre de cada año.
 
 <br/>
 <br/>
@@ -405,19 +378,19 @@ CREATE VIEW
 
    ```sql
    -- CUBE con 2 dimensiones: genera 2^2 = 4 combinaciones de agrupación
-   SELECT
-       COALESCE(region,   'TODAS LAS REGIONES')     AS region,
-       COALESCE(categoria,'TODAS LAS CATEGORÍAS')   AS categoria,
-       SUM(monto)                                    AS total_ventas,
-       COUNT(*)                                      AS transacciones,
-       COUNT(DISTINCT cliente_id)                   AS clientes_unicos
-   FROM ventas
-   GROUP BY CUBE(region, categoria)
-   ORDER BY
-       GROUPING(region),
-       GROUPING(categoria),
-       region   NULLS LAST,
-       categoria NULLS LAST;
+    SELECT
+        COALESCE(region,   'TODAS LAS REGIONES')     AS region,
+        COALESCE(categoria::TEXT,'TODAS LAS CATEGORÍAS')   AS categoria,
+        SUM(monto)                                    AS total_ventas,
+        COUNT(*)                                      AS transacciones,
+        COUNT(DISTINCT cliente_id)                   AS clientes_unicos
+    FROM v_ventas_enriquecida
+    GROUP BY CUBE(region, categoria)
+    ORDER BY
+        GROUPING(region),
+        GROUPING(categoria),
+        region   NULLS LAST,
+    categoria NULLS LAST;
    ```
 
 <br/>
@@ -427,23 +400,23 @@ CREATE VIEW
    ```sql
    -- CUBE con 3 dimensiones: región, categoría y año
    -- Genera 2^3 = 8 combinaciones de agrupación
-   SELECT
-       COALESCE(region::TEXT,    '[ TODAS ]') AS region,
-       COALESCE(categoria,       '[ TODAS ]') AS categoria,
-       COALESCE(anio::TEXT,      '[ TODOS ]') AS anio,
-       SUM(monto)                              AS total_ventas,
-       COUNT(*)                                AS transacciones,
-       ROUND(AVG(monto), 2)                   AS ticket_promedio,
-       -- Identificar el nivel de detalle de cada fila
-       (3 - GROUPING(region) - GROUPING(categoria) - GROUPING(anio))
-                                               AS nivel_detalle  -- 3=máximo detalle, 0=gran total
-   FROM v_ventas_enriquecida
-   GROUP BY CUBE(region, categoria, anio)
-   ORDER BY
-       nivel_detalle DESC,
-       region   NULLS LAST,
-       categoria NULLS LAST,
-       anio     NULLS LAST;
+    SELECT
+        COALESCE(region::TEXT,    '[ TODAS ]') AS region,
+        COALESCE(categoria::TEXT,       '[ TODAS ]') AS categoria,
+        COALESCE(anio::TEXT,      '[ TODOS ]') AS anio,
+        SUM(monto)                              AS total_ventas,
+        COUNT(*)                                AS transacciones,
+        ROUND(AVG(monto), 2)                   AS ticket_promedio,
+        -- Identificar el nivel de detalle de cada fila
+        (3 - GROUPING(region) - GROUPING(categoria) - GROUPING(anio))
+                                                AS nivel_detalle  -- 3=máximo detalle, 0=gran total
+    FROM v_ventas_enriquecida
+    GROUP BY CUBE(region, categoria, anio)
+    ORDER BY
+        nivel_detalle DESC,
+        region   NULLS LAST,
+        categoria NULLS LAST,
+        anio     NULLS LAST;
    ```
 
 <br/>
@@ -453,43 +426,27 @@ CREATE VIEW
    ```sql
    -- Tabla pivot usando CUBE y agregación condicional
    -- Muestra ventas por región en filas y categorías en columnas
-   SELECT
-       COALESCE(region, 'TOTAL') AS region,
-       SUM(CASE WHEN categoria = 'Electrónica'   THEN monto ELSE 0 END) AS electronica,
-       SUM(CASE WHEN categoria = 'Ropa'          THEN monto ELSE 0 END) AS ropa,
-       SUM(CASE WHEN categoria = 'Alimentos'     THEN monto ELSE 0 END) AS alimentos,
-       SUM(CASE WHEN categoria = 'Hogar'         THEN monto ELSE 0 END) AS hogar,
-       SUM(CASE WHEN categoria = 'Deportes'      THEN monto ELSE 0 END) AS deportes,
-       SUM(monto)                                                         AS total_region
-   FROM ventas
-   GROUP BY CUBE(region)
-   ORDER BY region NULLS LAST;
+    SELECT
+        COALESCE(region, 'TOTAL') AS region,
+        SUM(CASE WHEN categoria::TEXT = 'Electrónica'   THEN monto ELSE 0 END) AS electronica,
+        SUM(CASE WHEN categoria::TEXT = 'Ropa'          THEN monto ELSE 0 END) AS ropa,
+        SUM(CASE WHEN categoria::TEXT = 'Alimentos'     THEN monto ELSE 0 END) AS alimentos,
+        SUM(CASE WHEN categoria::TEXT = 'Hogar'         THEN monto ELSE 0 END) AS hogar,
+        SUM(CASE WHEN categoria::TEXT = 'Deportes'      THEN monto ELSE 0 END) AS deportes,
+        SUM(monto)                                                         AS total_region
+    FROM v_ventas_enriquecida
+    GROUP BY CUBE(region)
+    ORDER BY region NULLS LAST;
    ```
-
-<br/>
-
-**Salida Esperada:**
-
-```
-    region    |    categoria     |   anio    | total_ventas | transacciones | ticket_promedio | nivel_detalle
---------------+------------------+-----------+--------------+---------------+-----------------+---------------
- Norte        | Electrónica      | 2022      |    82450.00  |           634 |          130.05 |             3
- Norte        | Electrónica      | 2023      |    89320.50  |           687 |          130.01 |             3
- ...
- Norte        | Electrónica      | [ TODOS ] |   245830.50  |          1823 |          134.85 |             2
- ...
- Norte        | [ TODAS ]        | [ TODOS ] |   698450.25  |          5834 |          119.72 |             1
- ...
- [ TODAS ]    | [ TODAS ]        | [ TODOS ] |  2987650.00  |         15420 |          193.75 |             0
-```
+   --OJOJOJOJO
 
 <br/>
 
 **Verificación:**
 
-- Con 3 dimensiones y `CUBE`, el número total de filas debe ser mayor que con `ROLLUP` (CUBE genera más combinaciones)
-- La fila con `region='TOTAL'` en la tabla pivot debe ser igual a `SELECT SUM(monto) FROM ventas;`
-- Ejecuta `SELECT COUNT(*) FROM ventas GROUP BY CUBE(region, categoria, anio);` y verifica que el número de grupos es ≤ 2^3 veces el número de combinaciones únicas
+- Con 3 dimensiones y `CUBE`, el número total de filas debe ser mayor que con `ROLLUP` (CUBE genera más combinaciones).
+- La fila con `region='TOTAL'` en la tabla pivot debe ser igual a `SELECT SUM(monto) FROM ventas;`.
+- Ejecuta `SELECT COUNT(*) FROM ventas GROUP BY CUBE(region, categoria, anio);` y verifica que el número de grupos es ≤ 2^3 veces el número de combinaciones únicas.
 
 <br/>
 <br/>
@@ -500,17 +457,17 @@ CREATE VIEW
 
    ```sql
    -- Comparación: CASE WHEN vs FILTER (ambos producen el mismo resultado)
-   SELECT
-       region,
-       -- Enfoque tradicional con CASE WHEN
-       SUM(CASE WHEN tipo_cliente = 'nuevo'      THEN monto ELSE 0 END) AS ventas_nuevos_casewhen,
-       SUM(CASE WHEN tipo_cliente = 'recurrente' THEN monto ELSE 0 END) AS ventas_recurrentes_casewhen,
-       -- Enfoque moderno con FILTER (más legible)
-       SUM(monto) FILTER (WHERE tipo_cliente = 'nuevo')       AS ventas_nuevos_filter,
-       SUM(monto) FILTER (WHERE tipo_cliente = 'recurrente')  AS ventas_recurrentes_filter
-   FROM ventas
-   GROUP BY region
-   ORDER BY region;
+    SELECT
+        region,
+        -- Enfoque tradicional con CASE WHEN
+        SUM(CASE WHEN tipo_cliente = 'nuevo'      THEN monto ELSE 0 END) AS ventas_nuevos_casewhen,
+        SUM(CASE WHEN tipo_cliente = 'recurrente' THEN monto ELSE 0 END) AS ventas_recurrentes_casewhen,
+        -- Enfoque moderno con FILTER (más legible)
+        SUM(monto) FILTER (WHERE tipo_cliente = 'nuevo')       AS ventas_nuevos_filter,
+        SUM(monto) FILTER (WHERE tipo_cliente = 'recurrente')  AS ventas_recurrentes_filter
+    FROM v_ventas_enriquecida
+    GROUP BY region
+    ORDER BY region;
    ```
 
 <br/>
@@ -519,32 +476,32 @@ CREATE VIEW
 
    ```sql
    -- Reporte de KPIs por región usando FILTER para métricas condicionales
-   SELECT
-       region,
-       -- Métricas generales
-       COUNT(*)                                                    AS total_transacciones,
-       SUM(monto)                                                  AS total_ventas,
-       -- Ventas por tipo de cliente
-       COUNT(*)  FILTER (WHERE tipo_cliente = 'nuevo')            AS transacciones_nuevos,
-       COUNT(*)  FILTER (WHERE tipo_cliente = 'recurrente')       AS transacciones_recurrentes,
-       SUM(monto) FILTER (WHERE tipo_cliente = 'nuevo')           AS ventas_clientes_nuevos,
-       SUM(monto) FILTER (WHERE tipo_cliente = 'recurrente')      AS ventas_clientes_recurrentes,
-       -- Ventas por rango de monto
-       COUNT(*) FILTER (WHERE monto < 50)                         AS transacciones_pequenas,
-       COUNT(*) FILTER (WHERE monto BETWEEN 50 AND 200)           AS transacciones_medianas,
-       COUNT(*) FILTER (WHERE monto > 200)                        AS transacciones_grandes,
-       -- Ventas con y sin descuento
-       SUM(monto) FILTER (WHERE descuento > 0)                    AS ventas_con_descuento,
-       SUM(monto) FILTER (WHERE descuento = 0 OR descuento IS NULL) AS ventas_sin_descuento,
-       COUNT(*) FILTER (WHERE descuento > 0)                      AS num_ventas_con_descuento,
-       -- Porcentaje de ventas con descuento
-       ROUND(
-           COUNT(*) FILTER (WHERE descuento > 0) * 100.0
-           / NULLIF(COUNT(*), 0),
-       2)                                                          AS pct_ventas_con_descuento
-   FROM ventas
-   GROUP BY region
-   ORDER BY total_ventas DESC;
+    SELECT
+        region,
+        -- Métricas generales
+        COUNT(*)                                                    AS total_transacciones,
+        SUM(monto)                                                  AS total_ventas,
+        -- Ventas por tipo de cliente
+        COUNT(*)  FILTER (WHERE tipo_cliente = 'nuevo')            AS transacciones_nuevos,
+        COUNT(*)  FILTER (WHERE tipo_cliente = 'recurrente')       AS transacciones_recurrentes,
+        SUM(monto) FILTER (WHERE tipo_cliente = 'nuevo')           AS ventas_clientes_nuevos,
+        SUM(monto) FILTER (WHERE tipo_cliente = 'recurrente')      AS ventas_clientes_recurrentes,
+        -- Ventas por rango de monto
+        COUNT(*) FILTER (WHERE monto < 50)                         AS transacciones_pequenas,
+        COUNT(*) FILTER (WHERE monto BETWEEN 50 AND 200)           AS transacciones_medianas,
+        COUNT(*) FILTER (WHERE monto > 200)                        AS transacciones_grandes,
+        -- Ventas con y sin descuento
+        SUM(monto) FILTER (WHERE descuento > 0)                    AS ventas_con_descuento,
+        SUM(monto) FILTER (WHERE descuento = 0 OR descuento IS NULL) AS ventas_sin_descuento,
+        COUNT(*) FILTER (WHERE descuento > 0)                      AS num_ventas_con_descuento,
+        -- Porcentaje de ventas con descuento
+        ROUND(
+            COUNT(*) FILTER (WHERE descuento > 0) * 100.0
+            / NULLIF(COUNT(*), 0),
+        2)                                                          AS pct_ventas_con_descuento
+    FROM v_ventas_enriquecida
+    GROUP BY region
+    ORDER BY total_ventas DESC;
    ```
 
 <br/>
@@ -553,49 +510,35 @@ CREATE VIEW
 
    ```sql
    -- Análisis temporal con FILTER: comparar ventas por período del día
-   SELECT
-       DATE_TRUNC('month', fecha_venta)::DATE                     AS mes,
-       COUNT(*)                                                    AS total_transacciones,
-       SUM(monto)                                                  AS total_ventas,
-       -- Ventas por trimestre dentro del mes (usando día del mes como proxy)
-       SUM(monto) FILTER (WHERE EXTRACT(DAY FROM fecha_venta) <= 10)  AS ventas_primera_decena,
-       SUM(monto) FILTER (WHERE EXTRACT(DAY FROM fecha_venta) BETWEEN 11 AND 20) AS ventas_segunda_decena,
-       SUM(monto) FILTER (WHERE EXTRACT(DAY FROM fecha_venta) > 20)   AS ventas_tercera_decena,
-       -- Ventas por día de la semana
-       SUM(monto) FILTER (WHERE EXTRACT(DOW FROM fecha_venta) IN (0,6)) AS ventas_fin_semana,
-       SUM(monto) FILTER (WHERE EXTRACT(DOW FROM fecha_venta) NOT IN (0,6)) AS ventas_dias_habiles,
-       -- Ratio fin de semana vs días hábiles
-       ROUND(
-           SUM(monto) FILTER (WHERE EXTRACT(DOW FROM fecha_venta) IN (0,6))
-           / NULLIF(SUM(monto) FILTER (WHERE EXTRACT(DOW FROM fecha_venta) NOT IN (0,6)), 0),
-       4)                                                          AS ratio_fds_vs_habiles
-   FROM ventas
-   WHERE fecha_venta >= '2024-01-01'
-   GROUP BY DATE_TRUNC('month', fecha_venta)
-   ORDER BY mes;
+    SELECT
+        DATE_TRUNC('month', fecha_venta)::DATE                     AS mes,
+        COUNT(*)                                                    AS total_transacciones,
+        SUM(monto)                                                  AS total_ventas,
+        -- Ventas por trimestre dentro del mes (usando día del mes como proxy)
+        SUM(monto) FILTER (WHERE EXTRACT(DAY FROM fecha_venta) <= 10)  AS ventas_primera_decena,
+        SUM(monto) FILTER (WHERE EXTRACT(DAY FROM fecha_venta) BETWEEN 11 AND 20) AS ventas_segunda_decena,
+        SUM(monto) FILTER (WHERE EXTRACT(DAY FROM fecha_venta) > 20)   AS ventas_tercera_decena,
+        -- Ventas por día de la semana
+        SUM(monto) FILTER (WHERE EXTRACT(DOW FROM fecha_venta) IN (0,6)) AS ventas_fin_semana,
+        SUM(monto) FILTER (WHERE EXTRACT(DOW FROM fecha_venta) NOT IN (0,6)) AS ventas_dias_habiles,
+        -- Ratio fin de semana vs días hábiles
+        ROUND(
+            SUM(monto) FILTER (WHERE EXTRACT(DOW FROM fecha_venta) IN (0,6))
+            / NULLIF(SUM(monto) FILTER (WHERE EXTRACT(DOW FROM fecha_venta) NOT IN (0,6)), 0),
+        4)                                                          AS ratio_fds_vs_habiles
+    FROM v_ventas_enriquecida
+    WHERE fecha_venta >= '2024-01-01'
+    GROUP BY DATE_TRUNC('month', fecha_venta)
+    ORDER BY mes;
    ```
-
-<br/>
-
-**Salida Esperada:**
-
-```
-  region  | total_transacciones | total_ventas | transacciones_nuevos | transacciones_recurrentes | ventas_clientes_nuevos | ventas_clientes_recurrentes | pct_ventas_con_descuento
-----------+---------------------+--------------+----------------------+---------------------------+------------------------+-----------------------------+--------------------------
- Norte    |                5834 |    698450.25 |                 1204 |                      4630 |             142380.50  |                  556069.75  |                    34.28
- Sur      |                4210 |    521340.75 |                  987 |                      3223 |             108450.25  |                  412890.50  |                    31.45
- Este     |                3180 |    398760.50 |                  743 |                      2437 |              82340.75  |                  316419.75  |                    28.93
- Oeste    |                2196 |    369098.50 |                  512 |                      1684 |              76230.00  |                  292868.50  |                    27.61
-(4 filas)
-```
 
 <br/>
 
 **Verificación:**
 
-- La suma de `transacciones_nuevos + transacciones_recurrentes` debe ser igual a `total_transacciones` para cada región
-- La suma de `ventas_clientes_nuevos + ventas_clientes_recurrentes` debe ser igual a `total_ventas`
-- Ejecuta `SELECT SUM(ventas_clientes_nuevos + ventas_clientes_recurrentes) = SUM(total_ventas) FROM (... consulta anterior ...) t;` para verificar la integridad
+- La suma de `transacciones_nuevos + transacciones_recurrentes` debe ser igual a `total_transacciones` para cada región.
+- La suma de `ventas_clientes_nuevos + ventas_clientes_recurrentes` debe ser igual a `total_ventas`.
+- Ejecuta `SELECT SUM(ventas_clientes_nuevos + ventas_clientes_recurrentes) = SUM(total_ventas) FROM (... consulta anterior ...) t;` para verificar la integridad.
 
 <br/>
 <br/>
@@ -607,32 +550,28 @@ CREATE VIEW
    ```sql
    -- KPIs de dispersión estadística por categoría de producto
    SELECT
-       categoria,
-       COUNT(*)                           AS num_transacciones,
-       ROUND(AVG(precio_unitario), 2)    AS precio_promedio,
-       ROUND(MIN(precio_unitario), 2)    AS precio_minimo,
-       ROUND(MAX(precio_unitario), 2)    AS precio_maximo,
-       -- Desviación estándar: mide la dispersión respecto al promedio
-       ROUND(STDDEV(precio_unitario), 2) AS desviacion_estandar,
-       -- Varianza: cuadrado de la desviación estándar
-       ROUND(VARIANCE(precio_unitario), 2) AS varianza,
-       -- Coeficiente de variación: dispersión relativa (menor = más consistente)
-       ROUND(
-           STDDEV(precio_unitario) * 100.0
-           / NULLIF(AVG(precio_unitario), 0),
-       2)                                 AS coef_variacion_pct,
-       -- Percentiles de precio
-       ROUND(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY precio_unitario), 2) AS p25_precio,
-       ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY precio_unitario), 2) AS p50_mediana,
-       ROUND(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY precio_unitario), 2) AS p75_precio,
-       -- Rango intercuartílico (IQR): diferencia entre P75 y P25
-       ROUND(
-           PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY precio_unitario)
-           - PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY precio_unitario),
-       2)                                 AS rango_intercuartilico
-   FROM ventas
-   GROUP BY categoria
-   ORDER BY desviacion_estandar DESC;
+        categoria,
+        COUNT(*) AS num_transacciones,
+        ROUND(AVG(precio_venta)::numeric, 2) AS precio_promedio,
+        ROUND(MIN(precio_venta)::numeric, 2) AS precio_minimo,
+        ROUND(MAX(precio_venta)::numeric, 2) AS precio_maximo,
+        ROUND(STDDEV(precio_venta)::numeric, 2) AS desviacion_estandar,
+        ROUND(VARIANCE(precio_venta)::numeric, 2) AS varianza,
+        ROUND(
+            (STDDEV(precio_venta) * 100.0 / NULLIF(AVG(precio_venta), 0))::numeric,
+            2
+        ) AS coef_variacion_pct,
+        ROUND(PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY precio_venta)::numeric, 2) AS p25_precio,
+        ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY precio_venta)::numeric, 2) AS p50_mediana,
+        ROUND(PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY precio_venta)::numeric, 2) AS p75_precio,
+        ROUND((
+            PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY precio_venta) -
+            PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY precio_venta)
+        )::numeric, 2) AS rango_intercuartilico
+    FROM v_ventas_enriquecida
+    GROUP BY categoria
+    ORDER BY desviacion_estandar DESC;
+
    ```
 
 <br/>
@@ -641,25 +580,25 @@ CREATE VIEW
 
    ```sql
    -- Análisis de correlación: descuento vs volumen de compra por región
-   SELECT
-       region,
-       COUNT(*)                                        AS num_transacciones,
-       -- CORR() retorna el coeficiente de correlación de Pearson (-1 a 1)
-       -- 1 = correlación perfecta positiva, -1 = perfecta negativa, 0 = sin correlación
-       ROUND(CORR(descuento, cantidad)::NUMERIC, 4)   AS corr_descuento_cantidad,
-       ROUND(CORR(descuento, monto)::NUMERIC, 4)      AS corr_descuento_monto,
-       ROUND(CORR(precio_unitario, cantidad)::NUMERIC, 4) AS corr_precio_cantidad,
-       -- Interpretar la correlación
-       CASE
-           WHEN ABS(CORR(descuento, cantidad)) >= 0.7 THEN 'Correlación fuerte'
-           WHEN ABS(CORR(descuento, cantidad)) >= 0.4 THEN 'Correlación moderada'
-           WHEN ABS(CORR(descuento, cantidad)) >= 0.2 THEN 'Correlación débil'
-           ELSE 'Sin correlación significativa'
-       END                                             AS interpretacion_corr_desc_cant
-   FROM ventas
-   WHERE descuento IS NOT NULL AND cantidad IS NOT NULL
-   GROUP BY region
-   ORDER BY corr_descuento_cantidad DESC;
+    SELECT
+        region,
+        COUNT(*)                                        AS num_transacciones,
+        -- CORR() retorna el coeficiente de correlación de Pearson (-1 a 1)
+        -- 1 = correlación perfecta positiva, -1 = perfecta negativa, 0 = sin correlación
+        ROUND(CORR(descuento, cantidad)::NUMERIC, 4)   AS corr_descuento_cantidad,
+        ROUND(CORR(descuento, monto)::NUMERIC, 4)      AS corr_descuento_monto,
+        ROUND(CORR(precio_venta, cantidad)::NUMERIC, 4) AS corr_precio_cantidad,
+        -- Interpretar la correlación
+        CASE
+            WHEN ABS(CORR(descuento, cantidad)) >= 0.7 THEN 'Correlación fuerte'
+            WHEN ABS(CORR(descuento, cantidad)) >= 0.4 THEN 'Correlación moderada'
+            WHEN ABS(CORR(descuento, cantidad)) >= 0.2 THEN 'Correlación débil'
+            ELSE 'Sin correlación significativa'
+        END                                             AS interpretacion_corr_desc_cant
+    FROM v_ventas_enriquecida
+    WHERE descuento IS NOT NULL AND cantidad IS NOT NULL
+    GROUP BY region
+    ORDER BY corr_descuento_cantidad DESC;
    ```
 
 <br/>
@@ -669,47 +608,46 @@ CREATE VIEW
    ```sql
    -- Reporte integral de KPIs financieros por categoría y región
    -- Combina métricas de tendencia central, dispersión, percentiles y correlación
-   WITH estadisticas_base AS (
-       SELECT
-           categoria,
-           region,
-           COUNT(*)                                                    AS n,
-           SUM(monto)                                                  AS total_ventas,
-           AVG(monto)                                                  AS media_ticket,
-           STDDEV(monto)                                               AS stddev_ticket,
-           PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY monto)        AS mediana_ticket,
-           PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY monto)        AS p90_ticket,
-           PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY monto)        AS p95_ticket,
-           PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY monto)        AS p99_ticket,
-           CORR(descuento, monto)                                      AS corr_descuento_monto,
-           AVG(descuento)                                              AS descuento_promedio
-       FROM ventas
-       GROUP BY categoria, region
-   )
-   SELECT
-       categoria,
-       region,
-       n                                               AS transacciones,
-       ROUND(total_ventas, 2)                         AS total_ventas,
-       ROUND(media_ticket, 2)                         AS ticket_promedio,
-       ROUND(mediana_ticket, 2)                       AS ticket_mediana,
-       ROUND(stddev_ticket, 2)                        AS ticket_stddev,
-       -- Intervalo de confianza aproximado del 95% para el ticket promedio
-       ROUND(media_ticket - 1.96 * stddev_ticket / SQRT(n), 2) AS ic95_inferior,
-       ROUND(media_ticket + 1.96 * stddev_ticket / SQRT(n), 2) AS ic95_superior,
-       ROUND(p90_ticket, 2)                           AS ticket_p90,
-       ROUND(p95_ticket, 2)                           AS ticket_p95,
-       ROUND(p99_ticket, 2)                           AS ticket_p99,
-       ROUND(corr_descuento_monto::NUMERIC, 4)        AS corr_descuento_monto,
-       ROUND(descuento_promedio, 4)                   AS descuento_promedio,
-       -- Clasificar la variabilidad del ticket
-       CASE
-           WHEN stddev_ticket / NULLIF(media_ticket, 0) < 0.3 THEN 'Baja variabilidad'
-           WHEN stddev_ticket / NULLIF(media_ticket, 0) < 0.7 THEN 'Variabilidad moderada'
-           ELSE 'Alta variabilidad'
-       END                                             AS clasificacion_variabilidad
-   FROM estadisticas_base
-   ORDER BY total_ventas DESC;
+    WITH estadisticas_base AS (
+        SELECT
+            categoria,
+            region,
+            COUNT(*) AS n,
+            SUM(monto) AS total_ventas,
+            AVG(monto) AS media_ticket,
+            STDDEV(monto) AS stddev_ticket,
+            PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY monto) AS mediana_ticket,
+            PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY monto) AS p90_ticket,
+            PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY monto) AS p95_ticket,
+            PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY monto) AS p99_ticket,
+            CORR(descuento, monto) AS corr_descuento_monto,
+            AVG(descuento) AS descuento_promedio
+        FROM v_ventas_enriquecida
+        GROUP BY categoria, region
+    )
+    SELECT
+        categoria,
+        region,
+        n AS transacciones,
+        ROUND(total_ventas::numeric, 2) AS total_ventas,
+        ROUND(media_ticket::numeric, 2) AS ticket_promedio,
+        ROUND(mediana_ticket::numeric, 2) AS ticket_mediana,
+        ROUND(stddev_ticket::numeric, 2) AS ticket_stddev,
+        -- Intervalo de confianza 95%
+        ROUND((media_ticket - 1.96 * stddev_ticket / SQRT(n))::numeric, 2) AS ic95_inferior,
+        ROUND((media_ticket + 1.96 * stddev_ticket / SQRT(n))::numeric, 2) AS ic95_superior,
+        ROUND(p90_ticket::numeric, 2) AS ticket_p90,
+        ROUND(p95_ticket::numeric, 2) AS ticket_p95,
+        ROUND(p99_ticket::numeric, 2) AS ticket_p99,
+        ROUND(corr_descuento_monto::numeric, 4) AS corr_descuento_monto,
+        ROUND(descuento_promedio::numeric, 4) AS descuento_promedio,
+        CASE
+            WHEN stddev_ticket / NULLIF(media_ticket, 0) < 0.3 THEN 'Baja variabilidad'
+            WHEN stddev_ticket / NULLIF(media_ticket, 0) < 0.7 THEN 'Variabilidad moderada'
+            ELSE 'Alta variabilidad'
+        END AS clasificacion_variabilidad
+    FROM estadisticas_base
+    ORDER BY total_ventas DESC;
    ```
 
 <br/>
@@ -718,63 +656,52 @@ CREATE VIEW
 
    ```sql
    -- Segmentación de clientes por percentil de gasto
-   WITH gasto_por_cliente AS (
-       SELECT
-           cliente_id,
-           region,
-           COUNT(*)        AS num_compras,
-           SUM(monto)      AS gasto_total,
-           AVG(monto)      AS ticket_promedio
-       FROM ventas
-       GROUP BY cliente_id, region
-   ),
-   percentiles AS (
-       SELECT
-           PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY gasto_total) AS p25,
-           PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY gasto_total) AS p50,
-           PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY gasto_total) AS p75,
-           PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY gasto_total) AS p90
-       FROM gasto_por_cliente
-   )
-   SELECT
-       gc.cliente_id,
-       gc.region,
-       gc.num_compras,
-       ROUND(gc.gasto_total, 2)    AS gasto_total,
-       ROUND(gc.ticket_promedio, 2) AS ticket_promedio,
-       -- Segmentar al cliente según su gasto total
-       CASE
-           WHEN gc.gasto_total >= p.p90 THEN 'VIP (Top 10%)'
-           WHEN gc.gasto_total >= p.p75 THEN 'Premium (Top 25%)'
-           WHEN gc.gasto_total >= p.p50 THEN 'Estándar (Top 50%)'
-           WHEN gc.gasto_total >= p.p25 THEN 'Básico (Top 75%)'
-           ELSE 'Ocasional (Bottom 25%)'
-       END                          AS segmento_cliente
-   FROM gasto_por_cliente gc
-   CROSS JOIN percentiles p
-   ORDER BY gc.gasto_total DESC
-   LIMIT 20;
+    WITH gasto_por_cliente AS (
+        SELECT
+            cliente_id,
+            region,
+            COUNT(*)        AS num_compras,
+            SUM(monto)      AS gasto_total,
+            AVG(monto)      AS ticket_promedio
+        FROM v_ventas_enriquecida
+        GROUP BY cliente_id, region
+    ),
+    percentiles AS (
+        SELECT
+            PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY gasto_total) AS p25,
+            PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY gasto_total) AS p50,
+            PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY gasto_total) AS p75,
+            PERCENTILE_CONT(0.90) WITHIN GROUP (ORDER BY gasto_total) AS p90
+        FROM gasto_por_cliente
+    )
+    SELECT
+        gc.cliente_id,
+        gc.region,
+        gc.num_compras,
+        ROUND(gc.gasto_total, 2)    AS gasto_total,
+        ROUND(gc.ticket_promedio, 2) AS ticket_promedio,
+        -- Segmentar al cliente según su gasto total
+        CASE
+            WHEN gc.gasto_total >= p.p90 THEN 'VIP (Top 10%)'
+            WHEN gc.gasto_total >= p.p75 THEN 'Premium (Top 25%)'
+            WHEN gc.gasto_total >= p.p50 THEN 'Estándar (Top 50%)'
+            WHEN gc.gasto_total >= p.p25 THEN 'Básico (Top 75%)'
+            ELSE 'Ocasional (Bottom 25%)'
+        END                          AS segmento_cliente
+    FROM gasto_por_cliente gc
+    CROSS JOIN percentiles p
+    ORDER BY gc.gasto_total DESC
+    LIMIT 20;
    ```
 
 <br/>
 
-**Salida Esperada:**
-
-```
-    categoria    |  region  | transacciones | total_ventas | ticket_promedio | ticket_mediana | ticket_stddev | ic95_inferior | ic95_superior | ticket_p90 | ticket_p95 | ticket_p99 | corr_descuento_monto | descuento_promedio | clasificacion_variabilidad
------------------+----------+---------------+--------------+-----------------+----------------+---------------+---------------+---------------+------------+------------+------------+----------------------+--------------------+----------------------------
- Electrónica     | Norte    |          1823 |    245830.50 |          134.85 |         119.50 |         87.32 |        130.85 |        138.85 |     245.80 |     312.40 |     489.20 |               0.1823 |             0.0842 | Variabilidad moderada
- Electrónica     | Sur      |          1456 |    198420.75 |          136.28 |         121.00 |         89.14 |        131.70 |        140.86 |     251.30 |     318.90 |     495.60 |               0.1654 |             0.0789 | Variabilidad moderada
- ...
-```
-<br/>
-
 **Verificación:**
 
-- El `ticket_p99` debe ser mayor que `ticket_p95`, que debe ser mayor que `ticket_p90`
-- El `ic95_inferior` debe ser menor que `ticket_promedio`, y el `ic95_superior` mayor
-- La correlación (`corr_descuento_monto`) debe estar entre -1 y 1
-- Verifica que la segmentación de clientes cubre exactamente el 100% de los clientes: `SELECT COUNT(*) FROM gasto_por_cliente;` debe ser igual a la suma de clientes en todos los segmentos
+- El `ticket_p99` debe ser mayor que `ticket_p95`, que debe ser mayor que `ticket_p90`.
+- El `ic95_inferior` debe ser menor que `ticket_promedio`, y el `ic95_superior` mayor.
+- La correlación (`corr_descuento_monto`) debe estar entre -1 y 1.
+- Verifica que la segmentación de clientes cubre exactamente el 100% de los clientes: `SELECT COUNT(*) FROM gasto_por_cliente;` debe ser igual a la suma de clientes en todos los segmentos.
 
 <br/>
 <br/>
@@ -799,16 +726,16 @@ CREATE VIEW
 
    ```sql
    -- Test 1: El gran total de GROUPING SETS debe coincidir con SUM directo
-   WITH resultado_grouping AS (
-       SELECT SUM(monto) AS total_grouping
-       FROM ventas
-       GROUP BY GROUPING SETS (())
-   )
-   SELECT
-       (SELECT SUM(monto) FROM ventas) AS total_directo,
-       total_grouping,
-       (SELECT SUM(monto) FROM ventas) = total_grouping AS son_iguales
-   FROM resultado_grouping;
+    WITH resultado_grouping AS (
+        SELECT SUM(monto_total) AS total_grouping
+        FROM ventas
+        GROUP BY GROUPING SETS (())
+    )
+    SELECT
+        (SELECT SUM(monto_total) FROM ventas) AS total_directo,
+        total_grouping,
+        (SELECT SUM(monto_total) FROM ventas) = total_grouping AS son_iguales
+    FROM resultado_grouping;
    ```
 <br/>
 
@@ -820,16 +747,40 @@ CREATE VIEW
 
    ```sql
    -- Test 2: ROLLUP debe generar más filas que GROUP BY normal
-   SELECT
-       (SELECT COUNT(*) FROM ventas GROUP BY region, categoria) AS filas_group_by,
-       (SELECT COUNT(*) FROM (
-           SELECT region, categoria FROM ventas
-           GROUP BY ROLLUP(region, categoria)
-       ) t) AS filas_rollup,
-       (SELECT COUNT(*) FROM (
-           SELECT region, categoria FROM ventas
-           GROUP BY CUBE(region, categoria)
-       ) t) AS filas_cube;
+    SELECT
+        COUNT(DISTINCT (region, categoria)) AS filas_group_by,
+        (SELECT COUNT(*) FROM (
+            SELECT region, categoria
+            FROM v_ventas_enriquecida
+            GROUP BY ROLLUP(region, categoria)
+        ) t) AS filas_rollup,
+        (SELECT COUNT(*) FROM (
+            SELECT region, categoria
+            FROM v_ventas_enriquecida
+            GROUP BY CUBE(region, categoria)
+        ) t) AS filas_cube
+    FROM v_ventas_enriquecida; 
+
+    -- Otra forma
+
+    SELECT
+    (SELECT COUNT(*) FROM (
+        SELECT region, categoria
+        FROM v_ventas_enriquecida
+        GROUP BY region, categoria
+    ) t) AS filas_group_by,
+    (SELECT COUNT(*) FROM (
+        SELECT region, categoria
+        FROM v_ventas_enriquecida
+        GROUP BY ROLLUP(region, categoria)
+    ) t) AS filas_rollup,
+    (SELECT COUNT(*) FROM (
+        SELECT region, categoria
+        FROM v_ventas_enriquecida
+        GROUP BY CUBE(region, categoria)
+    ) t) AS filas_cube;
+
+ 
    ```
 <br/>
 
@@ -841,18 +792,18 @@ CREATE VIEW
 
    ```sql
    -- Test 3: La suma de métricas con FILTER debe igualar el total
-   SELECT
-       region,
-       SUM(monto) AS total_real,
-       SUM(monto) FILTER (WHERE tipo_cliente = 'nuevo')
-       + SUM(monto) FILTER (WHERE tipo_cliente = 'recurrente') AS total_por_tipo,
-       ABS(
-           SUM(monto) -
-           (SUM(monto) FILTER (WHERE tipo_cliente = 'nuevo')
-           + SUM(monto) FILTER (WHERE tipo_cliente = 'recurrente'))
-       ) < 0.01 AS son_consistentes
-   FROM ventas
-   GROUP BY region;
+    SELECT
+        region,
+        SUM(monto) AS total_real,
+        SUM(monto) FILTER (WHERE tipo_cliente = 'nuevo')
+        + SUM(monto) FILTER (WHERE tipo_cliente = 'recurrente') AS total_por_tipo,
+        ABS(
+            SUM(monto) -
+            (SUM(monto) FILTER (WHERE tipo_cliente = 'nuevo')
+            + SUM(monto) FILTER (WHERE tipo_cliente = 'recurrente'))
+        ) < 0.01 AS son_consistentes
+    FROM v_ventas_enriquecida
+    GROUP BY region;
    ```
 
 <br/>
@@ -865,24 +816,23 @@ CREATE VIEW
 
    ```sql
    -- Test 4: Los percentiles deben estar en orden ascendente
-   SELECT
-       categoria,
-       PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY monto) AS p25,
-       PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY monto) AS p50,
-       PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY monto) AS p75,
-       PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY monto)
-           < PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY monto)
-       AND PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY monto)
-           < PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY monto) AS orden_correcto
-   FROM ventas
-   GROUP BY categoria;
+    SELECT
+        categoria,
+        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY monto) AS p25,
+        PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY monto) AS p50,
+        PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY monto) AS p75,
+        PERCENTILE_CONT(0.25) WITHIN GROUP (ORDER BY monto)
+            < PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY monto)
+        AND PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY monto)
+            < PERCENTILE_CONT(0.75) WITHIN GROUP (ORDER BY monto) AS orden_correcto
+    FROM v_ventas_enriquecida
+    GROUP BY categoria;
    ```
 <br/>
 
    **Resultado Esperado:** `orden_correcto = true` para todas las categorías
 
 <br/>
-
 <br/>
 
 ## Solución de Problemas
