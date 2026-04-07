@@ -53,7 +53,17 @@ Estas técnicas son fundamentales en entornos de Business Intelligence donde los
 
 <br/><br/>
 
-### [Práctica 3.4 Nombre de la práctica](CHAPTER_06/ch06-fraud-detection-subscriptions/README.md)
+### [Práctica 3.4 Uso de Funciones de Tiempo](Capitulo_3/Readme3-4.md)
+
+En esta práctica aplicarás técnicas avanzadas de análisis temporal en PostgreSQL utilizando el dataset de ventas enriquecido construido en las prácticas anteriores. Dominarás funciones clave como DATE_TRUNC(), EXTRACT(), INTERVAL y generate_series() para realizar agrupaciones temporales, detectar gaps en datos, construir comparaciones Year-over-Year (YoY) y Month-over-Month (MoM), e implementar un análisis de cohortes de clientes. Finalizarás explorando TimescaleDB, una extensión de PostgreSQL diseñada específicamente para series de tiempo, aprendiendo a crear hypertables y ejecutar consultas optimizadas con time_bucket().
+
+El análisis temporal es una competencia fundamental en cualquier proyecto de analítica de negocio. Las técnicas aprendidas aquí son directamente aplicables en reportes financieros, análisis de retención de clientes, detección de anomalías operacionales y construcción de dashboards de KPIs en herramientas como Power BI.
+
+  - **Duración estimada**: 60 min.
+
+
+
+### [Práctica 4.1 Nombre de la práctica](Capitulo_4/Readme4-1.md)
 
   - **Descripción**: xxx.
 
@@ -61,7 +71,7 @@ Estas técnicas son fundamentales en entornos de Business Intelligence donde los
 
 
 
-### [Práctica 3. Nombre de la práctica](CHAPTER_07/ch07-expense-analytics-caching/README.md)
+### [Práctica 4.2 Nombre de la práctica](Capitulo_4/Readme4-2.md)
 
   - **Descripción**: xxx.
 
@@ -69,13 +79,19 @@ Estas técnicas son fundamentales en entornos de Business Intelligence donde los
 
 
 
-### [Práctica 3. Nombre de la práctica](CHAPTER_08/ch08-carbon-footprint-governance/README.md)
+### [Práctica 5.1 Nombre de la práctica](Capitulo_5/Readme5-1.md)
 
   - **Descripción**: xxx.
 
   - **Duración estimada**: xx min.
 
 
+
+### [Práctica 6.2 Nombre de la práctica](Capitulo_6/Readme6-1.md)
+
+  - **Descripción**: xxx.
+
+  - **Duración estimada**: xx min.
 
 <br/><br/>
 
