@@ -29,7 +29,7 @@ Al completar esta práctica, serás capaz de:
 ### Acceso Requerido
 
 - Contenedor Docker de PostgreSQL 16 ejecutándose (configurado en Lab 01-00-01)
-- Acceso a pgAdmin 4 (http://localhost:5050) o cliente `psql`
+- Acceso a pgAdmin 4 (http://localhost:8080) o cliente `psql`
 - Permisos de superusuario en la base de datos `ventas_db` (usuario `postgres`)
 - Conexión a internet para descargar la imagen Docker de TimescaleDB (o imagen pre-descargada disponible)
 
@@ -78,7 +78,7 @@ SELECT 'order_items', COUNT(*) FROM order_items;
 
 ### Paso 1: Preparación y Enriquecimiento del Dataset Temporal
 
-1. Abre pgAdmin 4 en tu navegador (http://localhost:5050) y conéctate al servidor PostgreSQL. Selecciona la base de datos `ventas_db` y abre el Query Tool.
+1. Abre pgAdmin 4 en tu navegador (http://localhost:8080) y conéctate al servidor PostgreSQL. Selecciona la base de datos `ventas_db` y abre el Query Tool.
 
 <br/>
 
