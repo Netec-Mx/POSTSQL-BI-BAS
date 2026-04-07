@@ -106,7 +106,7 @@ CREATE TABLE sales AS
 SELECT 
     v.venta_id        AS sale_id,
     v.fecha_venta     AS sale_date,
-    v.id_cliente      AS customer_id,
+    v.cliente_id      AS customer_id,
     v.monto_total     AS total_amount,
     v.fecha_venta::TIMESTAMPTZ
         + (FLOOR(RANDOM() * 8 + 8) || ' hours')::INTERVAL
@@ -149,16 +149,6 @@ FROM pg_indexes
 WHERE tablename = 'sales' 
   AND indexname LIKE 'idx_sales%';
 ```
-
-**Salida Esperada:**
-
-```
-         indexname          |                    indexdef
-----------------------------+------------------------------------------------
- idx_sales_sale_date        | CREATE INDEX idx_sales_sale_date ON public.sales USING btree (sale_date)
- idx_sales_sale_timestamp   | CREATE INDEX idx_sales_sale_timestamp ON public.sales USING btree (sale_timestamp)
-```
-
 <br/>
 
 **Verificación:**
@@ -257,19 +247,6 @@ FROM sales
 WHERE sale_timestamp IS NOT NULL
 GROUP BY EXTRACT(HOUR FROM sale_timestamp)
 ORDER BY hora_del_dia;
-```
-
-<br/>
-
-**Salida Esperada (ejemplo para ventas por mes):**
-
-```
-    mes     | num_transacciones | ingresos_totales | ticket_promedio | clientes_unicos
-------------+-------------------+------------------+-----------------+-----------------
- 2022-01-01 |              1842 |        184320.50 |          100.06 |             412
- 2022-02-01 |              1654 |        165240.75 |           99.90 |             389
- 2022-03-01 |              1923 |        192300.00 |          100.00 |             445
- ...
 ```
 
 <br/>
@@ -383,19 +360,6 @@ WHERE s.sale_date BETWEEN fr.fecha_max - INTERVAL '90 days'
                       AND fr.fecha_max
 GROUP BY DATE_TRUNC('week', s.sale_date)
 ORDER BY semana_inicio;
-```
-
-<br/>
-
-**Salida Esperada (ejemplo pivot):**
-
-```
- mes_num | mes | ventas_2022  | ventas_2023  | ventas_2024
----------+-----+--------------+--------------+-------------
-       1 | Jan | 184320.50    | 201540.75    | 215320.00
-       2 | Feb | 165240.75    | 178920.50    | 189450.25
-       3 | Mar | 192300.00    | 209870.00    | 221340.50
-      ...
 ```
 
 <br/>
@@ -563,19 +527,6 @@ FROM ventas_mensuales;
 -- Verificar la vista
 SELECT * FROM v_metricas_temporales ORDER BY mes DESC LIMIT 6;
 ```
-<br/>
-
-**Salida Esperada:**
-
-```
-    mes     | anio | mes_num | num_ventas | ingresos  | pct_mom | pct_yoy
-------------+------+---------+------------+-----------+---------+---------
- 2024-03-01 | 2024 |       3 |       1923 | 192300.00 |    4.52 |    6.78
- 2024-02-01 | 2024 |       2 |       1654 | 183940.75 |   -4.85 |    5.12
- 2024-01-01 | 2024 |       1 |       1842 | 193420.50 |    2.34 |    7.23
- ...
-```
-
 <br/>
 
 **Verificación:**
@@ -748,18 +699,6 @@ SELECT
 FROM horas_del_dia h
 LEFT JOIN ventas_por_hora v ON h.hora_inicio = v.hora
 ORDER BY h.hora_inicio;
-```
-
-<br/>
-
-**Salida Esperada (resumen de gaps por mes):**
-
-```
-    mes     | dias_en_mes | dias_con_ventas | dias_sin_ventas | pct_cobertura
-------------+-------------+-----------------+-----------------+---------------
- 2022-01-01 |          31 |              28 |               3 |          90.3
- 2022-02-01 |          28 |              26 |               2 |          92.9
- ...
 ```
 
 <br/>
@@ -962,18 +901,6 @@ JOIN base b USING (mes_cohorte);
 
 -- Verificar la vista
 SELECT * FROM v_analisis_cohortes WHERE periodo_meses <= 3 ORDER BY mes_cohorte LIMIT 20;
-```
-
-<br/>
-
-**Salida Esperada (pivot de retención):**
-
-```
- mes_cohorte | tamano_cohorte | Mes_0 | Mes_1 | Mes_2 | Mes_3 | Mes_4 | Mes_5
--------------+----------------+-------+-------+-------+-------+-------+-------
- 2022-01-01  |            145 | 100.0 |  42.1 |  28.3 |  21.4 |  18.6 |  15.2
- 2022-02-01  |            132 | 100.0 |  38.6 |  25.0 |  19.7 |  16.7 |  13.6
- ...
 ```
 
 <br/>
@@ -1188,18 +1115,6 @@ ORDER BY bucket_3h
 LIMIT 10;
 ```
 
-**Salida Esperada:**
-
-```
--- Chunks de la hypertable
-     chunk_name      | range_start | range_end  | tamanio
----------------------+-------------+------------+---------
- _hyper_1_1_chunk    | 2024-07-01  | 2024-08-01 | 1024 kB
- _hyper_1_2_chunk    | 2024-08-01  | 2024-09-01 | 1024 kB
- _hyper_1_3_chunk    | 2024-09-01  | 2024-10-01 | 1024 kB
- ...
-```
-
 <br/>
 
 **Verificación:**
@@ -1264,19 +1179,6 @@ SELECT
 
 <br/>
 
-**Resultado Esperado:**
-
-```
-               prueba                  | resultado
---------------------------------------+-----------
- sale_timestamp existe                 | PASS
- índice sale_date existe               | PASS
- vista v_metricas_temporales existe    | PASS
- vista v_analisis_cohortes existe      | PASS
-```
-
-<br/>
-
 2. Verifica la integridad de la vista de métricas temporales:
 
 ```sql
@@ -1288,16 +1190,6 @@ SELECT
     MIN(mes) AS primer_mes,
     MAX(mes) AS ultimo_mes
 FROM v_metricas_temporales;
-```
-
-<br/>
-
-**Resultado Esperado:**
-
-```
- total_meses | meses_con_mom | meses_con_yoy | primer_mes | ultimo_mes
--------------+---------------+---------------+------------+------------
-          36 |            35 |            24 | 2022-01-01 | 2024-12-01
 ```
 
 <br/>
@@ -1316,16 +1208,6 @@ WHERE periodo_meses = 0;
 
 <br/>
 
-**Resultado Esperado:**
-
-```
- cohortes_verificadas | min_retencion_periodo0 | max_retencion_periodo0
-----------------------+------------------------+------------------------
-                   36 |                 100.00 |                 100.00
-```
-
-<br/>
-
 4. Verifica TimescaleDB desde la línea de comandos:
 
 ```bash
@@ -1337,16 +1219,6 @@ SELECT
     pg_size_pretty(total_bytes) AS tamanio_total
 FROM timescaledb_information.hypertable_detailed_size('ventas_metricas');
 "
-```
-
-<br/>
-
-**Resultado Esperado:**
-
-```
- hypertable_name | num_chunks | tamanio_total
------------------+------------+---------------
- ventas_metricas |          7 | 8192 kB
 ```
 
 <br/>
