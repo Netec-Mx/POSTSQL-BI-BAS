@@ -113,6 +113,11 @@ SELECT
         + (FLOOR(RANDOM() * 60) || ' minutes')::INTERVAL
         AS sale_timestamp
 FROM ventas v;
+
+-- Verificación
+SELECT * from sales limit 1;
+SELECT count(*) from sales;
+
 ```
 
 <br/>
@@ -921,17 +926,11 @@ SELECT * FROM v_analisis_cohortes WHERE periodo_meses <= 3 ORDER BY mes_cohorte 
 
 ```bash
 # Descargar imagen TimescaleDB para PostgreSQL 16
-docker pull timescale/timescaledb-ha:pg16
+docker pull timescale/timescaledb:2.15.3-pg16
 
 # Ejecutar contenedor TimescaleDB en puerto 5433
-docker run -d \
-  --name timescaledb_lab \
-  -e POSTGRES_PASSWORD=postgres \
-  -e POSTGRES_USER=postgres \
-  -e curso_postgres=tsdb \
-  -p 5433:5432 \
-  -v timescaledb_data:/home/postgres/pgdata/data \
-  timescale/timescaledb-ha:pg16
+
+docker run -d --name timescaledb_lab --restart unless-stopped -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres -e POSTGRES_DB=tsdb -p 5433:5432 -v timescaledb_data:/var/lib/postgresql/data timescale/timescaledb:2.15.3-pg16
 
 # Verificar que el contenedor está ejecutándose
 docker ps --filter "name=timescaledb_lab"
