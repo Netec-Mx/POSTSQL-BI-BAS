@@ -73,11 +73,13 @@ Esta práctica tiene relevancia directa en entornos de producción: las vistas m
 
 <br/><br/>
 
-### [Práctica 4.2 Nombre de la práctica](Capitulo_4/Readme4-2.md)
+### [Práctica 4.2 Creación de Procedimientos y Funciones](Capitulo_4/Readme4-2.md)
 
-  - **Descripción**: xxx.
+En esta práctica aprenderás a programar lógica de negocio directamente en PostgreSQL usando PL/pgSQL. Comenzarás con funciones simples para calcular descuentos y categorizar clientes, avanzarás hacia funciones con múltiples parámetros de salida, e implementarás un procedimiento completo de carga incremental con manejo explícito de transacciones (`COMMIT` / `ROLLBACK`). Finalmente, utilizarás cursores explícitos para procesar registros de forma iterativa y bloques `DO $$` para ejecutar lógica ad-hoc, concluyendo con una introducción a pgAgent para programar la ejecución automática del procedimiento de carga diaria.
 
-  - **Duración estimada**: xx min.
+Esta práctica refleja patrones reales de ingeniería de datos: encapsular reglas de negocio en la base de datos garantiza consistencia, reutilización y mantenibilidad en entornos analíticos y de producción.
+
+   - **Duración estimada**: 60 min.
 
 
 
