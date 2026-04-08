@@ -811,7 +811,7 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
             RAISE;  -- Re-lanzar el error original
     END;
     $$;
-    
+
    COMMENT ON FUNCTION public.procesar_clientes_inactivos(INTEGER, VARCHAR)
    IS 'Usa cursor explícito para identificar y marcar clientes inactivos. Demuestra DECLARE/OPEN/FETCH/CLOSE con manejo de errores.';
    ```
@@ -850,31 +850,33 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
    -- Propósito: Retorna un REFCURSOR que el cliente puede iterar
    --            Útil para pasar resultados grandes entre funciones
    -- ============================================================
-   CREATE OR REPLACE FUNCTION public.obtener_cursor_ventas_region(
-       p_id_region  INTEGER,
-       p_anio       INTEGER DEFAULT EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER
-   )
-   RETURNS REFCURSOR
-   LANGUAGE plpgsql
-   AS $$
-   DECLARE
-       ref_cursor REFCURSOR := 'cursor_ventas_region';  -- Nombre del cursor
-   BEGIN
-       OPEN ref_cursor FOR
-           SELECT
-               DATE_TRUNC('month', v.fecha_venta)::DATE  AS mes,
-               SUM(v.total_venta)                        AS total_ventas,
-               COUNT(*)                                  AS num_transacciones,
-               AVG(v.total_venta)                        AS ticket_promedio
-           FROM public.ventas v
-           WHERE v.id_region = p_id_region
-             AND EXTRACT(YEAR FROM v.fecha_venta) = p_anio
-           GROUP BY DATE_TRUNC('month', v.fecha_venta)
-           ORDER BY mes;
+    CREATE OR REPLACE FUNCTION public.obtener_cursor_ventas_region(
+        p_id_region  INTEGER,
+        p_anio       INTEGER DEFAULT EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER
+    )
+    RETURNS REFCURSOR
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+        ref_cursor REFCURSOR := 'cursor_ventas_region';
+    BEGIN
+        OPEN ref_cursor FOR
+            SELECT
+                DATE_TRUNC('month', v.fecha_venta)::DATE  AS mes,
+                SUM(v.monto_total)                        AS total_ventas,
+                COUNT(*)                                  AS num_transacciones,
+                AVG(v.monto_total)                        AS ticket_promedio
+            FROM public.ventas v
+            INNER JOIN public.clientes c
+                ON v.cliente_id = c.id_cliente   -- 👈 CLAVE
+            WHERE c.region_id = p_id_region      -- 👈 FIX
+            AND EXTRACT(YEAR FROM v.fecha_venta) = p_anio
+            GROUP BY DATE_TRUNC('month', v.fecha_venta)
+            ORDER BY mes;
 
-       RETURN ref_cursor;
-   END;
-   $$;
+        RETURN ref_cursor;
+    END;
+    $$;
 
    -- Usar el REFCURSOR en una transacción (debe estar en un bloque BEGIN/COMMIT)
    BEGIN;
