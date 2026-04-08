@@ -39,14 +39,39 @@ Al completar esta práctica, serás capaz de:
 Antes de comenzar, ejecuta el siguiente comando para confirmar que el entorno está listo:
 
 ```sql
+
+
+-- Asegurar catálogo de regiones
+CREATE TABLE IF NOT EXISTS regions (
+    region_id   INT PRIMARY KEY,
+    region_name VARCHAR(50) NOT NULL
+);
+
+INSERT INTO regions (region_id, region_name)
+VALUES
+(1, 'Norte'),
+(2, 'Sur'),
+(3, 'Centro'),
+(4, 'Occidente')
+ON CONFLICT (region_id) DO NOTHING;
+
+-- Corre estádiscas a las siguientes tablas
+
+ANALYZE sales;
+ANALYZE clientes;
+ANALYZE productos;
+ANALYZE regions;
+
 -- Verificar que las tablas base existen y tienen datos suficientes
 SELECT
     schemaname,
-    tablename,
+    relname AS tablename,
     n_live_tup AS registros_aproximados
 FROM pg_stat_user_tables
-WHERE tablename IN ('sales', 'customers', 'products', 'regions')
-ORDER BY tablename;
+WHERE relname IN ('sales', 'clientes', 'productos', 'regions')
+ORDER BY relname;
+
+
 ```
 
 <br/>
