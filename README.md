@@ -61,15 +61,17 @@ El análisis temporal es una competencia fundamental en cualquier proyecto de an
 
   - **Duración estimada**: 60 min.
 
+<br/><br/>
 
+### [Práctica 4.1. Creación y Uso de Vistas y Vistas Materializadas](Capitulo_4/Readme4-1.md)
 
-### [Práctica 4.1 Nombre de la práctica](Capitulo_4/Readme4-1.md)
+En esta práctica aprenderás a crear y gestionar vistas lógicas y vistas materializadas en PostgreSQL 16 como mecanismo de abstracción sobre el modelo de datos de ventas construido en los módulos anteriores. Las vistas lógicas encapsulan consultas complejas con JOINs y agregaciones, simplificando el acceso a datos para aplicaciones y analistas. Las vistas materializadas van un paso más allá: persisten físicamente los resultados de consultas costosas, reduciendo drásticamente los tiempos de respuesta para dashboards y reportes.
 
-  - **Descripción**: xxx.
+Esta práctica tiene relevancia directa en entornos de producción: las vistas materializadas son una de las técnicas más utilizadas para optimizar el rendimiento de dashboards de Power BI conectados a PostgreSQL, ya que permiten que las herramientas de visualización consulten datos pre-agregados en lugar de recalcular millones de filas en cada actualización del reporte.
 
-  - **Duración estimada**: xx min.
+  - **Duración estimada**: 60 min.
 
-
+<br/><br/>
 
 ### [Práctica 4.2 Nombre de la práctica](Capitulo_4/Readme4-2.md)
 

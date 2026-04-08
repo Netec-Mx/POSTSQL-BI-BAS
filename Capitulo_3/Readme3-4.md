@@ -12,7 +12,15 @@ Al completar esta práctica, serás capaz de:
 - Calcular métricas de retención y cohortes basadas en la fecha de primera compra de cada cliente.
 - Explorar los conceptos básicos de TimescaleDB: instalación de la extensión, creación de una hypertable y consulta con `time_bucket()`.
 
-<br/>
+<br/><br/>
+
+## Objetivo Visual
+
+<p align="center">
+  <img src="../images/i17.png" style="display: block; margin: 0 auto;" width="300"/>
+</p>
+
+<br/><br/>
 
 ## Prerrequisitos
 
@@ -1215,35 +1223,29 @@ docker exec -it timescaledb_lab psql -U postgres -d tsdb
 
 ```sql
 
-    SELECT 
-        pg_size_pretty(total_bytes) AS tamanio_total,
-        pg_size_pretty(table_bytes) AS tabla,
-        pg_size_pretty(index_bytes) AS indices,
-        pg_size_pretty(toast_bytes) AS toast
-    FROM hypertable_detailed_size('ventas_metricas'::regclass);
-   
-    -- Para ver qué columnas trae
-    SELECT *
-    FROM hypertable_detailed_size('ventas_metricas'::regclass);
+SELECT 
+    pg_size_pretty(total_bytes) AS tamanio_total,
+    pg_size_pretty(table_bytes) AS tabla,
+    pg_size_pretty(index_bytes) AS indices,
+    pg_size_pretty(toast_bytes) AS toast
+FROM hypertable_detailed_size('ventas_metricas'::regclass);
 
-    -- El número de chunks
-    SELECT 
-        hypertable_name,
-        num_chunks
-    FROM timescaledb_information.hypertables
-    WHERE hypertable_name = 'ventas_metricas';
+-- Para ver qué columnas trae
+SELECT *
+FROM hypertable_detailed_size('ventas_metricas'::regclass);
 
-    -- El tamaño
-    SELECT 
-    pg_size_pretty(total_bytes) AS tamanio_total
-    FROM hypertable_detailed_size('ventas_metricas'::regclass);
-
-    -- Número de chunks
-    SELECT 
+-- El número de chunks
+SELECT 
     hypertable_name,
     num_chunks
-    FROM timescaledb_information.hypertables
-    WHERE hypertable_name = 'ventas_metricas';
+FROM timescaledb_information.hypertables
+WHERE hypertable_name = 'ventas_metricas';
+
+-- El tamaño
+SELECT 
+pg_size_pretty(total_bytes) AS tamanio_total
+FROM hypertable_detailed_size('ventas_metricas'::regclass);
+
 
 ```
 
