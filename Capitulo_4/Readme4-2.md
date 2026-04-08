@@ -4,7 +4,7 @@
 
 ## Objetivos
 
-Al completar este laboratorio, serás capaz de:
+Al completar esta práctica, serás capaz de:
 
 - Diferenciar en la práctica entre `FUNCTION` y `PROCEDURE` en PostgreSQL y sus casos de uso específicos.
 - Escribir funciones PL/pgSQL con parámetros `IN`, `OUT` e `INOUT` y diferentes tipos de retorno.
@@ -70,7 +70,8 @@ docker compose up -d
 ```
 
 ```bash
-# Crear el schema de trabajo para este laboratorio si no existe
+
+# Crear el schema de trabajo para esta práctica si no existe
 docker exec -it curso_postgres psql -U postgres -d ventas_db 
 ```
 
@@ -96,7 +97,7 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
 
 ### Paso 1: Explorar la Diferencia entre FUNCTION y PROCEDURE
 
-1. Abre pgAdmin 4 en tu navegador (http://localhost:5050) y conéctate al servidor PostgreSQL con las credenciales configuradas en el Lab 01-00-01.
+1. Abre pgAdmin 4 en tu navegador (http://localhost:8080) y conéctate al servidor PostgreSQL con las credenciales configuradas en la práctica 1.1.
 
 <br/>
 
@@ -1422,7 +1423,7 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
 1. Verificar todas las funciones creadas en el schema `public`:
 
    ```sql
-   -- Listar todas las funciones y procedimientos creados en este laboratorio
+   -- Listar todas las funciones y procedimientos creados en esta práctica
    SELECT
        routine_name,
        routine_type,
@@ -1453,7 +1454,7 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
 2. Prueba integral del flujo completo:
 
    ```sql
-   -- PRUEBA INTEGRAL: Simular flujo completo del laboratorio
+   -- PRUEBA INTEGRAL: Simular flujo completo de la práctica
    DO $$
    DECLARE
        v_descuento         NUMERIC;
@@ -1521,7 +1522,7 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
 3. Verificar el estado final de la base de datos:
 
    ```sql
-   -- Resumen del estado final del laboratorio
+   -- Resumen del estado final de la práctica
    SELECT
        'Funciones creadas'      AS objeto,
        COUNT(*)::TEXT           AS cantidad
@@ -1563,7 +1564,7 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
 <br/>
 
 **Causa:**
-Los nombres de columnas en tu dataset pueden diferir de los usados en los scripts del laboratorio. El dataset creado en Lab 02-00-01 puede usar nombres como `monto_total` en lugar de `total_venta`, o `categoria_producto` en lugar de `categoria`.
+Los nombres de columnas en tu dataset pueden diferir de los usados en los scripts de la práctica. El dataset creado en la práctica 2.1 puede usar nombres como `monto_total` en lugar de `total_venta`, o `categoria_producto` en lugar de `categoria`.
 
 <br/>
 
@@ -1758,12 +1759,12 @@ GRANT ALL ON SCHEMA public TO PUBLIC;
 
 ## Limpieza
 
-> **Advertencia:** Ejecuta la limpieza **solo si deseas eliminar los objetos creados en este laboratorio**. Los procedimientos y funciones creados aquí son utilizados en laboratorios posteriores (05-00-01 y 06-00-01). Si estás en un contexto de curso secuencial, **NO ejecutes la limpieza hasta haber completado todos los laboratorios del módulo**.
+> **Advertencia:** Ejecuta la limpieza **solo si deseas eliminar los objetos creados en esta práctica**. Los procedimientos y funciones creados aquí son utilizados en prácticas posteriores (05-00-01 y 06-00-01). Si estás en un contexto de curso secuencial.
 
 ```sql
 -- ============================================================
--- SCRIPT DE LIMPIEZA - LAB 04-00-02
--- Elimina todos los objetos creados en este laboratorio
+-- SCRIPT DE LIMPIEZA - Práctica 4.2
+-- Elimina todos los objetos creados en esta práctica
 -- PRECAUCIÓN: Ejecutar solo al finalizar el módulo completo
 -- ============================================================
 
@@ -1803,7 +1804,7 @@ DROP FUNCTION IF EXISTS public.clasificar_productos_rendimiento(DATE, DATE);
 DROP FUNCTION IF EXISTS public.obtener_metricas_cliente(INTEGER);
 DROP FUNCTION IF EXISTS public.calcular_descuento_volumen(INTEGER);
 
--- 4. Eliminar tablas creadas en este laboratorio
+-- 4. Eliminar tablas creadas
 DROP TABLE IF EXISTS public.resumen_ventas_mensual CASCADE;
 DROP TABLE IF EXISTS public.log_operaciones CASCADE;
 
