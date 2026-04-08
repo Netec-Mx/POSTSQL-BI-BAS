@@ -1207,15 +1207,14 @@ WHERE periodo_meses = 0;
 
 4. Verifica TimescaleDB desde la línea de comandos:
 
-    ```bash
-    # Verificar hypertable y chunks
-    docker exec -it timescaledb_lab psql -U postgres -d tsdb
-
-    ```
+```bash
+# Verificar hypertable y chunks
+docker exec -it timescaledb_lab psql -U postgres -d tsdb
+```
 
 <br/>
 
-    ```sql
+```sql
     SELECT 
         pg_size_pretty(total_bytes) AS tamanio_total,
         pg_size_pretty(table_bytes) AS tabla,
@@ -1246,7 +1245,7 @@ WHERE periodo_meses = 0;
     FROM timescaledb_information.hypertables
     WHERE hypertable_name = 'ventas_metricas';
 
-    ```
+```
 
 <br/>
 <br/>
