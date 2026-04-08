@@ -18,7 +18,7 @@ Al completar esta práctica, serás capaz de:
 ## Objetivo Visual
 
 <p align="center">
-  <img src="../images/i18.png" style="display: block; margin: 0 auto;" width="300"/>
+  <img src="../images/i18.png" style="display: block; margin: 0 auto;" />
 </p>
 
 <br/><br/>
