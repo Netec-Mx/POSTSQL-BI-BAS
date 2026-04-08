@@ -20,7 +20,7 @@ Al completar esta práctica, serás capaz de:
 
 - Las cuatro prácticas del capítulo 3 completadas.
 - Comprensión de consultas SQL con `JOIN`, `GROUP BY`, `HAVING` y funciones de agregación.
-- Familiaridad con la estructura del dataset de ventas (`sales`, `customers`, `products`, `regions`).
+- Familiaridad con la estructura del dataset de ventas (`sales`, `clientes`, `productos`, `regions`).
 - Conocimiento básico del cliente `psql` y pgAdmin 4.
 
 <br/>
@@ -129,10 +129,10 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
    \d sales
 
    -- Estructura de la tabla de clientes
-   \d customers
+   \d clientes
 
    -- Estructura de la tabla de productos
-   \d products
+   \d productos
 
    -- Estructura de la tabla de regiones
    \d regions
@@ -153,7 +153,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
        MIN(s.sale_date)                       AS primera_venta,
        MAX(s.sale_date)                       AS ultima_venta
    FROM sales s
-   INNER JOIN customers c ON s.customer_id = c.customer_id
+   INNER JOIN clientes c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
    GROUP BY r.region_name
    ORDER BY ingresos_brutos DESC;
@@ -211,7 +211,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
        MIN(s.sale_date)                       AS primera_venta,
        MAX(s.sale_date)                       AS ultima_venta
    FROM sales s
-   INNER JOIN customers c ON s.customer_id = c.customer_id
+   INNER JOIN clientes c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
    GROUP BY r.region_id, r.region_name
    ORDER BY ingresos_brutos DESC;
@@ -242,7 +242,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
            WHEN SUM(s.quantity * s.unit_price) >= 1000  THEN 'Plata'
            ELSE 'Bronce'
        END                                    AS segmento_cliente
-   FROM customers c
+   FROM clientes c
    INNER JOIN sales s    ON c.customer_id = s.customer_id
    INNER JOIN regions r  ON c.region_id   = r.region_id
    GROUP BY c.customer_id, c.first_name, c.last_name, c.email, r.region_name
@@ -265,7 +265,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
        COALESCE(SUM(s.quantity * s.unit_price), 0) AS ingresos_generados,
        COALESCE(COUNT(s.sale_id), 0)          AS numero_transacciones,
        COALESCE(ROUND(AVG(s.quantity)::numeric, 2), 0) AS cantidad_promedio_por_venta
-   FROM products p
+   FROM productos p
    LEFT JOIN sales s ON p.product_id = s.product_id
    GROUP BY p.product_id, p.product_name, p.category, p.unit_price
    ORDER BY ingresos_generados DESC;
@@ -322,7 +322,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
 1. Crea una vista simple (sin agregaciones) para demostrar la updatability:
 
    ```sql
-   -- Vista simple y actualizable sobre la tabla customers
+   -- Vista simple y actualizable sobre la tabla clientes
    CREATE OR REPLACE VIEW analytics.vw_clientes_activos AS
    SELECT
        customer_id,
@@ -331,7 +331,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
        email,
        region_id,
        created_at
-   FROM customers
+   FROM clientes
    WHERE is_active = TRUE;
    ```
 
@@ -347,12 +347,12 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
    WHERE customer_id = 1;
 
    -- Verificar el cambio en la tabla base
-   SELECT customer_id, email FROM customers WHERE customer_id = 1;
+   SELECT customer_id, email FROM clientes WHERE customer_id = 1;
 
    -- Revertir el cambio para no afectar datos de la práctica
    UPDATE analytics.vw_clientes_activos
    SET email = (
-       SELECT email FROM customers WHERE customer_id = 1
+       SELECT email FROM clientes WHERE customer_id = 1
    )
    WHERE customer_id = 1;
    ```
@@ -440,9 +440,9 @@ HINT:  To enable updating the view, provide an INSTEAD OF UPDATE trigger or an u
        SUM(s.quantity * s.unit_price)         AS ingresos_brutos,
        ROUND(AVG(s.quantity * s.unit_price)::numeric, 2) AS ticket_promedio
    FROM sales s
-   INNER JOIN customers c ON s.customer_id = c.customer_id
+   INNER JOIN clientes c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
-   INNER JOIN products p  ON s.product_id  = p.product_id
+   INNER JOIN productos p  ON s.product_id  = p.product_id
    GROUP BY DATE_TRUNC('month', s.sale_date), r.region_name, p.category
    ORDER BY mes DESC, ingresos_brutos DESC;
    ```
@@ -462,9 +462,9 @@ HINT:  To enable updating the view, provide an INSTEAD OF UPDATE trigger or an u
        SUM(s.quantity * s.unit_price)         AS ingresos_brutos,
        ROUND(AVG(s.quantity * s.unit_price)::numeric, 2) AS ticket_promedio
    FROM sales s
-   INNER JOIN customers c ON s.customer_id = c.customer_id
+   INNER JOIN clientes c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
-   INNER JOIN products p  ON s.product_id  = p.product_id
+   INNER JOIN productos p  ON s.product_id  = p.product_id
    GROUP BY DATE_TRUNC('month', s.sale_date), r.region_name, p.category
    ORDER BY mes DESC, ingresos_brutos DESC;
    ```
@@ -536,9 +536,9 @@ HINT:  To enable updating the view, provide an INSTEAD OF UPDATE trigger or an u
        COUNT(DISTINCT s.customer_id)          AS clientes_unicos,
        NOW()                                  AS ultima_actualizacion
    FROM sales s
-   INNER JOIN customers c ON s.customer_id = c.customer_id
+   INNER JOIN clientes c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
-   INNER JOIN products p  ON s.product_id  = p.product_id
+   INNER JOIN productos p  ON s.product_id  = p.product_id
    GROUP BY
        DATE_TRUNC('month', s.sale_date),
        r.region_id,
@@ -666,9 +666,9 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
        p.category AS categoria,
        SUM(s.quantity * s.unit_price) AS ingresos_brutos
    FROM sales s
-   INNER JOIN customers c ON s.customer_id = c.customer_id
+   INNER JOIN clientes c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
-   INNER JOIN products p  ON s.product_id  = p.product_id
+   INNER JOIN productos p  ON s.product_id  = p.product_id
    WHERE s.sale_date >= '2024-01-01'
    GROUP BY DATE_TRUNC('month', s.sale_date), r.region_name, p.category
    ORDER BY mes DESC, ingresos_brutos DESC;
@@ -904,7 +904,7 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
        SUM(s.quantity * s.unit_price)             AS ingresos_totales,
        ROUND(AVG(cliente_total.total_cliente)::numeric, 2) AS ltv_promedio,
        NOW()                                      AS ultima_actualizacion
-   FROM customers c
+   FROM clientes c
    INNER JOIN regions r ON c.region_id = r.region_id
    LEFT JOIN sales s ON c.customer_id = s.customer_id
    LEFT JOIN (
@@ -925,7 +925,7 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
        COUNT(DISTINCT s.customer_id)              AS clientes_unicos,
        NOW()                                      AS ultima_actualizacion
    FROM sales s
-   INNER JOIN customers c ON s.customer_id = c.customer_id
+   INNER JOIN clientes c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
    GROUP BY DATE_TRUNC('week', s.sale_date), r.region_name
    ORDER BY semana_inicio DESC
@@ -1186,9 +1186,9 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
        SELECT DATE_TRUNC('month', s.sale_date), r.region_name, p.category,
               SUM(s.quantity * s.unit_price)
        FROM sales s
-       INNER JOIN customers c ON s.customer_id = c.customer_id
+       INNER JOIN clientes c ON s.customer_id = c.customer_id
        INNER JOIN regions r   ON c.region_id   = r.region_id
-       INNER JOIN products p  ON s.product_id  = p.product_id
+       INNER JOIN productos p  ON s.product_id  = p.product_id
        GROUP BY 1, 2, 3
    ) sub;
 
@@ -1223,7 +1223,7 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
 <br/>
 
 **Causa:**
-Las tablas base (`sales`, `customers`, `products`, `regions`) no existen en la base de datos `ventas_db`, o el estudiante está conectado a una base de datos incorrecta. Esto ocurre cuando las prácticas del capítulo 2 y 3 fueron completados correctamente.
+Las tablas base (`sales`, `clientes`, `productos`, `regions`) no existen en la base de datos `ventas_db`, o el estudiante está conectado a una base de datos incorrecta. Esto ocurre cuando las prácticas del capítulo 2 y 3 fueron completados correctamente.
 
 <br/>
 
