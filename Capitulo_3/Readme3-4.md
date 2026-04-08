@@ -1211,10 +1211,10 @@ WHERE periodo_meses = 0;
 # Verificar hypertable y chunks
 docker exec -it timescaledb_lab psql -U postgres -d tsdb
 ```
-
 <br/>
 
 ```sql
+
     SELECT 
         pg_size_pretty(total_bytes) AS tamanio_total,
         pg_size_pretty(table_bytes) AS tabla,
