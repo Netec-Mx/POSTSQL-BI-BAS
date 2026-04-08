@@ -153,7 +153,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
        MIN(s.sale_date)                       AS primera_venta,
        MAX(s.sale_date)                       AS ultima_venta
    FROM sales s
-   INNER JOIN customers c ON s.customer_id = c.id_cliente
+   INNER JOIN customers c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
    GROUP BY r.region_name
    ORDER BY ingresos_brutos DESC;
