@@ -232,57 +232,58 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
    -- Parámetros OUT: retorna múltiples valores sin necesidad de
    --                 un tipo compuesto o tabla
    -- ============================================================
-   CREATE OR REPLACE FUNCTION public.obtener_metricas_cliente(
-       p_id_cliente    INTEGER,              -- IN: identificador del cliente
-       OUT o_nombre    VARCHAR,              -- OUT: nombre del cliente
-       OUT o_total_ventas    NUMERIC,        -- OUT: suma total de ventas
-       OUT o_num_pedidos     INTEGER,        -- OUT: cantidad de pedidos
-       OUT o_ticket_promedio NUMERIC,        -- OUT: monto promedio por pedido
-       OUT o_categoria       VARCHAR         -- OUT: categoría calculada
-   )
-   LANGUAGE plpgsql
-   STABLE
-   AS $$
-   BEGIN
-       -- Obtener métricas agregadas del cliente
-       SELECT
-           c.nombre,
-           COALESCE(SUM(v.total_venta), 0),
-           COALESCE(COUNT(DISTINCT v.id_venta), 0),
-           COALESCE(AVG(v.total_venta), 0)
-       INTO
-           o_nombre,
-           o_total_ventas,
-           o_num_pedidos,
-           o_ticket_promedio
-       FROM public.clientes c
-       LEFT JOIN public.ventas v ON c.id_cliente = v.id_cliente
-       WHERE c.id_cliente = p_id_cliente
-       GROUP BY c.nombre;
 
-       -- Verificar si el cliente existe
-       IF o_nombre IS NULL THEN
-           RAISE EXCEPTION 'Cliente con id % no encontrado', p_id_cliente;
-       END IF;
+    CREATE OR REPLACE FUNCTION public.obtener_metricas_cliente(
+        p_id_cliente    INTEGER,              -- IN: identificador del cliente
+        OUT o_nombre    VARCHAR,              -- OUT: nombre del cliente
+        OUT o_total_ventas    NUMERIC,        -- OUT: suma total de ventas
+        OUT o_num_pedidos     INTEGER,        -- OUT: cantidad de pedidos
+        OUT o_ticket_promedio NUMERIC,        -- OUT: monto promedio por pedido
+        OUT o_categoria       VARCHAR         -- OUT: categoría calculada
+    )
+    LANGUAGE plpgsql
+    STABLE
+    AS $$
+    BEGIN
+        -- Obtener métricas agregadas del cliente
+        SELECT
+            c.nombre,
+            COALESCE(SUM(v.monto_total), 0),
+            COALESCE(COUNT(DISTINCT v.venta_id), 0),
+            COALESCE(AVG(v.monto_total), 0)
+        INTO
+            o_nombre,
+            o_total_ventas,
+            o_num_pedidos,
+            o_ticket_promedio
+        FROM public.clientes c
+        LEFT JOIN public.ventas v ON c.id_cliente = v.cliente_id
+        WHERE c.id_cliente = p_id_cliente
+        GROUP BY c.nombre;
 
-       -- Clasificar cliente según ticket promedio con IF/ELSIF/ELSE
-       IF o_ticket_promedio >= 5000 THEN
-           o_categoria := 'PREMIUM';
-       ELSIF o_ticket_promedio >= 2000 THEN
-           o_categoria := 'GOLD';
-       ELSIF o_ticket_promedio >= 500 THEN
-           o_categoria := 'SILVER';
-       ELSIF o_ticket_promedio > 0 THEN
-           o_categoria := 'BRONZE';
-       ELSE
-           o_categoria := 'INACTIVO';
-       END IF;
+        -- Verificar si el cliente existe
+        IF o_nombre IS NULL THEN
+            RAISE EXCEPTION 'Cliente con id % no encontrado', p_id_cliente;
+        END IF;
 
-   END;
-   $$;
+        -- Clasificar cliente según ticket promedio con IF/ELSIF/ELSE
+        IF o_ticket_promedio >= 5000 THEN
+            o_categoria := 'PREMIUM';
+        ELSIF o_ticket_promedio >= 2000 THEN
+            o_categoria := 'GOLD';
+        ELSIF o_ticket_promedio >= 500 THEN
+            o_categoria := 'SILVER';
+        ELSIF o_ticket_promedio > 0 THEN
+            o_categoria := 'BRONZE';
+        ELSE
+            o_categoria := 'INACTIVO';
+        END IF;
 
-   COMMENT ON FUNCTION public.obtener_metricas_cliente(INTEGER)
-   IS 'Retorna nombre, total ventas, número de pedidos, ticket promedio y categoría de un cliente. Usa parámetros OUT para retorno múltiple.';
+    END;
+    $$;
+
+    COMMENT ON FUNCTION public.obtener_metricas_cliente(INTEGER)
+    IS 'Retorna nombre, total ventas, número de pedidos, ticket promedio y categoría de un cliente. Usa parámetros OUT para retorno múltiple.';
    ```
 
 <br/>
@@ -295,64 +296,63 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
    -- Propósito: Clasifica todos los productos según su rendimiento
    --            de ventas usando CASE y retorna una tabla
    -- ============================================================
-   CREATE OR REPLACE FUNCTION public.clasificar_productos_rendimiento(
-       p_fecha_inicio DATE DEFAULT DATE_TRUNC('year', CURRENT_DATE)::DATE,
-       p_fecha_fin    DATE DEFAULT CURRENT_DATE
-   )
-   RETURNS TABLE (
-       id_producto         INTEGER,
-       nombre_producto     VARCHAR,
-       total_vendido       NUMERIC,
-       unidades_vendidas   BIGINT,
-       ranking_ventas      BIGINT,
-       etiqueta_rendimiento VARCHAR,
-       recomendacion       TEXT
-   )
-   LANGUAGE plpgsql
-   STABLE
-   AS $$
-   BEGIN
-       RETURN QUERY
-       WITH metricas_productos AS (
-           SELECT
-               p.id_producto,
-               p.nombre                                    AS nombre_producto,
-               COALESCE(SUM(v.total_venta), 0)            AS total_vendido,
-               COALESCE(SUM(v.cantidad)::BIGINT, 0)       AS unidades_vendidas,
-               RANK() OVER (ORDER BY SUM(v.total_venta) DESC NULLS LAST) AS ranking_ventas
-           FROM public.productos p
-           LEFT JOIN public.ventas v
-               ON p.id_producto = v.id_producto
-               AND v.fecha_venta BETWEEN p_fecha_inicio AND p_fecha_fin
-           GROUP BY p.id_producto, p.nombre
-       )
-       SELECT
-           mp.id_producto,
-           mp.nombre_producto,
-           mp.total_vendido,
-           mp.unidades_vendidas,
-           mp.ranking_ventas,
-           -- CASE para asignar etiqueta de rendimiento
-           CASE
-               WHEN mp.ranking_ventas <= 10                     THEN 'ESTRELLA'
-               WHEN mp.ranking_ventas <= ROUND(COUNT(*) OVER() * 0.25) THEN 'ALTO_RENDIMIENTO'
-               WHEN mp.ranking_ventas <= ROUND(COUNT(*) OVER() * 0.75) THEN 'RENDIMIENTO_MEDIO'
-               WHEN mp.total_vendido > 0                        THEN 'BAJO_RENDIMIENTO'
-               ELSE                                                  'SIN_VENTAS'
-           END AS etiqueta_rendimiento,
-           -- CASE para recomendación estratégica
-           CASE
-               WHEN mp.ranking_ventas <= 10                     THEN 'Mantener stock prioritario y destacar en catálogo'
-               WHEN mp.ranking_ventas <= ROUND(COUNT(*) OVER() * 0.25) THEN 'Incrementar inventario y considerar promociones'
-               WHEN mp.ranking_ventas <= ROUND(COUNT(*) OVER() * 0.75) THEN 'Monitorear tendencia y optimizar precio'
-               WHEN mp.total_vendido > 0                        THEN 'Revisar estrategia de marketing o descontinuar'
-               ELSE                                                  'Evaluar eliminación del catálogo'
-           END AS recomendacion
-       FROM metricas_productos mp
-       ORDER BY mp.ranking_ventas;
-   END;
-   $$;
-
+    CREATE OR REPLACE FUNCTION public.clasificar_productos_rendimiento(
+        p_fecha_inicio DATE DEFAULT DATE_TRUNC('year', CURRENT_DATE)::DATE,
+        p_fecha_fin    DATE DEFAULT CURRENT_DATE
+    )
+    RETURNS TABLE (
+        id_producto         INTEGER,
+        nombre_producto     VARCHAR,
+        total_vendido       NUMERIC,
+        unidades_vendidas   BIGINT,
+        ranking_ventas      BIGINT,
+        etiqueta_rendimiento VARCHAR,
+        recomendacion       TEXT
+    )
+    LANGUAGE plpgsql
+    STABLE
+    AS $$
+    BEGIN
+        RETURN QUERY
+        WITH metricas_productos AS (
+            SELECT
+                p.id_producto,
+                p.nombre                                    AS nombre_producto,
+                COALESCE(SUM(v.monto_total), 0)            AS total_vendido,
+                COALESCE(SUM(v.cantidad)::BIGINT, 0)       AS unidades_vendidas,
+                RANK() OVER (ORDER BY SUM(v.monto_total) DESC NULLS LAST) AS ranking_ventas
+            FROM public.productos p
+            LEFT JOIN public.ventas v
+                ON p.id_producto = v.producto_id
+                AND v.fecha_venta BETWEEN p_fecha_inicio AND p_fecha_fin
+            GROUP BY p.id_producto, p.nombre
+        )
+        SELECT
+            mp.id_producto,
+            mp.nombre_producto,
+            mp.total_vendido,
+            mp.unidades_vendidas,
+            mp.ranking_ventas,
+            -- CASE para asignar etiqueta de rendimiento
+            CASE
+                WHEN mp.ranking_ventas <= 10                     THEN 'ESTRELLA'::VARCHAR
+                WHEN mp.ranking_ventas <= ROUND(COUNT(*) OVER() * 0.25) THEN 'ALTO_RENDIMIENTO'::VARCHAR
+                WHEN mp.ranking_ventas <= ROUND(COUNT(*) OVER() * 0.75) THEN 'RENDIMIENTO_MEDIO'::VARCHAR
+                WHEN mp.total_vendido > 0                        THEN 'BAJO_RENDIMIENTO'::VARCHAR
+                ELSE                                                  'SIN_VENTAS'::VARCHAR
+            END AS etiqueta_rendimiento,
+            -- CASE para recomendación estratégica
+            CASE
+                WHEN mp.ranking_ventas <= 10                     THEN 'Mantener stock prioritario y destacar en catálogo'::TEXT
+                WHEN mp.ranking_ventas <= ROUND(COUNT(*) OVER() * 0.25) THEN 'Incrementar inventario y considerar promociones'::TEXT
+                WHEN mp.ranking_ventas <= ROUND(COUNT(*) OVER() * 0.75) THEN 'Monitorear tendencia y optimizar precio'::TEXT
+                WHEN mp.total_vendido > 0                        THEN 'Revisar estrategia de marketing o descontinuar'::TEXT
+                ELSE                                                  'Evaluar eliminación del catálogo'::TEXT
+            END AS recomendacion
+        FROM metricas_productos mp
+        ORDER BY mp.ranking_ventas;
+    END;
+    $$;
    COMMENT ON FUNCTION public.clasificar_productos_rendimiento(DATE, DATE)
    IS 'Clasifica productos por rendimiento de ventas en un período dado. Retorna etiqueta y recomendación estratégica usando CASE.';
    ```
@@ -395,48 +395,49 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
    -- Propósito: Demuestra uso de INOUT - recibe precio y lo
    --            modifica aplicando descuentos acumulativos
    -- ============================================================
-   CREATE OR REPLACE FUNCTION public.aplicar_descuento_acumulado(
-       INOUT p_precio      NUMERIC,     -- INOUT: entra como precio base, sale como precio final
-       p_cantidad          INTEGER,     -- IN: cantidad para descuento por volumen
-       p_es_cliente_vip    BOOLEAN DEFAULT FALSE  -- IN: si es VIP, descuento adicional
-   )
-   LANGUAGE plpgsql
-   IMMUTABLE
-   AS $$
-   DECLARE
-       v_descuento_volumen  NUMERIC;
-       v_descuento_vip      NUMERIC := 0.0;
-       v_precio_original    NUMERIC;
-   BEGIN
-       v_precio_original := p_precio;
+    CREATE OR REPLACE FUNCTION public.aplicar_descuento_acumulado(
+        INOUT p_precio      NUMERIC,     -- INOUT: entra como precio base, sale como precio final
+        p_cantidad          INTEGER,     -- IN: cantidad para descuento por volumen
+        p_es_cliente_vip    BOOLEAN DEFAULT FALSE  -- IN: si es VIP, descuento adicional
+    )
+    LANGUAGE plpgsql
+    IMMUTABLE
+    AS $$
+    DECLARE
+        v_descuento_volumen  NUMERIC;
+        v_descuento_vip      NUMERIC := 0.0;
+        v_precio_original    NUMERIC;
+    BEGIN
+        v_precio_original := p_precio;
 
-       -- Obtener descuento por volumen usando la función creada en Paso 1
-       v_descuento_volumen := public.calcular_descuento_volumen(p_cantidad);
+        -- Obtener descuento por volumen usando la función creada en Paso 1
+        v_descuento_volumen := public.calcular_descuento_volumen(p_cantidad);
 
-       -- Descuento adicional para clientes VIP
-       IF p_es_cliente_vip THEN
-           v_descuento_vip := 0.05;  -- 5% adicional para VIP
-       END IF;
+        -- Descuento adicional para clientes VIP
+        IF p_es_cliente_vip THEN
+            v_descuento_vip := 0.05;  -- 5% adicional para VIP
+        END IF;
 
-       -- Aplicar descuentos acumulativos (no sumados, sino encadenados)
-       p_precio := p_precio * (1 - v_descuento_volumen) * (1 - v_descuento_vip);
+        -- Aplicar descuentos acumulativos (no sumados, sino encadenados)
+        p_precio := p_precio * (1 - v_descuento_volumen) * (1 - v_descuento_vip);
 
-       -- Redondear a 2 decimales
-       p_precio := ROUND(p_precio, 2);
+        -- Redondear a 2 decimales
+        p_precio := ROUND(p_precio, 2);
 
-       RAISE NOTICE 'Precio original: % | Desc. volumen: %% | Desc. VIP: %% | Precio final: %',
-           v_precio_original,
-           v_descuento_volumen * 100,
-           v_descuento_vip * 100,
-           p_precio;
-   END;
-   $$;
+        RAISE NOTICE 'Precio original: % | Desc. volumen: %%% | Desc. VIP: %%% | Precio final: %',
+            v_precio_original,
+            v_descuento_volumen * 100,
+            v_descuento_vip * 100,
+            p_precio;
+    END;
+    $$;
 
    -- Probar INOUT: el mismo parámetro entra y sale modificado
    SELECT public.aplicar_descuento_acumulado(1000.00, 60, TRUE);
    -- Resultado esperado: 1000 * (1-0.15) * (1-0.05) = 807.50
    ```
 
+<br/>
 
 **Verificación:**
 
@@ -519,79 +520,74 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
    -- Propósito: Itera sobre categorías de productos y calcula
    --            métricas acumulativas usando FOR sobre query
    -- ============================================================
-   CREATE OR REPLACE FUNCTION public.generar_resumen_categorias(
-       p_anio INTEGER DEFAULT EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER
-   )
-   RETURNS TABLE (
-       categoria           VARCHAR,
-       total_productos     BIGINT,
-       total_ventas        NUMERIC,
-       porcentaje_del_total NUMERIC,
-       nivel_contribucion  VARCHAR
-   )
-   LANGUAGE plpgsql
-   STABLE
-   AS $$
-   DECLARE
-       -- Cursor implícito con FOR sobre query
-       rec_categoria       RECORD;
-       v_total_global      NUMERIC := 0;
-       v_acumulado         NUMERIC := 0;
+    CREATE OR REPLACE FUNCTION public.generar_resumen_categorias(
+        p_anio INTEGER DEFAULT EXTRACT(YEAR FROM CURRENT_DATE)::INTEGER
+    )
+    RETURNS TABLE (
+        categoria           VARCHAR,
+        total_productos     BIGINT,
+        total_ventas        NUMERIC,
+        porcentaje_del_total NUMERIC,
+        nivel_contribucion  VARCHAR
+    )
+    LANGUAGE plpgsql
+    STABLE
+    AS $$
+    DECLARE
+        -- Cursor implícito con FOR sobre query
+        rec_categoria       RECORD;
+        v_total_global      NUMERIC := 0;
+        v_acumulado         NUMERIC := 0;
+    BEGIN
+        -- Primero: calcular el total global para porcentajes
+        SELECT COALESCE(SUM(v.monto_total), 0)
+        INTO v_total_global
+        FROM public.ventas v
+        WHERE EXTRACT(YEAR FROM v.fecha_venta) = p_anio;
 
-       -- Tabla temporal para almacenar resultados intermedios
-       TYPE t_resumen IS RECORD (
-           cat     VARCHAR,
-           prods   BIGINT,
-           ventas  NUMERIC
-       );
-   BEGIN
-       -- Primero: calcular el total global para porcentajes
-       SELECT COALESCE(SUM(v.total_venta), 0)
-       INTO v_total_global
-       FROM public.ventas v
-       WHERE EXTRACT(YEAR FROM v.fecha_venta) = p_anio;
+        -- Manejar caso sin datos
+        IF v_total_global = 0 THEN
+            RAISE WARNING 'No se encontraron ventas para el año %', p_anio;
+            RETURN;
+        END IF;
 
-       -- Manejar caso sin datos
-       IF v_total_global = 0 THEN
-           RAISE WARNING 'No se encontraron ventas para el año %', p_anio;
-           RETURN;
-       END IF;
+        -- FOR sobre resultado de query: itera fila por fila
+        FOR rec_categoria IN
+            SELECT
+                c.nombre_categoria as categoria,
+                COUNT(DISTINCT p.id_producto)       AS total_productos,
+                COALESCE(SUM(v.monto_total), 0)     AS total_ventas
+            FROM public.productos p
+            INNER JOIN public.categorias c 
+            ON p.id_categoria = c.id_categoria
+            LEFT JOIN public.ventas v
+                ON p.id_producto = v.producto_id
+                AND EXTRACT(YEAR FROM v.fecha_venta) = p_anio
+            GROUP BY c.nombre_categoria
+            ORDER BY SUM(v.monto_total) DESC NULLS LAST
+        LOOP
+            -- Acumular para análisis de Pareto (regla 80/20)
+            v_acumulado := v_acumulado + rec_categoria.total_ventas;
 
-       -- FOR sobre resultado de query: itera fila por fila
-       FOR rec_categoria IN
-           SELECT
-               p.categoria,
-               COUNT(DISTINCT p.id_producto)       AS total_productos,
-               COALESCE(SUM(v.total_venta), 0)     AS total_ventas
-           FROM public.productos p
-           LEFT JOIN public.ventas v
-               ON p.id_producto = v.id_producto
-               AND EXTRACT(YEAR FROM v.fecha_venta) = p_anio
-           GROUP BY p.categoria
-           ORDER BY SUM(v.total_venta) DESC NULLS LAST
-       LOOP
-           -- Acumular para análisis de Pareto (regla 80/20)
-           v_acumulado := v_acumulado + rec_categoria.total_ventas;
+            -- Retornar fila usando RETURN NEXT (para RETURNS TABLE)
+            categoria           := rec_categoria.categoria;
+            total_productos     := rec_categoria.total_productos;
+            total_ventas        := rec_categoria.total_ventas;
+            porcentaje_del_total := ROUND(
+                (rec_categoria.total_ventas / NULLIF(v_total_global, 0)) * 100, 2
+            );
+            nivel_contribucion  := CASE
+                WHEN (v_acumulado / v_total_global) <= 0.80 THEN 'PARETO_80'
+                WHEN (v_acumulado / v_total_global) <= 0.95 THEN 'COMPLEMENTARIO_15'
+                ELSE 'COLA_LARGA_5'
+            END;
 
-           -- Retornar fila usando RETURN NEXT (para RETURNS TABLE)
-           categoria           := rec_categoria.categoria;
-           total_productos     := rec_categoria.total_productos;
-           total_ventas        := rec_categoria.total_ventas;
-           porcentaje_del_total := ROUND(
-               (rec_categoria.total_ventas / NULLIF(v_total_global, 0)) * 100, 2
-           );
-           nivel_contribucion  := CASE
-               WHEN (v_acumulado / v_total_global) <= 0.80 THEN 'PARETO_80'
-               WHEN (v_acumulado / v_total_global) <= 0.95 THEN 'COMPLEMENTARIO_15'
-               ELSE 'COLA_LARGA_5'
-           END;
+            RETURN NEXT;  -- Emite la fila actual y continúa el loop
+        END LOOP;
 
-           RETURN NEXT;  -- Emite la fila actual y continúa el loop
-       END LOOP;
-
-       RETURN;  -- Fin de la función
-   END;
-   $$;
+        RETURN;  -- Fin de la función
+    END;
+    $$;
 
    COMMENT ON FUNCTION public.generar_resumen_categorias(INTEGER)
    IS 'Genera resumen de ventas por categoría con análisis de Pareto (80/20). Usa FOR sobre query para iteración.';
@@ -700,116 +696,122 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
    --            su estado. Demuestra: DECLARE cursor, OPEN,
    --            FETCH, CLOSE y manejo de NOT FOUND.
    -- ============================================================
-   CREATE OR REPLACE FUNCTION public.procesar_clientes_inactivos(
-       p_meses_sin_compra  INTEGER DEFAULT 6,
-       p_nuevo_estado      VARCHAR DEFAULT 'INACTIVO'
-   )
-   RETURNS TABLE (
-       clientes_procesados INTEGER,
-       clientes_actualizados INTEGER,
-       fecha_corte         DATE
-   )
-   LANGUAGE plpgsql
-   AS $$
-   DECLARE
-       -- Declaración del cursor explícito con parámetro
-       cur_inactivos CURSOR (v_fecha_corte DATE) FOR
-           SELECT
-               c.id_cliente,
-               c.nombre,
-               c.estado,
-               MAX(v.fecha_venta) AS ultima_compra
-           FROM public.clientes c
-           LEFT JOIN public.ventas v ON c.id_cliente = v.id_cliente
-           WHERE c.estado != 'INACTIVO'  -- Solo procesar activos
-           GROUP BY c.id_cliente, c.nombre, c.estado
-           HAVING MAX(v.fecha_venta) < v_fecha_corte
-               OR MAX(v.fecha_venta) IS NULL  -- Sin ninguna compra
-           ORDER BY c.id_cliente
-           FOR UPDATE OF c;  -- Bloquear filas para actualización
+    CREATE OR REPLACE FUNCTION public.procesar_clientes_inactivos(
+        p_meses_sin_compra  INTEGER DEFAULT 6,
+        p_nuevo_estado      VARCHAR DEFAULT 'INACTIVO'
+    )
+    RETURNS TABLE (
+        clientes_procesados INTEGER,
+        clientes_actualizados INTEGER,
+        fecha_corte         DATE
+    )
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+        -- Variables de trabajo
+        rec_cliente         RECORD;
+        v_fecha_corte       DATE;
+        v_procesados        INTEGER := 0;
+        v_actualizados      INTEGER := 0;
+        
+        -- Declaración del cursor explícito con parámetro
+        cur_inactivos CURSOR (v_fecha_corte DATE) FOR
+            SELECT
+                c.id_cliente,
+                c.nombre,
+                c.estado,
+                MAX(v.fecha_venta) AS ultima_compra
+            FROM public.clientes c
+            LEFT JOIN public.ventas v ON c.id_cliente = v.cliente_id
+            WHERE c.estado != 'INACTIVO'  -- Solo procesar activos
+            GROUP BY c.id_cliente, c.nombre, c.estado
+            HAVING MAX(v.fecha_venta) < v_fecha_corte
+                OR MAX(v.fecha_venta) IS NULL  -- Sin ninguna compra
+            ORDER BY c.id_cliente;
 
-       -- Variables de trabajo
-       rec_cliente         RECORD;
-       v_fecha_corte       DATE;
-       v_procesados        INTEGER := 0;
-       v_actualizados      INTEGER := 0;
-   BEGIN
-       -- Calcular fecha de corte
-       v_fecha_corte := CURRENT_DATE - (p_meses_sin_compra || ' months')::INTERVAL;
+    BEGIN
+        -- Agregar columna estado si no existe
+        IF NOT EXISTS (
+            SELECT 1 FROM information_schema.columns
+            WHERE table_name = 'clientes' AND column_name = 'estado'
+        ) THEN
+            ALTER TABLE public.clientes ADD COLUMN estado VARCHAR(20) DEFAULT 'ACTIVO';
+        END IF;
 
-       RAISE NOTICE 'Procesando clientes inactivos desde: % (% meses sin compra)',
-           v_fecha_corte, p_meses_sin_compra;
+        -- Calcular fecha de corte
+        v_fecha_corte := (CURRENT_DATE - (p_meses_sin_compra || ' months')::INTERVAL)::DATE;
 
-       -- Agregar columna estado si no existe
-       IF NOT EXISTS (
-           SELECT 1 FROM information_schema.columns
-           WHERE table_name = 'clientes' AND column_name = 'estado'
-       ) THEN
-           ALTER TABLE public.clientes ADD COLUMN estado VARCHAR(20) DEFAULT 'ACTIVO';
-       END IF;
+        RAISE NOTICE 'Procesando clientes inactivos desde: % (% meses sin compra)',
+            v_fecha_corte, p_meses_sin_compra;
 
-       -- OPEN: abrir el cursor con el parámetro calculado
-       OPEN cur_inactivos(v_fecha_corte);
+        
+        -- OPEN: abrir el cursor con el parámetro calculado
+        OPEN cur_inactivos(v_fecha_corte);
 
-       -- Loop de procesamiento con FETCH
-       LOOP
-           -- FETCH: obtener la siguiente fila del cursor
-           FETCH cur_inactivos INTO rec_cliente;
+        -- Loop de procesamiento con FETCH
+        LOOP
+            -- FETCH: obtener la siguiente fila del cursor
+            FETCH cur_inactivos INTO rec_cliente;
 
-           -- EXIT cuando no hay más filas (FOUND es FALSE después del último FETCH)
-           EXIT WHEN NOT FOUND;
+            -- EXIT cuando no hay más filas (FOUND es FALSE después del último FETCH)
+            EXIT WHEN NOT FOUND;
 
-           v_procesados := v_procesados + 1;
+            v_procesados := v_procesados + 1;
 
-           -- Lógica de negocio: actualizar estado del cliente
-           UPDATE public.clientes
-           SET
-               estado           = p_nuevo_estado,
-               categoria_cliente = 'INACTIVO'
-           WHERE id_cliente = rec_cliente.id_cliente;
+            -- Lógica de negocio: actualizar estado del cliente
+            UPDATE public.clientes
+            SET
+                estado           = p_nuevo_estado,
+                categoria_cliente = 'INACTIVO'
+            WHERE id_cliente = rec_cliente.id_cliente;
 
-           v_actualizados := v_actualizados + 1;
+            v_actualizados := v_actualizados + 1;
 
-           RAISE NOTICE 'Cliente % (%) marcado como % - Última compra: %',
-               rec_cliente.id_cliente,
-               rec_cliente.nombre,
-               p_nuevo_estado,
-               COALESCE(rec_cliente.ultima_compra::TEXT, 'Nunca');
+            RAISE NOTICE 'Cliente % (%) marcado como % - Última compra: %',
+                rec_cliente.id_cliente,
+                rec_cliente.nombre,
+                p_nuevo_estado,
+                COALESCE(rec_cliente.ultima_compra::TEXT, 'Nunca');
 
-       END LOOP;
+        END LOOP;
 
-       -- CLOSE: liberar recursos del cursor (buena práctica)
-       CLOSE cur_inactivos;
+        -- CLOSE: liberar recursos del cursor (buena práctica)
+        CLOSE cur_inactivos;
 
-       -- Registrar operación en log
-       CALL public.registrar_log_operacion(
-           'PROCESAR_CLIENTES_INACTIVOS',
-           FORMAT('Fecha corte: %s | Procesados: %s | Actualizados: %s',
-               v_fecha_corte, v_procesados, v_actualizados),
-           'OK'
-       );
+        -- Registrar operación en log
+        CALL public.registrar_log_operacion(
+            'PROCESAR_CLIENTES_INACTIVOS',
+            FORMAT('Fecha corte: %s | Procesados: %s | Actualizados: %s',
+                v_fecha_corte, v_procesados, v_actualizados),
+            'OK'
+        );
 
-       -- Retornar resumen
-       clientes_procesados  := v_procesados;
-       clientes_actualizados := v_actualizados;
-       fecha_corte          := v_fecha_corte;
-       RETURN NEXT;
+        -- Retornar resumen
+        clientes_procesados  := v_procesados;
+        clientes_actualizados := v_actualizados;
+        fecha_corte          := v_fecha_corte;
+        RETURN NEXT;
 
-   EXCEPTION
-       WHEN OTHERS THEN
-           -- Cerrar cursor en caso de error para liberar recursos
-           IF cur_inactivos%ISOPEN THEN
-               CLOSE cur_inactivos;
-           END IF;
-           CALL public.registrar_log_operacion(
-               'PROCESAR_CLIENTES_INACTIVOS',
-               FORMAT('ERROR: %s', SQLERRM),
-               'ERROR'
-           );
-           RAISE;  -- Re-lanzar el error original
-   END;
-   $$;
-
+    EXCEPTION
+        WHEN OTHERS THEN
+            -- Cerrar cursor en caso de error para liberar recursos
+            BEGIN
+                CLOSE cur_inactivos;
+            EXCEPTION
+                WHEN OTHERS THEN
+                    -- ignorar si el cursor no estaba abierto
+                NULL;
+            END;
+            
+        -- CALL public.registrar_log_operacion(
+            --    'PROCESAR_CLIENTES_INACTIVOS',
+            --   FORMAT('ERROR: %s', SQLERRM),
+            --   'ERROR'
+        --  );
+            RAISE;  -- Re-lanzar el error original
+    END;
+    $$;
+    
    COMMENT ON FUNCTION public.procesar_clientes_inactivos(INTEGER, VARCHAR)
    IS 'Usa cursor explícito para identificar y marcar clientes inactivos. Demuestra DECLARE/OPEN/FETCH/CLOSE con manejo de errores.';
    ```
