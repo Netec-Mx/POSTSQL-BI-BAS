@@ -20,7 +20,7 @@ Al completar este laboratorio, serás capaz de:
 ### Conocimiento Requerido
 
 - La práctica 4.1 completada (vistas y materialized views creadas sobre el dataset de ventas).
-- Comprensión de vistas lógicas y materialized views (Lección 4.1).
+- Comprensión de vistas lógicas y materialized views.
 - Familiaridad con lógica de programación básica: condicionales, bucles, manejo de errores.
 - Conocimiento de SQL avanzado: `JOIN`, `GROUP BY`, subconsultas, funciones de agregación.
 - Comprensión básica de transacciones en bases de datos (`BEGIN`, `COMMIT`, `ROLLBACK`).
@@ -55,7 +55,13 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT version(
 docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT schemaname, tablename, pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) AS size FROM pg_tables WHERE schemaname = 'public' ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC LIMIT 10; "
 ```
 
-**Salida esperada:** Deberías ver las tablas `ventas`, `clientes`, `productos` y `regiones` listadas con sus tamaños correspondientes. Si el contenedor no está corriendo, ejecuta:
+<br/>
+
+**Salida esperada:** Deberías ver las tablas `ventas` o `sales`, `clientes`, `productos` y `regiones` listadas con sus tamaños correspondientes. 
+
+<br/>
+
+Si el contenedor no está corriendo, ejecuta:
 
 ```bash
 # Iniciar el entorno Docker Compose
@@ -65,7 +71,7 @@ docker compose up -d
 
 ```bash
 # Crear el schema de trabajo para este laboratorio si no existe
-docker exec -it postgres_db psql -U postgres -d ventas_db 
+docker exec -it curso_postgres psql -U postgres -d ventas_db 
 ```
 
 ```sql
@@ -1214,7 +1220,7 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
 
    ```bash
    # Conectarse al contenedor Docker
-   docker exec -it postgres_db bash
+   docker exec -it curso_postgres bash
 
    # Instalar pgAgent dentro del contenedor
    apt-get update && apt-get install -y postgresql-16-pgagent
@@ -1689,13 +1695,13 @@ pgAgent requiere: (1) que el paquete esté instalado en el sistema operativo, (2
 
 ```bash
 # Verificar si pgagent está instalado en el contenedor
-docker exec -it postgres_db which pgagent
+docker exec -it curso_postgres which pgagent
 
 # Si no está instalado:
-docker exec -it postgres_db bash -c "apt-get update && apt-get install -y postgresql-16-pgagent"
+docker exec -it curso_postgres bash -c "apt-get update && apt-get install -y postgresql-16-pgagent"
 
 # Iniciar el daemon pgagent (dentro del contenedor)
-docker exec -it postgres_db bash -c "
+docker exec -it curso_postgres bash -c "
 pgagent -f -l 2 host=localhost dbname=ventas_db user=postgres password=postgres &
 echo 'pgAgent iniciado con PID: '$!
 "
