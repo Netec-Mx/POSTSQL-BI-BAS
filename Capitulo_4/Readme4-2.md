@@ -945,188 +945,191 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
    --            - Hace COMMIT en éxito, ROLLBACK en error
    --            - Registra todo en log_operaciones
    -- ============================================================
-   CREATE OR REPLACE PROCEDURE public.sp_carga_resumen_mensual(
-       p_anio          INTEGER,
-       p_mes           INTEGER,
-       p_modo          VARCHAR DEFAULT 'INCREMENTAL'  -- 'INCREMENTAL' o 'RECARGA_FORZADA'
-   )
-   LANGUAGE plpgsql
-   AS $$
-   DECLARE
-       v_fecha_inicio      DATE;
-       v_fecha_fin         DATE;
-       v_registros_origen  INTEGER;
-       v_registros_cargados INTEGER := 0;
-       v_registros_existentes INTEGER;
-       v_inicio_proceso    TIMESTAMPTZ := NOW();
-       v_duracion_seg      NUMERIC;
-       v_mensaje_log       TEXT;
-   BEGIN
-       -- --------------------------------------------------------
-       -- VALIDACIONES DE ENTRADA
-       -- --------------------------------------------------------
-       IF p_anio < 2000 OR p_anio > EXTRACT(YEAR FROM CURRENT_DATE) + 1 THEN
-           RAISE EXCEPTION 'Año inválido: %. Debe estar entre 2000 y %',
-               p_anio, EXTRACT(YEAR FROM CURRENT_DATE) + 1;
-       END IF;
+    CREATE OR REPLACE PROCEDURE public.sp_carga_resumen_mensual(
+        p_anio          INTEGER,
+        p_mes           INTEGER,
+        p_modo          VARCHAR DEFAULT 'INCREMENTAL'  -- 'INCREMENTAL' o 'RECARGA_FORZADA'
+    )
+    LANGUAGE plpgsql
+    AS $$
+    DECLARE
+        v_fecha_inicio      DATE;
+        v_fecha_fin         DATE;
+        v_registros_origen  INTEGER;
+        v_registros_cargados INTEGER := 0;
+        v_registros_existentes INTEGER;
+        v_inicio_proceso    TIMESTAMPTZ := NOW();
+        v_duracion_seg      NUMERIC;
+        v_mensaje_log       TEXT;
+    BEGIN
+        -- --------------------------------------------------------
+        -- VALIDACIONES DE ENTRADA
+        -- --------------------------------------------------------
+        IF p_anio < 2000 OR p_anio > EXTRACT(YEAR FROM CURRENT_DATE) + 1 THEN
+            RAISE EXCEPTION 'Año inválido: %. Debe estar entre 2000 y %',
+                p_anio, EXTRACT(YEAR FROM CURRENT_DATE) + 1;
+        END IF;
 
-       IF p_mes < 1 OR p_mes > 12 THEN
-           RAISE EXCEPTION 'Mes inválido: %. Debe estar entre 1 y 12', p_mes;
-       END IF;
+        IF p_mes < 1 OR p_mes > 12 THEN
+            RAISE EXCEPTION 'Mes inválido: %. Debe estar entre 1 y 12', p_mes;
+        END IF;
 
-       IF p_modo NOT IN ('INCREMENTAL', 'RECARGA_FORZADA') THEN
-           RAISE EXCEPTION 'Modo inválido: %. Use INCREMENTAL o RECARGA_FORZADA', p_modo;
-       END IF;
+        IF p_modo NOT IN ('INCREMENTAL', 'RECARGA_FORZADA') THEN
+            RAISE EXCEPTION 'Modo inválido: %. Use INCREMENTAL o RECARGA_FORZADA', p_modo;
+        END IF;
 
-       -- Calcular rango de fechas del período
-       v_fecha_inicio := MAKE_DATE(p_anio, p_mes, 1);
-       v_fecha_fin    := (v_fecha_inicio + INTERVAL '1 month' - INTERVAL '1 day')::DATE;
+        -- Calcular rango de fechas del período
+        v_fecha_inicio := MAKE_DATE(p_anio, p_mes, 1);
+        v_fecha_fin    := (v_fecha_inicio + INTERVAL '1 month' - INTERVAL '1 day')::DATE;
 
-       RAISE NOTICE '[%] Iniciando carga % para período: % a %',
-           NOW()::TIME, p_modo, v_fecha_inicio, v_fecha_fin;
+        RAISE NOTICE '[%] Iniciando carga % para período: % a %',
+            NOW()::TIME, p_modo, v_fecha_inicio, v_fecha_fin;
 
-       -- --------------------------------------------------------
-       -- VERIFICAR SI EL PERÍODO YA FUE PROCESADO
-       -- --------------------------------------------------------
-       SELECT COUNT(*)
-       INTO v_registros_existentes
-       FROM public.resumen_ventas_mensual
-       WHERE anio = p_anio AND mes = p_mes;
+        -- --------------------------------------------------------
+        -- VERIFICAR SI EL PERÍODO YA FUE PROCESADO
+        -- --------------------------------------------------------
+        SELECT COUNT(*)
+        INTO v_registros_existentes
+        FROM public.resumen_ventas_mensual
+        WHERE anio = p_anio AND mes = p_mes;
 
-       IF v_registros_existentes > 0 AND p_modo = 'INCREMENTAL' THEN
-           RAISE NOTICE '[%] Período %/% ya procesado (% registros existentes). Use RECARGA_FORZADA para reprocesar.',
-               NOW()::TIME, p_anio, p_mes, v_registros_existentes;
+        IF v_registros_existentes > 0 AND p_modo = 'INCREMENTAL' THEN
+            RAISE NOTICE '[%] Período %/% ya procesado (% registros existentes). Use RECARGA_FORZADA para reprocesar.',
+                NOW()::TIME, p_anio, p_mes, v_registros_existentes;
 
-           CALL public.registrar_log_operacion(
-               'CARGA_RESUMEN_MENSUAL',
-               FORMAT('OMITIDO: Período %s/%s ya existe con %s registros',
-                   p_anio, p_mes, v_registros_existentes),
-               'OMITIDO'
-           );
-           RETURN;  -- Salir sin hacer nada (comportamiento idempotente)
-       END IF;
+            CALL public.registrar_log_operacion(
+                'CARGA_RESUMEN_MENSUAL',
+                FORMAT('OMITIDO: Período %s/%s ya existe con %s registros',
+                    p_anio, p_mes, v_registros_existentes),
+                'OMITIDO'
+            );
+            RETURN;  -- Salir sin hacer nada (comportamiento idempotente)
+        END IF;
 
-       -- --------------------------------------------------------
-       -- VERIFICAR QUE HAY DATOS ORIGEN PARA EL PERÍODO
-       -- --------------------------------------------------------
-       SELECT COUNT(*)
-       INTO v_registros_origen
-       FROM public.ventas
-       WHERE fecha_venta BETWEEN v_fecha_inicio AND v_fecha_fin;
+        -- --------------------------------------------------------
+        -- VERIFICAR QUE HAY DATOS ORIGEN PARA EL PERÍODO
+        -- --------------------------------------------------------
+        SELECT COUNT(*)
+        INTO v_registros_origen
+        FROM public.ventas
+        WHERE fecha_venta BETWEEN v_fecha_inicio AND v_fecha_fin;
 
-       IF v_registros_origen = 0 THEN
-           RAISE WARNING '[%] No se encontraron ventas para el período %/%. Carga omitida.',
-               NOW()::TIME, p_anio, p_mes;
+        IF v_registros_origen = 0 THEN
+            RAISE WARNING '[%] No se encontraron ventas para el período %/%. Carga omitida.',
+                NOW()::TIME, p_anio, p_mes;
 
-           CALL public.registrar_log_operacion(
-               'CARGA_RESUMEN_MENSUAL',
-               FORMAT('SIN DATOS: No hay ventas para %s/%s', p_anio, p_mes),
-               'SIN_DATOS'
-           );
-           RETURN;
-       END IF;
+            CALL public.registrar_log_operacion(
+                'CARGA_RESUMEN_MENSUAL',
+                FORMAT('SIN DATOS: No hay ventas para %s/%s', p_anio, p_mes),
+                'SIN_DATOS'
+            );
+            RETURN;
+        END IF;
 
-       RAISE NOTICE '[%] Encontrados % registros de ventas para procesar',
-           NOW()::TIME, v_registros_origen;
+        RAISE NOTICE '[%] Encontrados % registros de ventas para procesar',
+            NOW()::TIME, v_registros_origen;
 
-       -- --------------------------------------------------------
-       -- ELIMINAR DATOS EXISTENTES SI ES RECARGA FORZADA
-       -- --------------------------------------------------------
-       IF p_modo = 'RECARGA_FORZADA' AND v_registros_existentes > 0 THEN
-           DELETE FROM public.resumen_ventas_mensual
-           WHERE anio = p_anio AND mes = p_mes;
+        -- --------------------------------------------------------
+        -- ELIMINAR DATOS EXISTENTES SI ES RECARGA FORZADA
+        -- --------------------------------------------------------
+        IF p_modo = 'RECARGA_FORZADA' AND v_registros_existentes > 0 THEN
+            DELETE FROM public.resumen_ventas_mensual
+            WHERE anio = p_anio AND mes = p_mes;
 
-           RAISE NOTICE '[%] Eliminados % registros anteriores del período %/%',
-               NOW()::TIME, v_registros_existentes, p_anio, p_mes;
-       END IF;
+            RAISE NOTICE '[%] Eliminados % registros anteriores del período %/%',
+                NOW()::TIME, v_registros_existentes, p_anio, p_mes;
+        END IF;
 
-       -- --------------------------------------------------------
-       -- CARGA DE DATOS: INSERT con agregaciones calculadas
-       -- --------------------------------------------------------
-       INSERT INTO public.resumen_ventas_mensual (
-           anio, mes, id_region, id_categoria,
-           total_ventas, num_transacciones, ticket_promedio,
-           total_unidades, clientes_unicos, fecha_carga, hash_control
-       )
-       SELECT
-           p_anio                                          AS anio,
-           p_mes                                           AS mes,
-           v.id_region,
-           p.categoria                                     AS id_categoria,
-           ROUND(SUM(v.total_venta), 2)                   AS total_ventas,
-           COUNT(*)                                        AS num_transacciones,
-           ROUND(AVG(v.total_venta), 2)                   AS ticket_promedio,
-           SUM(v.cantidad)                                 AS total_unidades,
-           COUNT(DISTINCT v.id_cliente)                    AS clientes_unicos,
-           NOW()                                           AS fecha_carga,
-           -- Hash de control para detectar cambios en recargas futuras
-           MD5(
-               p_anio::TEXT || p_mes::TEXT ||
-               v.id_region::TEXT ||
-               p.categoria ||
-               SUM(v.total_venta)::TEXT
-           )                                               AS hash_control
-       FROM public.ventas v
-       JOIN public.productos p ON v.id_producto = p.id_producto
-       WHERE v.fecha_venta BETWEEN v_fecha_inicio AND v_fecha_fin
-       GROUP BY v.id_region, p.categoria;
+        -- --------------------------------------------------------
+        -- CARGA DE DATOS: INSERT con agregaciones calculadas
+        -- --------------------------------------------------------
+        INSERT INTO public.resumen_ventas_mensual (
+            anio, mes, id_region, id_categoria,
+            total_ventas, num_transacciones, ticket_promedio,
+            total_unidades, clientes_unicos, fecha_carga, hash_control
+        )
+        SELECT
+            p_anio                                         AS anio,
+            p_mes                                          AS mes,
+            c.region_id,
+            cat.nombre_categoria                           AS id_categoria,
+            ROUND(SUM(v.monto_total), 2)                   AS total_ventas,
+            COUNT(*)                                       AS num_transacciones,
+            ROUND(AVG(v.monto_total), 2)                   AS ticket_promedio,
+            SUM(v.cantidad)                                AS total_unidades,
+            COUNT(DISTINCT v.cliente_id)                   AS clientes_unicos,
+            NOW()                                          AS fecha_carga,
+            -- Hash de control para detectar cambios en recargas futuras
+            MD5(
+                p_anio::TEXT || p_mes::TEXT ||
+                c.region_id::TEXT ||
+                cat.nombre_categoria ||
+                SUM(v.monto_total)::TEXT
+            )                                               AS hash_control
+        FROM public.ventas v
+        JOIN public.productos p ON v.producto_id = p.id_producto
+        JOIN public.categorias cat ON p.id_categoria = cat.id_categoria
+        JOIN public.clientes c ON v.cliente_id = c.id_cliente
+        WHERE v.fecha_venta BETWEEN v_fecha_inicio AND v_fecha_fin
+        GROUP BY c.region_id, cat.nombre_categoria;
 
-       -- Capturar cantidad de filas insertadas
-       GET DIAGNOSTICS v_registros_cargados = ROW_COUNT;
+        -- Capturar cantidad de filas insertadas
+        GET DIAGNOSTICS v_registros_cargados = ROW_COUNT;
 
-       RAISE NOTICE '[%] Insertados % registros de resumen',
-           NOW()::TIME, v_registros_cargados;
+        RAISE NOTICE '[%] Insertados % registros de resumen',
+            NOW()::TIME, v_registros_cargados;
 
-       -- --------------------------------------------------------
-       -- CALCULAR DURACIÓN Y REGISTRAR ÉXITO
-       -- --------------------------------------------------------
-       v_duracion_seg := EXTRACT(EPOCH FROM (NOW() - v_inicio_proceso));
+        -- --------------------------------------------------------
+        -- CALCULAR DURACIÓN Y REGISTRAR ÉXITO
+        -- --------------------------------------------------------
+        v_duracion_seg := EXTRACT(EPOCH FROM (NOW() - v_inicio_proceso));
 
-       v_mensaje_log := FORMAT(
-           'Período: %s/%s | Modo: %s | Origen: %s registros | Cargados: %s resúmenes | Duración: %s seg',
-           p_anio, p_mes, p_modo,
-           v_registros_origen, v_registros_cargados,
-           ROUND(v_duracion_seg, 3)
-       );
+        v_mensaje_log := FORMAT(
+            'Período: %s/%s | Modo: %s | Origen: %s registros | Cargados: %s resúmenes | Duración: %s seg',
+            p_anio, p_mes, p_modo,
+            v_registros_origen, v_registros_cargados,
+            ROUND(v_duracion_seg, 3)
+        );
 
-       CALL public.registrar_log_operacion(
-           'CARGA_RESUMEN_MENSUAL',
-           v_mensaje_log,
-           'OK'
-       );
+        CALL public.registrar_log_operacion(
+            'CARGA_RESUMEN_MENSUAL',
+            v_mensaje_log,
+            'OK'
+        );
 
-       -- COMMIT explícito: confirmar toda la transacción
-       COMMIT;
+        -- COMMIT explícito: confirmar toda la transacción
+        --COMMIT;
 
-       RAISE NOTICE '[%] ✓ Carga completada exitosamente. Duración: % segundos',
-           NOW()::TIME, ROUND(v_duracion_seg, 3);
+        RAISE NOTICE '[%] ✓ Carga completada exitosamente. Duración: % segundos',
+            NOW()::TIME, ROUND(v_duracion_seg, 3);
 
-   EXCEPTION
-       WHEN OTHERS THEN
-           -- --------------------------------------------------------
-           -- MANEJO DE ERRORES: ROLLBACK y registro del error
-           -- --------------------------------------------------------
-           RAISE WARNING '[%] ERROR en carga %/%: % - %',
-               NOW()::TIME, p_anio, p_mes, SQLSTATE, SQLERRM;
+    EXCEPTION
+        WHEN OTHERS THEN
+            -- --------------------------------------------------------
+            -- MANEJO DE ERRORES: ROLLBACK y registro del error
+            -- --------------------------------------------------------
+            RAISE WARNING '[%] ERROR en carga %/%: % - %',
+                NOW()::TIME, p_anio, p_mes, SQLSTATE, SQLERRM;
 
-           -- ROLLBACK explícito: deshacer todos los cambios de esta ejecución
-           ROLLBACK;
+            -- ROLLBACK explícito: deshacer todos los cambios de esta ejecución
+            ROLLBACK;
 
-           -- Registrar el error (en una nueva transacción implícita)
-           CALL public.registrar_log_operacion(
-               'CARGA_RESUMEN_MENSUAL',
-               FORMAT('ERROR [%s]: %s | Período: %s/%s | Modo: %s',
-                   SQLSTATE, SQLERRM, p_anio, p_mes, p_modo),
-               'ERROR'
-           );
+            -- Registrar el error (en una nueva transacción implícita)
+            CALL public.registrar_log_operacion(
+                'CARGA_RESUMEN_MENSUAL',
+                FORMAT('ERROR [%s]: %s | Período: %s/%s | Modo: %s',
+                    SQLSTATE, SQLERRM, p_anio, p_mes, p_modo),
+                'ERROR'
+            );
 
-           -- Re-lanzar para que el llamador sepa que hubo error
-           RAISE EXCEPTION 'Carga fallida para período %/%. Error: %', p_anio, p_mes, SQLERRM;
-   END;
-   $$;
+            -- Re-lanzar para que el llamador sepa que hubo error
+            RAISE EXCEPTION 'Carga fallida para período %/%. Error: %', p_anio, p_mes, SQLERRM;
+    END;
+    $$;
 
-   COMMENT ON PROCEDURE public.sp_carga_resumen_mensual(INTEGER, INTEGER, VARCHAR)
-   IS 'Procedimiento de carga incremental de resúmenes mensuales de ventas. Soporta modo INCREMENTAL (idempotente) y RECARGA_FORZADA. Incluye COMMIT/ROLLBACK explícitos y logging.';
+    COMMENT ON PROCEDURE public.sp_carga_resumen_mensual(INTEGER, INTEGER, VARCHAR)
+    IS 'Procedimiento de carga incremental de resúmenes mensuales de ventas. Soporta modo INCREMENTAL (idempotente) y RECARGA_FORZADA. Incluye COMMIT/ROLLBACK explícitos y logging.';
+
    ```
 
 <br/>
