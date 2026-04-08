@@ -1211,14 +1211,43 @@ WHERE periodo_meses = 0;
 
 ```bash
 # Verificar hypertable y chunks
-docker exec -it timescaledb_lab psql -U postgres -d tsdb -c "
-SELECT 
-    hypertable_name,
-    num_chunks,
-    pg_size_pretty(total_bytes) AS tamanio_total
-FROM timescaledb_information.hypertable_detailed_size('ventas_metricas');
-"
+docker exec -it timescaledb_lab psql -U postgres -d tsdb
+
 ```
+
+<br/>
+
+```sql
+    SELECT 
+        pg_size_pretty(total_bytes) AS tamanio_total,
+        pg_size_pretty(table_bytes) AS tabla,
+        pg_size_pretty(index_bytes) AS indices,
+        pg_size_pretty(toast_bytes) AS toast
+    FROM hypertable_detailed_size('ventas_metricas'::regclass);
+    ```
+    -- Para ver qué columnas trae
+    SELECT *
+    FROM hypertable_detailed_size('ventas_metricas'::regclass);
+
+    -- El número de chunks
+    SELECT 
+        hypertable_name,
+        num_chunks
+    FROM timescaledb_information.hypertables
+    WHERE hypertable_name = 'ventas_metricas';
+
+    -- El tamaño
+
+    SELECT 
+    pg_size_pretty(total_bytes) AS tamanio_total
+    FROM hypertable_detailed_size('ventas_metricas'::regclass);
+
+    -- Número de chunks
+    SELECT 
+    hypertable_name,
+    num_chunks
+    FROM timescaledb_information.hypertables
+    WHERE hypertable_name = 'ventas_metricas';
 
 <br/>
 <br/>
