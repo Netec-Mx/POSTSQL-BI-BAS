@@ -20,7 +20,7 @@ Al completar esta práctica, serás capaz de:
 
 - Las cuatro prácticas del capítulo 3 completadas.
 - Comprensión de consultas SQL con `JOIN`, `GROUP BY`, `HAVING` y funciones de agregación.
-- Familiaridad con la estructura del dataset de ventas (`sales`, `clientes`, `productos`, `regions`).
+- Familiaridad con la estructura del dataset de ventas (`sales`, `customers`, `products`, `regions`).
 - Conocimiento básico del cliente `psql` y pgAdmin 4.
 
 <br/>
@@ -58,8 +58,8 @@ ON CONFLICT (region_id) DO NOTHING;
 -- Corre estádiscas a las siguientes tablas
 
 ANALYZE sales;
-ANALYZE clientes;
-ANALYZE productos;
+ANALYZE customers;
+ANALYZE products;
 ANALYZE regions;
 
 -- Verificar que las tablas base existen y tienen datos suficientes
@@ -68,7 +68,7 @@ SELECT
     relname AS tablename,
     n_live_tup AS registros_aproximados
 FROM pg_stat_user_tables
-WHERE relname IN ('sales', 'clientes', 'productos', 'regions')
+WHERE relname IN ('sales', 'customers', 'products', 'regions')
 ORDER BY relname;
 
 
@@ -128,11 +128,11 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
    -- Estructura de la tabla de ventas
    \d sales
 
-   -- Estructura de la tabla de clientes
-   \d clientes
+   -- Estructura de la tabla de customers
+   \d customers
 
-   -- Estructura de la tabla de productos
-   \d productos
+   -- Estructura de la tabla de products
+   \d products
 
    -- Estructura de la tabla de regiones
    \d regions
@@ -153,7 +153,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
        MIN(s.sale_date)                       AS primera_venta,
        MAX(s.sale_date)                       AS ultima_venta
    FROM sales s
-   INNER JOIN clientes c ON s.customer_id = c.id_cliente
+   INNER JOIN customers c ON s.customer_id = c.id_cliente
    INNER JOIN regions r   ON c.region_id   = r.region_id
    GROUP BY r.region_name
    ORDER BY ingresos_brutos DESC;
@@ -211,7 +211,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
        MIN(s.sale_date)                       AS primera_venta,
        MAX(s.sale_date)                       AS ultima_venta
    FROM sales s
-   INNER JOIN clientes c ON s.customer_id = c.customer_id
+   INNER JOIN customers c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
    GROUP BY r.region_id, r.region_name
    ORDER BY ingresos_brutos DESC;
@@ -222,11 +222,11 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
 
 <br/>
 
-3. Crea la **Vista 2**: Top Clientes por Ingresos:
+3. Crea la **Vista 2**: Top customers por Ingresos:
 
    ```sql
-   -- Vista lógica: top clientes con métricas de comportamiento
-   CREATE OR REPLACE VIEW analytics.vw_top_clientes AS
+   -- Vista lógica: top customers con métricas de comportamiento
+   CREATE OR REPLACE VIEW analytics.vw_top_customers AS
    SELECT
        c.customer_id,
        c.first_name || ' ' || c.last_name     AS nombre_completo,
@@ -242,7 +242,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
            WHEN SUM(s.quantity * s.unit_price) >= 1000  THEN 'Plata'
            ELSE 'Bronce'
        END                                    AS segmento_cliente
-   FROM clientes c
+   FROM customers c
    INNER JOIN sales s    ON c.customer_id = s.customer_id
    INNER JOIN regions r  ON c.region_id   = r.region_id
    GROUP BY c.customer_id, c.first_name, c.last_name, c.email, r.region_name
@@ -251,11 +251,11 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
 
 <br/>
 
-4. Crea la **Vista 3**: Inventario y Rendimiento de Productos:
+4. Crea la **Vista 3**: Inventario y Rendimiento de products:
 
    ```sql
-   -- Vista lógica: rendimiento de productos con métricas de ventas
-   CREATE OR REPLACE VIEW analytics.vw_rendimiento_productos AS
+   -- Vista lógica: rendimiento de products con métricas de ventas
+   CREATE OR REPLACE VIEW analytics.vw_rendimiento_products AS
    SELECT
        p.product_id,
        p.product_name                         AS producto,
@@ -265,7 +265,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
        COALESCE(SUM(s.quantity * s.unit_price), 0) AS ingresos_generados,
        COALESCE(COUNT(s.sale_id), 0)          AS numero_transacciones,
        COALESCE(ROUND(AVG(s.quantity)::numeric, 2), 0) AS cantidad_promedio_por_venta
-   FROM productos p
+   FROM products p
    LEFT JOIN sales s ON p.product_id = s.product_id
    GROUP BY p.product_id, p.product_name, p.category, p.unit_price
    ORDER BY ingresos_generados DESC;
@@ -280,10 +280,10 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
    SELECT * FROM analytics.vw_ventas_por_region;
 
    -- Probar Vista 2: mostrar solo top 10
-   SELECT * FROM analytics.vw_top_clientes LIMIT 10;
+   SELECT * FROM analytics.vw_top_customers LIMIT 10;
 
-   -- Probar Vista 3: mostrar solo top 10 productos
-   SELECT * FROM analytics.vw_rendimiento_productos LIMIT 10;
+   -- Probar Vista 3: mostrar solo top 10 products
+   SELECT * FROM analytics.vw_rendimiento_products LIMIT 10;
    ```
 
 **Salida Esperada:**
@@ -296,7 +296,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
          2 | Sur    |               38902 |     7123456.78  |          183.11 | ...
 (4 rows)
 
--- Vista 2: vw_top_clientes (primeras filas)
+-- Vista 2: vw_top_customers (primeras filas)
  customer_id | nombre_completo    | region | total_compras | valor_total_compras | segmento_cliente
 -------------+--------------------+--------+---------------+---------------------+-----------------
         1042 | Ana García López   | Norte  |            87 |           15234.50  | Platino
@@ -322,8 +322,8 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
 1. Crea una vista simple (sin agregaciones) para demostrar la updatability:
 
    ```sql
-   -- Vista simple y actualizable sobre la tabla clientes
-   CREATE OR REPLACE VIEW analytics.vw_clientes_activos AS
+   -- Vista simple y actualizable sobre la tabla customers
+   CREATE OR REPLACE VIEW analytics.vw_customers_activos AS
    SELECT
        customer_id,
        first_name,
@@ -331,7 +331,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
        email,
        region_id,
        created_at
-   FROM clientes
+   FROM customers
    WHERE is_active = TRUE;
    ```
 
@@ -342,17 +342,17 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
    ```sql
    -- Esto FUNCIONARÁ porque es una vista simple (sin JOIN, sin GROUP BY)
    -- Actualizar el email de un cliente a través de la vista
-   UPDATE analytics.vw_clientes_activos
+   UPDATE analytics.vw_customers_activos
    SET email = 'nuevo_email_test@ejemplo.com'
    WHERE customer_id = 1;
 
    -- Verificar el cambio en la tabla base
-   SELECT customer_id, email FROM clientes WHERE customer_id = 1;
+   SELECT customer_id, email FROM customers WHERE customer_id = 1;
 
    -- Revertir el cambio para no afectar datos de la práctica
-   UPDATE analytics.vw_clientes_activos
+   UPDATE analytics.vw_customers_activos
    SET email = (
-       SELECT email FROM clientes WHERE customer_id = 1
+       SELECT email FROM customers WHERE customer_id = 1
    )
    WHERE customer_id = 1;
    ```
@@ -388,7 +388,7 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
 **Salida Esperada:**
 
 ```
--- Resultado del UPDATE exitoso en vw_clientes_activos
+-- Resultado del UPDATE exitoso en vw_customers_activos
 UPDATE 1
 
 -- Error esperado al intentar actualizar vw_ventas_por_region
@@ -399,9 +399,9 @@ HINT:  To enable updating the view, provide an INSTEAD OF UPDATE trigger or an u
 -- Metadatos de updatability
         vista              | es_actualizable | permite_insert | actualizable_via_trigger
 ---------------------------+-----------------+----------------+--------------------------
- vw_clientes_activos       | YES             | YES            | YES
- vw_rendimiento_productos  | NO              | NO             | NO
- vw_top_clientes           | NO              | NO             | NO
+ vw_customers_activos       | YES             | YES            | YES
+ vw_rendimiento_products  | NO              | NO             | NO
+ vw_top_customers           | NO              | NO             | NO
  vw_ventas_por_region      | NO              | NO             | NO
 ```
 
@@ -409,7 +409,7 @@ HINT:  To enable updating the view, provide an INSTEAD OF UPDATE trigger or an u
 
 **Verificación:**
 
-- La vista `vw_clientes_activos` debe mostrar `is_updatable = YES`
+- La vista `vw_customers_activos` debe mostrar `is_updatable = YES`
 - Las vistas con `GROUP BY` deben mostrar `is_updatable = NO`
 - El error al actualizar `vw_ventas_por_region` es el comportamiento correcto y esperado
 
@@ -440,9 +440,9 @@ HINT:  To enable updating the view, provide an INSTEAD OF UPDATE trigger or an u
        SUM(s.quantity * s.unit_price)         AS ingresos_brutos,
        ROUND(AVG(s.quantity * s.unit_price)::numeric, 2) AS ticket_promedio
    FROM sales s
-   INNER JOIN clientes c ON s.customer_id = c.customer_id
+   INNER JOIN customers c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
-   INNER JOIN productos p  ON s.product_id  = p.product_id
+   INNER JOIN products p  ON s.product_id  = p.product_id
    GROUP BY DATE_TRUNC('month', s.sale_date), r.region_name, p.category
    ORDER BY mes DESC, ingresos_brutos DESC;
    ```
@@ -462,9 +462,9 @@ HINT:  To enable updating the view, provide an INSTEAD OF UPDATE trigger or an u
        SUM(s.quantity * s.unit_price)         AS ingresos_brutos,
        ROUND(AVG(s.quantity * s.unit_price)::numeric, 2) AS ticket_promedio
    FROM sales s
-   INNER JOIN clientes c ON s.customer_id = c.customer_id
+   INNER JOIN customers c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
-   INNER JOIN productos p  ON s.product_id  = p.product_id
+   INNER JOIN products p  ON s.product_id  = p.product_id
    GROUP BY DATE_TRUNC('month', s.sale_date), r.region_name, p.category
    ORDER BY mes DESC, ingresos_brutos DESC;
    ```
@@ -533,12 +533,12 @@ HINT:  To enable updating the view, provide an INSTEAD OF UPDATE trigger or an u
        SUM(s.quantity)                        AS unidades_vendidas,
        SUM(s.quantity * s.unit_price)         AS ingresos_brutos,
        ROUND(AVG(s.quantity * s.unit_price)::numeric, 2) AS ticket_promedio,
-       COUNT(DISTINCT s.customer_id)          AS clientes_unicos,
+       COUNT(DISTINCT s.customer_id)          AS customers_unicos,
        NOW()                                  AS ultima_actualizacion
    FROM sales s
-   INNER JOIN clientes c ON s.customer_id = c.customer_id
+   INNER JOIN customers c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
-   INNER JOIN productos p  ON s.product_id  = p.product_id
+   INNER JOIN products p  ON s.product_id  = p.product_id
    GROUP BY
        DATE_TRUNC('month', s.sale_date),
        r.region_id,
@@ -666,9 +666,9 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
        p.category AS categoria,
        SUM(s.quantity * s.unit_price) AS ingresos_brutos
    FROM sales s
-   INNER JOIN clientes c ON s.customer_id = c.customer_id
+   INNER JOIN customers c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
-   INNER JOIN productos p  ON s.product_id  = p.product_id
+   INNER JOIN products p  ON s.product_id  = p.product_id
    WHERE s.sale_date >= '2024-01-01'
    GROUP BY DATE_TRUNC('month', s.sale_date), r.region_name, p.category
    ORDER BY mes DESC, ingresos_brutos DESC;
@@ -893,18 +893,18 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
 1. Crea vistas materializadas adicionales orientadas a Power BI:
 
    ```sql
-   -- VISTA MATERIALIZADA 2: KPIs de clientes para dashboard ejecutivo
-   CREATE MATERIALIZED VIEW analytics.mv_kpis_clientes AS
+   -- VISTA MATERIALIZADA 2: KPIs de customers para dashboard ejecutivo
+   CREATE MATERIALIZED VIEW analytics.mv_kpis_customers AS
    SELECT
        r.region_name                              AS region,
-       COUNT(DISTINCT c.customer_id)              AS total_clientes,
+       COUNT(DISTINCT c.customer_id)              AS total_customers,
        COUNT(DISTINCT CASE
            WHEN s.sale_date >= CURRENT_DATE - INTERVAL '30 days'
-           THEN c.customer_id END)                AS clientes_activos_30d,
+           THEN c.customer_id END)                AS customers_activos_30d,
        SUM(s.quantity * s.unit_price)             AS ingresos_totales,
        ROUND(AVG(cliente_total.total_cliente)::numeric, 2) AS ltv_promedio,
        NOW()                                      AS ultima_actualizacion
-   FROM clientes c
+   FROM customers c
    INNER JOIN regions r ON c.region_id = r.region_id
    LEFT JOIN sales s ON c.customer_id = s.customer_id
    LEFT JOIN (
@@ -922,10 +922,10 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
        r.region_name                              AS region,
        COUNT(s.sale_id)                           AS transacciones,
        SUM(s.quantity * s.unit_price)             AS ingresos,
-       COUNT(DISTINCT s.customer_id)              AS clientes_unicos,
+       COUNT(DISTINCT s.customer_id)              AS customers_unicos,
        NOW()                                      AS ultima_actualizacion
    FROM sales s
-   INNER JOIN clientes c ON s.customer_id = c.customer_id
+   INNER JOIN customers c ON s.customer_id = c.customer_id
    INNER JOIN regions r   ON c.region_id   = r.region_id
    GROUP BY DATE_TRUNC('week', s.sale_date), r.region_name
    ORDER BY semana_inicio DESC
@@ -937,9 +937,9 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
 2. Crea índices para las nuevas vistas materializadas:
 
    ```sql
-   -- Índices para mv_kpis_clientes
+   -- Índices para mv_kpis_customers
    CREATE UNIQUE INDEX idx_mv_kpis_region
-       ON analytics.mv_kpis_clientes (region);
+       ON analytics.mv_kpis_customers (region);
 
    -- Índices para mv_tendencia_semanal
    CREATE UNIQUE INDEX idx_mv_tendencia_unique
@@ -975,7 +975,7 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
        ultima_actualizacion::TIMESTAMP
    FROM pg_matviews
    LEFT JOIN (
-       SELECT region, ultima_actualizacion FROM analytics.mv_kpis_clientes LIMIT 1
+       SELECT region, ultima_actualizacion FROM analytics.mv_kpis_customers LIMIT 1
    ) kpi ON TRUE
    WHERE schemaname = 'analytics'
    ORDER BY tipo, nombre;
@@ -1008,13 +1008,13 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
 -- Arquitectura completa de vistas
         tipo         |          nombre           |      capa_arquitectura  |         caracteristica
 ---------------------+---------------------------+-------------------------+--------------------------------
- Vista Materializada | mv_kpis_clientes          | Capa de Rendimiento     | Datos en disco, requiere REFRESH
+ Vista Materializada | mv_kpis_customers          | Capa de Rendimiento     | Datos en disco, requiere REFRESH
  Vista Materializada | mv_resumen_mensual_ventas | Capa de Rendimiento     | Datos en disco, requiere REFRESH
  Vista Materializada | mv_tendencia_semanal      | Capa de Rendimiento     | Datos en disco, requiere REFRESH
  Vista Lógica        | vw_catalogo_vistas        | Capa de Abstracción     | Tiempo real, sin almacenamiento
- Vista Lógica        | vw_clientes_activos       | Capa de Abstracción     | Tiempo real, sin almacenamiento
- Vista Lógica        | vw_rendimiento_productos  | Capa de Abstracción     | Tiempo real, sin almacenamiento
- Vista Lógica        | vw_top_clientes           | Capa de Abstracción     | Tiempo real, sin almacenamiento
+ Vista Lógica        | vw_customers_activos       | Capa de Abstracción     | Tiempo real, sin almacenamiento
+ Vista Lógica        | vw_rendimiento_products  | Capa de Abstracción     | Tiempo real, sin almacenamiento
+ Vista Lógica        | vw_top_customers           | Capa de Abstracción     | Tiempo real, sin almacenamiento
  Vista Lógica        | vw_ventas_por_region      | Capa de Abstracción     | Tiempo real, sin almacenamiento
 (8 rows)
 ```
@@ -1101,7 +1101,7 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
 -- Resultado de fn_refresh_all_views()
           vista_nombre          |   estado    | tiempo_ms
 --------------------------------+-------------+-----------
- mv_kpis_clientes               | COMPLETADO  |       234
+ mv_kpis_customers               | COMPLETADO  |       234
  mv_resumen_mensual_ventas      | COMPLETADO  |      1823
  mv_tendencia_semanal           | COMPLETADO  |       456
 (3 rows)
@@ -1186,9 +1186,9 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
        SELECT DATE_TRUNC('month', s.sale_date), r.region_name, p.category,
               SUM(s.quantity * s.unit_price)
        FROM sales s
-       INNER JOIN clientes c ON s.customer_id = c.customer_id
+       INNER JOIN customers c ON s.customer_id = c.customer_id
        INNER JOIN regions r   ON c.region_id   = r.region_id
-       INNER JOIN productos p  ON s.product_id  = p.product_id
+       INNER JOIN products p  ON s.product_id  = p.product_id
        GROUP BY 1, 2, 3
    ) sub;
 
@@ -1223,7 +1223,7 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
 <br/>
 
 **Causa:**
-Las tablas base (`sales`, `clientes`, `productos`, `regions`) no existen en la base de datos `ventas_db`, o el estudiante está conectado a una base de datos incorrecta. Esto ocurre cuando las prácticas del capítulo 2 y 3 fueron completados correctamente.
+Las tablas base (`sales`, `customers`, `products`, `regions`) no existen en la base de datos `ventas_db`, o el estudiante está conectado a una base de datos incorrecta. Esto ocurre cuando las prácticas del capítulo 2 y 3 fueron completados correctamente.
 
 <br/>
 
@@ -1405,14 +1405,14 @@ DROP FUNCTION IF EXISTS analytics.fn_refresh_all_views();
 
 -- 2. Eliminar vistas materializadas (y sus índices automáticamente)
 DROP MATERIALIZED VIEW IF EXISTS analytics.mv_tendencia_semanal;
-DROP MATERIALIZED VIEW IF EXISTS analytics.mv_kpis_clientes;
+DROP MATERIALIZED VIEW IF EXISTS analytics.mv_kpis_customers;
 DROP MATERIALIZED VIEW IF EXISTS analytics.mv_resumen_mensual_ventas;
 
 -- 3. Eliminar vistas lógicas
 DROP VIEW IF EXISTS analytics.vw_catalogo_vistas;
-DROP VIEW IF EXISTS analytics.vw_clientes_activos;
-DROP VIEW IF EXISTS analytics.vw_rendimiento_productos;
-DROP VIEW IF EXISTS analytics.vw_top_clientes;
+DROP VIEW IF EXISTS analytics.vw_customers_activos;
+DROP VIEW IF EXISTS analytics.vw_rendimiento_products;
+DROP VIEW IF EXISTS analytics.vw_top_customers;
 DROP VIEW IF EXISTS analytics.vw_ventas_por_region;
 
 -- 4. Eliminar el esquema (solo si está completamente vacío)
@@ -1438,8 +1438,8 @@ SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'analyti
 
 ### Lo que Lograste
 
-- **Creaste 5 vistas lógicas** en el esquema `analytics` que encapsulan las consultas más frecuentes del dataset de ventas (ventas por región, top clientes, rendimiento de productos, clientes activos, catálogo de vistas)
-- **Implementaste 3 vistas materializadas** (`mv_resumen_mensual_ventas`, `mv_kpis_clientes`, `mv_tendencia_semanal`) que persisten resultados pre-calculados en disco
+- **Creaste 5 vistas lógicas** en el esquema `analytics` que encapsulan las consultas más frecuentes del dataset de ventas (ventas por región, top customers, rendimiento de products, customers activos, catálogo de vistas)
+- **Implementaste 3 vistas materializadas** (`mv_resumen_mensual_ventas`, `mv_kpis_customers`, `mv_tendencia_semanal`) que persisten resultados pre-calculados en disco
 - **Mediste y documentaste** la diferencia de rendimiento entre consultas directas (~1800 ms) y vistas materializadas (~2 ms), demostrando mejoras de 100x a 1000x
 - **Ejecutaste `REFRESH MATERIALIZED VIEW`** en sus dos variantes (estándar y `CONCURRENTLY`) y comprendiste sus implicaciones de bloqueo
 - **Diseñaste una arquitectura de capas** (vistas lógicas → vistas materializadas) orientada a la integración con Power BI
