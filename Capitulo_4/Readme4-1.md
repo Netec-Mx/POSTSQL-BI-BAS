@@ -40,37 +40,158 @@ Antes de comenzar, ejecuta el siguiente comando para confirmar que el entorno es
 
 ```sql
 
+-- Con base a todas las consultas, joins, vistas y vistas materializadas usadas en la práctica
+-- Se actualizan algunas tablas que serán compatible con PostgreSQL 16-18.
 
--- Asegurar catálogo de regiones
-CREATE TABLE IF NOT EXISTS regions (
+-- Estructura de Tablas
+
+-- =========================
+-- LIMPIEZA (opcional)
+-- =========================
+DROP TABLE IF EXISTS sales CASCADE;
+DROP TABLE IF EXISTS customers CASCADE;
+DROP TABLE IF EXISTS products CASCADE;
+DROP TABLE IF EXISTS regions CASCADE;
+
+-- =========================
+-- TABLA: regions
+-- =========================
+CREATE TABLE regions (
     region_id   INT PRIMARY KEY,
     region_name VARCHAR(50) NOT NULL
 );
 
-INSERT INTO regions (region_id, region_name)
-VALUES
+-- =========================
+-- TABLA: customers
+-- =========================
+CREATE TABLE customers (
+    customer_id SERIAL PRIMARY KEY,
+    first_name  VARCHAR(50),
+    last_name   VARCHAR(50),
+    email       VARCHAR(100),
+    region_id   INT REFERENCES regions(region_id),
+    created_at  TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_active   BOOLEAN DEFAULT TRUE
+);
+
+-- =========================
+-- TABLA: products
+-- =========================
+CREATE TABLE products (
+    product_id   SERIAL PRIMARY KEY,
+    product_name VARCHAR(100),
+    category     VARCHAR(50),
+    unit_price   NUMERIC(10,2)
+);
+
+-- =========================
+-- TABLA: sales
+-- =========================
+CREATE TABLE sales (
+    sale_id     SERIAL PRIMARY KEY,
+    customer_id INT REFERENCES customers(customer_id),
+    product_id  INT REFERENCES products(product_id),
+    sale_date   DATE NOT NULL,
+    quantity    INT NOT NULL,
+    unit_price  NUMERIC(10,2) NOT NULL
+);
+```
+
+<br/>
+
+Agregar datos las tablas de regions, customers, products y sales.
+
+```sql
+
+-- catálogo de regiones
+
+INSERT INTO regions (region_id, region_name) VALUES
 (1, 'Norte'),
 (2, 'Sur'),
 (3, 'Centro'),
-(4, 'Occidente')
-ON CONFLICT (region_id) DO NOTHING;
+(4, 'Occidente');
 
--- Corre estádiscas a las siguientes tablas
+-- Customers (1000 registros)
+INSERT INTO customers (first_name, last_name, email, region_id, created_at, is_active)
+SELECT
+    'Nombre' || gs,
+    'Apellido' || gs,
+    'cliente' || gs || '@correo.com',
+    (RANDOM()*3 + 1)::INT,
+    CURRENT_DATE - (RANDOM()*365)::INT,
+    TRUE
+FROM generate_series(1,1000) gs;
+
+-- Products (50 registros)
+INSERT INTO products (product_name, category, unit_price)
+SELECT
+    'Producto ' || gs,
+    CASE 
+        WHEN gs % 4 = 0 THEN 'Electrónica'
+        WHEN gs % 4 = 1 THEN 'Ropa'
+        WHEN gs % 4 = 2 THEN 'Hogar'
+        ELSE 'Deportes'
+    END,
+    ROUND((RANDOM()*500 + 10)::numeric,2)
+FROM generate_series(1,50) gs;
+
+-- Sales (100,000 registros)
+-- Este será el más importante para rendimiento y vistas
+INSERT INTO sales (customer_id, product_id, sale_date, quantity, unit_price)
+SELECT
+    (RANDOM()*999 + 1)::INT,
+    (RANDOM()*49 + 1)::INT,
+    CURRENT_DATE - (RANDOM()*365)::INT,
+    (RANDOM()*10 + 1)::INT,
+    ROUND((RANDOM()*500 + 10)::numeric,2)
+FROM generate_series(1,100000);
+
+
+```
+
+Cración de índices críticos para la práctica
+
+```sql
+CREATE INDEX idx_sales_customer   ON sales(customer_id);
+CREATE INDEX idx_sales_product    ON sales(product_id);
+CREATE INDEX idx_sales_date       ON sales(sale_date);
+
+CREATE INDEX idx_customers_region ON customers(region_id);
+
+SELECT 
+    indexname,
+    indexdef
+FROM pg_indexes
+WHERE tablename in ( 'sales','customers', 'regions', 'products');
+
+
+SELECT 
+    i.relname AS indice,
+    am.amname AS tipo,
+    pg_get_indexdef(i.oid) AS definicion
+FROM pg_class t
+JOIN pg_index ix ON t.oid = ix.indrelid
+JOIN pg_class i ON i.oid = ix.indexrelid
+JOIN pg_am am ON i.relam = am.oid
+WHERE t.relname in ( 'sales','customers', 'regions', 'products')
+ORDER BY i.relname;
+
+-- Estádisticas obligatorias para apoyar a EXPLAIN
+
 
 ANALYZE sales;
 ANALYZE customers;
 ANALYZE products;
 ANALYZE regions;
 
--- Verificar que las tablas base existen y tienen datos suficientes
+-- Verificación
+
 SELECT
     schemaname,
-    relname AS tablename,
-    n_live_tup AS registros_aproximados
+    relname,
+    n_live_tup
 FROM pg_stat_user_tables
-WHERE relname IN ('sales', 'customers', 'products', 'regions')
-ORDER BY relname;
-
+WHERE relname IN ('sales','customers','products','regions');
 
 ```
 
@@ -159,20 +280,9 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
    ORDER BY ingresos_brutos DESC;
    ```
 
-**Salida Esperada:**
-
-```
- region        | total_transacciones | ingresos_brutos | ticket_promedio | primera_venta | ultima_venta
----------------+---------------------+-----------------+-----------------+---------------+--------------
- Norte         |               45231 |     8234567.89  |          182.05 |    2021-01-01 |   2024-12-31
- Sur           |               38902 |     7123456.78  |          183.11 |    2021-01-01 |   2024-12-31
- ...
-(4 rows)
-```
-
+<br/>
 
 > **Nota:** Los valores exactos dependerán del volumen de datos generado en tu entorno.
-
 
 <br/>
 
@@ -286,25 +396,6 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
    SELECT * FROM analytics.vw_rendimiento_products LIMIT 10;
    ```
 
-**Salida Esperada:**
-
-```
--- Vista 1: vw_ventas_por_region
- region_id | region | total_transacciones | ingresos_brutos | ticket_promedio | ...
------------+--------+---------------------+-----------------+-----------------+----
-         1 | Norte  |               45231 |     8234567.89  |          182.05 | ...
-         2 | Sur    |               38902 |     7123456.78  |          183.11 | ...
-(4 rows)
-
--- Vista 2: vw_top_customers (primeras filas)
- customer_id | nombre_completo    | region | total_compras | valor_total_compras | segmento_cliente
--------------+--------------------+--------+---------------+---------------------+-----------------
-        1042 | Ana García López   | Norte  |            87 |           15234.50  | Platino
-        2891 | Carlos Mendoza R.  | Sur    |            73 |           12890.75  | Platino
-...
-(10 rows)
-```
-
 <br/>
 
 **Verificación:**
@@ -384,26 +475,6 @@ psql -h localhost -p 5432 -U postgres -d ventas_db
    WHERE table_schema = 'analytics'
    ORDER BY table_name;
    ```
-
-**Salida Esperada:**
-
-```
--- Resultado del UPDATE exitoso en vw_customers_activos
-UPDATE 1
-
--- Error esperado al intentar actualizar vw_ventas_por_region
-ERROR:  cannot update view "vw_ventas_por_region"
-DETAIL:  Views that do not select from a single table or view are not automatically updatable.
-HINT:  To enable updating the view, provide an INSTEAD OF UPDATE trigger or an unconditional ON UPDATE DO INSTEAD rule.
-
--- Metadatos de updatability
-        vista              | es_actualizable | permite_insert | actualizable_via_trigger
----------------------------+-----------------+----------------+--------------------------
- vw_customers_activos       | YES             | YES            | YES
- vw_rendimiento_products  | NO              | NO             | NO
- vw_top_customers           | NO              | NO             | NO
- vw_ventas_por_region      | NO              | NO             | NO
-```
 
 <br/>
 
@@ -485,25 +556,6 @@ HINT:  To enable updating the view, provide an INSTEAD OF UPDATE trigger or an u
    INSERT INTO metricas_rendimiento VALUES
        ('Consulta directa', NULL, 'Tiempo medido con \timing - anotar manualmente');
    ```
-
-**Salida Esperada:**
-
-```
--- Ejemplo de salida de EXPLAIN ANALYZE (valores aproximados)
-                                                    QUERY PLAN
-------------------------------------------------------------------------------------------------------------------
- Sort  (cost=15234.56..15289.12 rows=2182 width=72) (actual time=1823.456..1825.123 rows=192 loops=1)
-   Sort Key: (date_trunc('month'::text, s.sale_date)) DESC, (sum((s.quantity * s.unit_price))) DESC
-   Sort Method: quicksort  Memory: 42kB
-   ->  HashAggregate  (cost=15089.34..15111.90 rows=2182 width=72) (actual time=1819.234..1820.567 rows=192 loops=1)
-         Group Key: date_trunc('month'::text, s.sale_date), r.region_name, p.category
-         ->  Hash Join  (cost=234.56..12456.78 rows=125000 width=48) (actual time=12.345..1456.789 rows=125000 loops=1)
- ...
- Planning Time: 3.456 ms
- Execution Time: 1826.789 ms
-```
-
-> **Anota este tiempo:** El tiempo de ejecución (~1800 ms con 100K registros) es nuestra línea base. Con 500K registros puede superar los 5 segundos. Este es el problema que las vistas materializadas resuelven.
 
 <br/>
 
@@ -606,31 +658,8 @@ HINT:  To enable updating the view, provide an INSTEAD OF UPDATE trigger or an u
    ORDER BY mes DESC, ingresos_brutos DESC;
    ```
 
-**Salida Esperada:**
 
-```
--- Verificación de existencia
- schemaname |       matviewname        | ispopulated
-------------+--------------------------+-------------
- analytics  | mv_resumen_mensual_ventas | t
-(1 row)
-
--- Conteo de filas
- total_filas
--------------
-         192
-(1 row)
-
--- Primeros registros
-    mes     | region_id | region | categoria | total_transacciones | ingresos_brutos | ultima_actualizacion
-------------+-----------+--------+-----------+---------------------+-----------------+---------------------
- 2024-12-01 |         1 | Norte  | Electrónica |              1234 |      234567.89  | 2024-01-15 10:23:45
- 2024-12-01 |         2 | Sur    | Ropa        |               987 |      189234.56  | 2024-01-15 10:23:45
-...
-
--- Tiempo de consulta sobre vista materializada (comparar con ~1800ms anterior)
-Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
-```
+<br/>
 
 **Verificación:**
 
@@ -712,29 +741,6 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
    ORDER BY tiempo_ms;
    ```
 
-**Salida Esperada:**
-
-```
--- Plan de ejecución de la vista materializada (MUCHO más simple)
-                                                 QUERY PLAN
------------------------------------------------------------------------------------------------------------
- Sort  (cost=12.45..12.89 rows=48 width=72) (actual time=0.234..0.267 rows=48 loops=1)
-   Sort Key: mes DESC, ingresos_brutos DESC
-   Sort Method: quicksort  Memory: 12kB
-   ->  Seq Scan on mv_resumen_mensual_ventas  (cost=0.00..11.20 rows=48 width=72) (actual time=0.023..0.089 rows=48 loops=1)
-         Filter: (mes >= '2024-01-01'::date)
- Planning Time: 0.234 ms
- Execution Time: 0.312 ms   ← vs ~1826 ms de la consulta directa
-
--- Tabla comparativa
-     tipo_consulta      | tiempo_ms |       operacion          | usa_indice | factor_mejora_x
-------------------------+-----------+--------------------------+------------+-----------------
- Vista Materializada    |     2.345 | Seq Scan / Index Scan    | Sí         |           779.0
- Consulta Directa       |  1826.789 | HashAggregate + Hash Join| No         |             1.0
- Vista Lógica           |  1834.123 | HashAggregate + Hash Join| No         |             1.0
-```
-
-> **Insight clave:** La vista lógica tiene prácticamente el **mismo tiempo** que la consulta directa porque PostgreSQL la expande y ejecuta la misma consulta subyacente. La vista materializada, en cambio, lee datos pre-calculados del disco, siendo **cientos de veces más rápida**.
 
 <br/>
 
@@ -855,27 +861,6 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
         'Actualización en producción con usuarios activos')
    ) AS t(metodo, bloquea_lecturas, requiere_unique_index, caso_de_uso);
    ```
-
-**Salida Esperada:**
-
-```
--- Comparación de conteos antes del refresh
-         fuente              | total_registros
------------------------------+-----------------
- Tabla sales (actual)        |          101000
- Vista materializada (cache) |          100000   ← datos desactualizados
-
--- Después del REFRESH
- datos_actualizados_hasta | filas_en_vista
---------------------------+----------------
- 2024-01-15 11:45:23      |            196   ← actualizado con nuevos datos
-
--- Tabla comparativa de métodos
-              metodo_refresh              | bloquea_lecturas               | requiere_indice_unico | cuando_usar
-------------------------------------------+--------------------------------+-----------------------+------------------------------------------
- REFRESH MATERIALIZED VIEW                | SÍ - bloquea AccessExclusive   | No                    | Mantenimiento nocturno
- REFRESH MATERIALIZED VIEW CONCURRENTLY   | NO - permite lecturas          | SÍ - UNIQUE obligatorio| Producción con usuarios activos
-```
 
 <br/>
 
@@ -1002,23 +987,6 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
    ORDER BY tipo DESC, nombre;
    ```
 
-**Salida Esperada:**
-
-```
--- Arquitectura completa de vistas
-        tipo         |          nombre           |      capa_arquitectura  |         caracteristica
----------------------+---------------------------+-------------------------+--------------------------------
- Vista Materializada | mv_kpis_customers          | Capa de Rendimiento     | Datos en disco, requiere REFRESH
- Vista Materializada | mv_resumen_mensual_ventas | Capa de Rendimiento     | Datos en disco, requiere REFRESH
- Vista Materializada | mv_tendencia_semanal      | Capa de Rendimiento     | Datos en disco, requiere REFRESH
- Vista Lógica        | vw_catalogo_vistas        | Capa de Abstracción     | Tiempo real, sin almacenamiento
- Vista Lógica        | vw_customers_activos       | Capa de Abstracción     | Tiempo real, sin almacenamiento
- Vista Lógica        | vw_rendimiento_products  | Capa de Abstracción     | Tiempo real, sin almacenamiento
- Vista Lógica        | vw_top_customers           | Capa de Abstracción     | Tiempo real, sin almacenamiento
- Vista Lógica        | vw_ventas_por_region      | Capa de Abstracción     | Tiempo real, sin almacenamiento
-(8 rows)
-```
-
 <br/>
 
 **Verificación:**
@@ -1094,20 +1062,6 @@ Time: 2.345 ms   ← DRÁSTICAMENTE más rápido
    WHERE schemaname = 'analytics'
    ORDER BY matviewname;
    ```
-
-**Salida Esperada:**
-
-```
--- Resultado de fn_refresh_all_views()
-          vista_nombre          |   estado    | tiempo_ms
---------------------------------+-------------+-----------
- mv_kpis_customers               | COMPLETADO  |       234
- mv_resumen_mensual_ventas      | COMPLETADO  |      1823
- mv_tendencia_semanal           | COMPLETADO  |       456
-(3 rows)
-```
-
-> **Desafío adicional (sin solución provista):** Modifica la función `fn_refresh_all_views()` para que registre cada ejecución en una tabla de auditoría `analytics.log_refresh_vistas` con columnas: `id SERIAL`, `vista TEXT`, `ejecutado_en TIMESTAMP`, `duracion_ms NUMERIC`, `estado TEXT`. Esta tabla será útil para monitorear la frecuencia y duración de los refreshes en producción.
 
 <br/>
 <br/>
