@@ -936,8 +936,6 @@ docker run -d --name timescaledb_lab --restart unless-stopped -e POSTGRES_PASSWO
 docker ps --filter "name=timescaledb_lab"
 ```
 
-> **Nota para Windows:** Si usas PowerShell, reemplaza los `\` al final de cada línea por `` ` `` (backtick) para la continuación de línea. En CMD usa `^`.
-
 <br/>
 
 2. Conéctate al contenedor TimescaleDB y verifica la extensión disponible:
