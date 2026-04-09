@@ -12,7 +12,7 @@ Al finalizar esta práctica, serás capaz de definir y programar un job en Postg
 ## Objetivo Visual
 
 <p align="center">
-  <img src="../images/i19.png" style="display: block; margin: 0 auto;" width="800"/>
+  <img src="../images/i19.png" style="display: block; margin: 0 auto;" width="500"/>
 </p>
 
 <br/><br/>
