@@ -1200,7 +1200,18 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
            RAISE NOTICE 'Error capturado correctamente: %', SQLERRM;
    END;
    $$;
+
+   DO $$
+    BEGIN
+        CALL public.sp_carga_resumen_mensual(2023, 12, 'INCREMENTAL');
+    EXCEPTION
+        WHEN OTHERS THEN
+            RAISE NOTICE 'Error capturado correctamente: %', SQLERRM;
+    END;
+    $$;
    ```
+
+<br/>
 
 **Verificación:**
 
