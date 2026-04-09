@@ -279,12 +279,9 @@ SELECT COUNT(*) AS ejecuciones FROM pgagent.pga_joblog;
 \d pgagent.pga_schedule
 ```
 
-<br/>
-
 > Debe ser mayor que 0
 
 <br/><br/>
-
 
 ## Conclusión
 
@@ -297,18 +294,6 @@ En esta práctica aprendiste a:
 
 <br/><br/>
 
-
-## Observación clave
-
-```text
-pgAgent requiere SIEMPRE:
-- [ ] extensión instalada
-- [ ] daemon ejecutándose
-- [ ] job habilitado
-- [ ] schedule válido
-```
-
-<br/><br/>
 
 ## Documentación oficial de pgAgent
 
