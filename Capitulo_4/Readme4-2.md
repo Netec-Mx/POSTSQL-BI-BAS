@@ -66,10 +66,6 @@ docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT schemana
 
 <br/>
 
-**Salida esperada:** Deberías ver las tablas `ventas` o `sales`, `clientes`, `productos` y `regiones` listadas con sus tamaños correspondientes. 
-
-<br/>
-
 Si el contenedor no está corriendo, ejecuta:
 
 ```bash
@@ -1865,23 +1861,6 @@ WHERE routine_schema = 'public'
   );
 -- Resultado esperado: 0 filas (todo eliminado)
 ```
-
-
-<br/><br/>
-
-
-## Ejercicio de Reto (Nivel: Avanzado) 
-
-### *Sin solución provista. Completar antes de avanzar la práctica 5.1*
-
-Implementa una función PL/pgSQL llamada `sp_analisis_cohortes(p_anio INTEGER)` que analice la retención de clientes por cohorte mensual de primera compra. La función debe:
-
-1. Identificar el mes de primera compra de cada cliente (cohorte de adquisición)
-2. Para cada cohorte, calcular cuántos clientes repitieron compra en los meses 1, 2, 3, 6 y 12 después de su primera compra
-3. Retornar una tabla con: `mes_cohorte`, `tamaño_cohorte`, `retencion_mes_1`, `retencion_mes_2`, `retencion_mes_3`, `retencion_mes_6`, `retencion_mes_12` (como porcentajes)
-4. Almacenar los resultados en una tabla `analytics.analisis_cohortes` con `UPSERT` (INSERT ON CONFLICT DO UPDATE)
-5. Incluir manejo de transacciones con `COMMIT`/`ROLLBACK` y registro en `log_operaciones`
-
 
 <br/><br/>
 

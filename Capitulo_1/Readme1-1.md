@@ -124,29 +124,8 @@ En Linux no se aplican límites de la misma forma, pero puedes configurar `--mem
    docker pull postgres:16
    ```
 
-<br/><br/>
 
-**Salida Esperada:**
-
-```
-# Para docker --version:
-Docker version 25.0.3, build 4debf41
-
-# Para docker compose version:
-Docker Compose version v2.24.5-desktop.1
-
-# Para docker run hello-world (fragmento):
-Hello from Docker!
-This message shows that your installation appears to be working correctly.
-
-# Para docker pull postgres:16:
-16: Pulling from library/postgres
-...
-Status: Downloaded newer image for postgres:16
-docker.io/library/postgres:16
-```
-
-<br/><br/>
+<br/>
 
 **Verificación:**
 
@@ -203,28 +182,8 @@ docker.io/library/postgres:16
    Get-ChildItem
    ```
 
-<br/><br/>
 
-**Salida Esperada:**
-
-```
-# En Linux/macOS:
-total 0
-drwxr-xr-x  4 usuario  staff  128 ene 15 10:00 .
-drwxr-xr-x  3 usuario  staff   96 ene 15 10:00 ..
-drwxr-xr-x  2 usuario  staff   64 ene 15 10:00 pgadmin-data
-drwxr-xr-x  2 usuario  staff   64 ene 15 10:00 pgdata
-
-# En Windows:
-    Directory: C:\Users\TuUsuario\curso-postgresql\lab-01
-
-Mode                 LastWriteTime         Length Name
-----                 -------------         ------ ----
-d-----        15/01/2025  10:00 AM                pgadmin-data
-d-----        15/01/2025  10:00 AM                pgdata
-```
-
-<br/><br/>
+<br/>
 
 **Verificación:**
 
@@ -374,22 +333,7 @@ d-----        15/01/2025  10:00 AM                pgdata
    Get-Content docker-compose.yml
    ```
 
-<br/><br/>
-
-**Salida Esperada:**
-
-```yaml
-version: '3.8'
-
-services:
-
-  postgres:
-    image: postgres:16
-    container_name: curso_postgres
-    ...
-```
-
-<br/><br/>
+<br/>
 
 **Verificación:**
 
@@ -439,26 +383,6 @@ services:
    ```bash
    docker inspect curso_postgres --format='{{.State.Health.Status}}'
    ```
-
-<br/>
-
-**Salida Esperada:**
-
-```
-# Para docker compose up -d:
-[+] Running 3/3
- ✔ Network lab-01_curso_network  Created
- ✔ Container curso_postgres      Started
- ✔ Container curso_pgadmin       Started
-
-# Para docker compose ps:
-NAME              IMAGE                   COMMAND                  SERVICE    CREATED         STATUS                   PORTS
-curso_pgadmin     dpage/pgadmin4:latest   "/entrypoint.sh"         pgadmin    2 minutes ago   Up 2 minutes             443/tcp, 0.0.0.0:8080->80/tcp
-curso_postgres    postgres:16             "docker-entrypoint.s…"   postgres   2 minutes ago   Up 2 minutes (healthy)   0.0.0.0:5432->5432/tcp
-
-# Para docker inspect (healthcheck):
-healthy
-```
 
 <br/>
 
@@ -550,48 +474,6 @@ healthy
 
 <br/>
 
-**Salida Esperada:**
-
-```
-# Al conectarse:
-psql (16.2 (Debian 16.2-1.pgdg120+2))
-Type "help" for help.
-
-curso_db=#
-
-# Para SELECT version():
-                                                     version
------------------------------------------------------------------------------------------------------------------
- PostgreSQL 16.2 (Debian 16.2-1.pgdg120+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit
-(1 row)
-
-# Para \l:
-                                                     List of databases
-   Name    |  Owner   | Encoding | Locale Provider |  Collate   |   Ctype    | ICU Locale | ICU Rules |   Access privileges
------------+----------+----------+-----------------+------------+------------+------------+-----------+-----------------------
- curso_db  | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           |
- postgres  | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           |
- template0 | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/postgres          +
-           |          |          |                 |            |            |            |           | postgres=CTc/postgres
- template1 | postgres | UTF8     | libc            | en_US.utf8 | en_US.utf8 |            |           | =c/postgres          +
-           |          |          |                 |            |            |            |           | postgres=CTc/postgres
-(4 rows)
-
-# Para \c curso_db:
-You are now connected to database "curso_db" as user "postgres".
-
-# Para \dt:
-Did not find any relations.
-
-# Para SELECT current_database()...:
- current_database | current_user | inet_server_addr | inet_server_port
-------------------+--------------+------------------+------------------
- curso_db         | postgres     | 127.0.0.1        |             5432
-(1 row)
-```
-
-<br/>
-
 **Verificación:**
 
 - [ ] La conexión a `psql` se estableció sin errores
@@ -667,37 +549,6 @@ Did not find any relations.
    docker exec -it curso_postgres psql -U postgres -d curso_db -c "SELECT * FROM prueba_persistencia;"
    ```
 
-<br/>
-
-**Salida Esperada:**
-
-```
-# Para CREATE TABLE:
-CREATE TABLE
-
-# Para INSERT:
-INSERT 0 3
-
-# Para SELECT * FROM prueba_persistencia:
- id |                 mensaje                  |         creado_en
-----+------------------------------------------+----------------------------
-  1 | Primer registro - Lab 01                 | 2025-01-15 10:30:00.123456
-  2 | PostgreSQL 16 funcionando correctamente  | 2025-01-15 10:30:00.234567
-  3 | Volúmenes Docker configurados            | 2025-01-15 10:30:00.345678
-(3 rows)
-
-# Para \d prueba_persistencia:
-                                     Table "public.prueba_persistencia"
-   Column   |            Type             | Collation | Nullable |              Default
-------------+-----------------------------+-----------+----------+------------------------------------
- id         | integer                     |           | not null | nextval('prueba_persistencia_id_seq'::regclass)
- mensaje    | text                        |           | not null |
- creado_en  | timestamp without time zone |           |          | CURRENT_TIMESTAMP
-Indexes:
-    "prueba_persistencia_pkey" PRIMARY KEY, btree (id)
-
-# Después del reinicio, SELECT debe mostrar los mismos 3 registros
-```
 
 <br/>
 
@@ -761,17 +612,6 @@ Indexes:
     WHERE schemaname = 'public';
     ```
 
-<br/>
-
-**Salida Esperada:**
-
-```
-# En el Query Tool de pgAdmin, la consulta debe mostrar:
- schemaname |      tablename       | tableowner | tablespace | hasindexes | hasrules | hastriggers
-------------+----------------------+------------+------------+------------+----------+-------------
- public     | prueba_persistencia  | postgres   |            | t          | f        | f
-(1 row)
-```
 
 <br/>
 
@@ -868,44 +708,6 @@ Indexes:
 
 <br/>
 
-**Salida Esperada:**
-
-```
-# Para pg_stat_activity:
-  pid  | usename  | application_name | client_addr | state  |         query
--------+----------+------------------+-------------+--------+-----------------------
- 12345 | postgres | psql             |             | active | SELECT pid, usename...
-(1 row)
-
-# Para pg_settings (memoria):
-         name          | setting |  unit  |                    short_desc
------------------------+---------+--------+----------------------------------------------------
- maintenance_work_mem  | 65536   | kB     | Sets the maximum memory for maintenance operations.
- max_connections       | 100     |        | Sets the maximum number of concurrent connections.
- max_wal_size          | 1024    | MB     | Sets the WAL size that triggers a checkpoint.
- shared_buffers        | 16384   | 8kB    | Sets the number of shared memory buffers used by the server.
- wal_level             | replica |        | Set the level of information written to the WAL.
- work_mem              | 4096    | kB     | Sets the maximum memory to be used for query workspaces.
-(6 rows)
-
-# Para pg_extension después de instalar pg_stat_statements:
-      extname       | extversion
---------------------+------------
- pg_stat_statements | 1.10
- plpgsql            | 1.0
-(2 rows)
-
-# Para tamaños de bases de datos:
- Base de Datos | Tamaño
----------------+--------
- postgres      | 7585 kB
- curso_db      | 7433 kB
- template1     | 7433 kB
- template0     | 7369 kB
-(4 rows)
-```
-
-<br/>
 
 **Verificación:**
 

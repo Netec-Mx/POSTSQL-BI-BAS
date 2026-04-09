@@ -1,6 +1,10 @@
-<img src="images/neteclogo.png" alt="logo" width="300"/>
 
 
+
+
+<p align="center">
+  <img src="images/neteclogo.png" alt="logo" width="300"/>
+</p>
 
 # Nombre del curso
 
@@ -92,11 +96,13 @@ En esta práctica aplicarás técnicas de indexación avanzada sobre el dataset 
 <br/><br/>
 
 
-### [Práctica 6.2 Nombre de la práctica](Capitulo_6/Readme6-1.md)
+### [Práctica 6.1 Integrando PostgreSQL con Power BI](Capitulo_6/Readme6-1.md)
 
-  - **Descripción**: xxx.
+En esta práctica integradora conectarás todo el trabajo realizado en PostgreSQL a lo largo del curso con Power BI Desktop para construir un dashboard ejecutivo de ventas completo. Importarás las vistas materializadas y tablas del dataset de ventas/sales, construirás un modelo de datos en estrella, crearás medidas DAX equivalentes a los KPIs calculados en SQL y diseñarás un reporte interactivo con múltiples visualizaciones. Finalmente, publicarás el reporte en Power BI Service y configurarás los mecanismos básicos de actualización y compartición de datos.
 
-  - **Duración estimada**: xx min.
+Esta práctica representa la culminación del curso: demuestra cómo las capacidades analíticas de PostgreSQL (índices, vistas materializadas, funciones de ventana, KPIs financieros) se traducen en reportes visuales e interactivos accesibles para usuarios de negocio sin conocimientos de SQL.
+
+  - **Duración estimada**: 120 min.
 
 <br/><br/>
 
@@ -110,3 +116,4 @@ Si tienes alguna pregunta o necesitas más detalles, no dudes en [contactarnos](
 <br/><br/>
 
 ¡Gracias por visitar nuestra plataforma! No olvides revisar todos los laboratorios y comenzar tu viaje de aprendizaje hoy mismo.
+

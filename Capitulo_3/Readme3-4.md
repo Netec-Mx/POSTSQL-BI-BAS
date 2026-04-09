@@ -1536,36 +1536,6 @@ docker ps --filter "name=curso_postgres"
 <br/>
 <br/>
 
-## Ejercicio de Reto (Evaluación Formativa)
-
-> **Nivel de Dificultad:** Avanzado  
-> **Tiempo estimado:** 15-20 minutos adicionales  
-> **Instrucción:** Completa este reto antes de avanzar a la prática 4.1. No se provee solución; el instructor evaluará tu implementación.
-
-<br/>
-
-**Reto: Análisis de Reactivación de Clientes Dormidos**
-
-Implementa una consulta SQL que identifique clientes "dormidos" (sin compras en los últimos 90 días del dataset) y calcule su potencial de reactivación basado en su historial de compras. La consulta debe:
-
-
-1. Identificar la fecha de última compra de cada cliente usando funciones de ventana
-2. Clasificar clientes como: `ACTIVO` (compra en últimos 30 días), `EN_RIESGO` (31-90 días), `DORMIDO` (91-180 días), `PERDIDO` (más de 180 días)
-3. Para cada segmento, calcular: cantidad de clientes, promedio de compras históricas, valor total histórico y días promedio entre compras
-4. Usar `generate_series()` para calcular la frecuencia de compra esperada de cada cliente dormido
-5. Presentar los resultados ordenados por valor total histórico descendente
-
-<br/>
-
-**Criterios de Evaluación:**
-- Uso correcto de `DATE_TRUNC()`, `EXTRACT()` y `AGE()` en la clasificación temporal
-- Implementación limpia con CTEs nombradas descriptivamente
-- Manejo correcto de `NULL` con `NULLIF()` o `COALESCE()` donde aplique
-- Resultado final legible con columnas bien nombradas en español
-
-<br/>
-<br/>
-
 ## Recursos Adicionales
 
 - [Documentación oficial PostgreSQL - Funciones de Fecha/Hora](https://www.postgresql.org/docs/16/functions-datetime.html) - Referencia completa de todas las funciones temporales disponibles en PostgreSQL 16

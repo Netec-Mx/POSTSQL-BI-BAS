@@ -156,23 +156,6 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
 
 <br/>
 
-**Salida Esperada:**
-
-```
-               List of relations
- Schema |      Name       | Type  |  Owner
---------+-----------------+-------+----------
- public | categorias      | table | postgres
- public | clientes        | table | postgres
- public | detalle_ordenes | table | postgres
- public | ordenes         | table | postgres
- public | productos       | table | postgres
- public | vendedores      | table | postgres
-(6 rows)
-```
-
-<br/>
-
 **Verificación:**
 
 - Confirma que aparecen exactamente 6 tablas en la lista.
@@ -409,22 +392,6 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
 
 <br/>
 
-**Salida Esperada:**
-
-```
-      tabla       | registros
-------------------+-----------
- categorias       |         8
- productos        |        33
- clientes         |        21
- vendedores       |         8
- ordenes          |        30
- detalle_ordenes  |        54
-(6 rows)
-```
-
-<br/>
-
 **Verificación:**
 
 - Confirma que los 6 conteos coinciden exactamente con los valores de la tabla anterior.
@@ -522,26 +489,6 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
 
 <br/>
 
-**Salida Esperada (Consulta 3.5):**
-
-```
-          nombre           | precio_unitario | id_categoria
----------------------------+-----------------+--------------
- El Quijote                |           22.00 |            5
- Diccionario Español       |           28.00 |            5
- Historia Universal        |           38.00 |            5
- Python para Análisis      |           55.00 |            5
- Aceite de Oliva Extra     |           18.50 |            6
- Café Molido Premium       |           24.00 |            6
- Chocolate Artesanal       |           12.00 |            6
- Vino Tinto Reserva        |           35.00 |            6
- Crema Hidratante SPF50    |           28.00 |            8
- Perfume Floral 100ml      |           95.00 |            8
-(10 rows)
-```
-
-<br/>
-
 > **Nota:** El resultado incluye el Aceite de Oliva ($18.50) y el Chocolate ($12.00) porque el filtro `IN (5, 6, 8)` los incluye aunque estén fuera del rango BETWEEN. Analiza la precedencia de los operadores: `BETWEEN` se evalúa antes que `AND`, y `AND` antes que `OR`. Si quieres combinar ambas condiciones de forma exclusiva, necesitas paréntesis explícitos.
 
 <br/>
@@ -611,21 +558,6 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
    ORDER BY id_cliente ASC
    LIMIT 5 OFFSET 10;
    ```
-
-<br/>
-
-**Salida Esperada (Consulta 4.1):**
-
-```
-          nombre           | precio_unitario | stock
----------------------------+-----------------+-------
- Laptop HP 15"             |         1299.99 |    45
- Sofá 3 Puestos            |          850.00 |    20
- Bicicleta de Montaña      |          650.00 |    30
- Mesa de Comedor           |          420.00 |    15
- Monitor 24" Full HD       |          350.00 |    60
-(5 rows)
-```
 
 <br/>
 
@@ -731,22 +663,6 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
 
 <br/>
 
-**Salida Esperada (Consulta 5.4 — clientes sin órdenes):**
-
-```
- id_cliente |  nombre   |  apellido  |    ciudad    |          correo
-------------+-----------+------------+--------------+--------------------------
-         13 | Gabriela  | Ruiz       | Bogotá       | gabriela.r@email.com
-         14 | Alejandro | Castro     | Barranquilla |
-         15 | Natalia   | Herrera    | Medellín     | natalia.h@email.com
-         16 | Felipe    | Mendoza    | Bogotá       | felipe.m@email.com
-         18 | Daniel    | Ortiz      | Bogotá       | daniel.o@email.com
-         19 | Catalina  | Núñez      | Medellín     | catalina.n@email.com
-(6 rows)
-```
-
-<br/>
-
 > **Nota:** La consulta 5.4 usa el patrón clásico `LEFT JOIN ... WHERE ... IS NULL` para encontrar registros huérfanos. Observa que Alejandro Castro (id=14) no tiene correo registrado — su campo `correo` es NULL, lo cual es diferente a no tener órdenes.
 
 <br/>
@@ -818,18 +734,8 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
    ORDER BY d.id_orden;
    ```
 
-<br/><br/>
 
-**Salida Esperada (Consulta 6.1):**
-
-```
- id_vendedor | nombre | apellido | region |  correo
--------------+--------+----------+--------+---------
-           7 | Julián | Vargas   | Cali   |
-(1 row)
-```
-
-<br/><br/>
+<br/>
 
 **Verificación:**
 
@@ -928,25 +834,6 @@ Deberías ver el prompt `postgres=#`. Escribe `\q` para salir por ahora.
    ORDER BY total_ordenes DESC, cliente;
    ```
 
-<br/>
-
-**Salida Esperada (Consulta 7.5):**
-
-```
-       cliente        |    ciudad    | total_ordenes | primera_orden | ultima_orden
-----------------------+--------------+---------------+---------------+--------------
- Ana López            | Bogotá       |             3 | 2023-01-15    | 2024-02-05
- María González       | Cali         |             2 | 2023-02-05    | 2023-11-15
- Camila Sánchez       | Bogotá       |             2 | 2023-03-01    | 2023-12-01
- Laura Díaz           | Cali         |             2 | 2023-04-02    | 2023-12-20
- Diego Vargas         | Bogotá       |             2 | 2023-05-25    | 2024-03-04
- Mateo Jiménez        | Cali         |             2 | 2023-06-28    | 2024-03-18
- Pedro Martínez       | Medellín     |             2 | 2023-01-22    | 2024-01-08
- Luis Rodríguez       | Barranquilla |             2 | 2023-02-18    | 2024-01-22
- Jorge Pérez          | Medellín     |             2 | 2023-03-14    | 2024-02-19
- Sebastián Flores     | Bogotá       |             2 | 2023-04-20    | 2024-02-19
-(10 rows)
-```
 
 <br/>
 
@@ -1293,18 +1180,6 @@ docker exec curso_postgres pg_dump -U postgres ventas_db > backup_ventas_db_lab0
 - **JOIN como puente entre tablas:** El tipo de JOIN determina qué registros se incluyen cuando no hay coincidencia: `INNER` excluye los no coincidentes, `LEFT` los incluye con NULL desde la tabla derecha.
 - **Persistencia del dataset:** Las tablas creadas en esta práctica son la base de las siguientes prácticas. Mantén el contenedor Docker en ejecución y no elimines `ventas_db`.
 
-
-<br/><br/>
-
-## Retos 
-
-Resuelve las siguientes preguntas de negocio escribiendo una sola consulta SQL por cada una. No se provee solución.  
-
-1. Genera un reporte que muestre, para cada ciudad donde hay clientes, el número total de clientes registrados, el número de clientes que han realizado al menos una orden, y el número de clientes que **nunca** han realizado una orden. Ordena por ciudad alfabéticamente.
-
-2. Encuentra los 5 productos que generaron el mayor ingreso total (suma de subtotales netos: `cantidad * precio_venta - descuento`), pero solo considerando órdenes con estado `'entregado'`. Muestra el nombre del producto, la categoría, el ingreso total y el número de órdenes distintas en que fue vendido.
-
-3. Escribe una consulta que liste todos los vendedores junto con el total de ventas que realizaron en el primer semestre de 2023 (enero a junio). Incluye también los vendedores que no tuvieron ventas en ese período (deben aparecer con `0` en el total, no con NULL — usa `COALESCE`). Ordena de mayor a menor total de ventas.
 
 
 <br/><br/>

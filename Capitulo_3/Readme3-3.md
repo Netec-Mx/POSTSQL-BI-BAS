@@ -1041,25 +1041,6 @@ docker ps --filter "name=postgres" --format "table {{.Names}}\t{{.Status}}"
 <br/>
 <br/>
 
-### Ejercicio de Reto 
-
-**Nivel de dificultad:** Intermedio-Avanzado
-
-**Instrucciones:** Construye en una **sola consulta SQL** (sin usar UNION ALL) un reporte ejecutivo de ventas que cumpla con **todos** los siguientes requisitos:
-
-1. Use `ROLLUP` sobre las dimensiones `anio`, `trimestre` y `region`
-2. Para cada combinación, calcule:
-   - Total de ventas
-   - Número de clientes únicos activos
-   - Ticket promedio
-   - Ventas de clientes nuevos vs recurrentes (usando `FILTER`)
-   - Percentil 90 del ticket de venta (`PERCENTILE_CONT`)
-3. Etiquete claramente cada fila con su nivel jerárquico: `'DETALLE'`, `'SUBTOTAL TRIMESTRE'`, `'SUBTOTAL AÑO'` o `'GRAN TOTAL'`
-4. Incluya una columna que muestre el porcentaje que representa cada fila respecto al gran total de ventas
-5. Filtre el resultado para mostrar solo filas donde el total de ventas supere el percentil 25 del total de ventas por grupo
-
-<br/>
-<br/>
 
 ## Recursos Adicionales
 

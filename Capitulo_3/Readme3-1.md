@@ -707,29 +707,6 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
 
 <br/>
 
-**Salida Esperada:**
-
-```sql
-
--- Consulta 2: top 3 por categoría
- nombre_categoria  | rank | nombre | precio_actual | unidades_vendidas | ingreso_total
-----------------+------+--------------+---------------+-------------------+--------------
- Android        |    1 | ...          |          ...  |               ... |          ...
- Android        |    2 | ...          |          ...  |               ... |          ...
- Android        |    3 | ...          |          ...  |               ... |          ...
- Auriculares    |    1 | ...          |          ...  |               ... |          ...
-(N rows)
-
--- Consulta 3: segmentación de clientes
- segmento  | num_clientes | frecuencia_promedio | valor_promedio | dias_promedio
------------+--------------+---------------------+----------------+--------------
- Ocasional |           XX |                 ... |            ... |           ...
- Nuevo     |           XX |                 ... |            ... |           ...
-(N rows)
-```
-
-<br/>
-
 **Verificación:**
 
 ```sql
@@ -1008,34 +985,6 @@ WHERE p.precio_unitario > (
    ORDER BY j.ruta;
    ```
 
-<br/>
-
-
-**Salida Esperada:**
-
-```
--- Jerarquía de categorías con indentación
- nivel |       categoria_indentada        |              ruta_completa
--------+----------------------------------+------------------------------------------
-     0 | Deportes                         | Deportes
-     1 |   Ciclismo                       | Deportes > Ciclismo
-     1 |   Fitness                        | Deportes > Fitness
-     1 |   Fútbol                         | Deportes > Fútbol
-     0 | Electrónica                      | Electrónica
-     1 |   Audio                          | Electrónica > Audio
-     2 |     Altavoces                    | Electrónica > Audio > Altavoces
-     2 |     Auriculares                  | Electrónica > Audio > Auriculares
-(21 rows)
-
--- Árbol de empleados
- nivel |           empleado              | puesto
--------+---------------------------------+---------------------------
-     0 | Carlos Mendoza                  | CEO
-     1 |   Ana Rodríguez                 | Directora de Ventas
-     2 |     Laura Sánchez               | Gerente de Ventas Sur
-     3 |       Andrés Morales            | Ejecutivo de Ventas
-(13 rows)
-```
 
 <br/>
 
@@ -1334,78 +1283,6 @@ FROM (
 - Confirma que ambas versiones devuelven el mismo número de filas
 - Anota los tiempos de ejecución de `EXPLAIN ANALYZE`.
 - Observa si PostgreSQL aplica "CTE inlining" o materialización en cada caso
-
-<br/>
-<br/>
-
-
-### Paso 7: Reto – Pipeline Analítico Completo
-
-Construye un reporte analítico SQL completo que responda la siguiente pregunta de negocio:
-
-Para cada categoría raíz, muestra el top 3 de clientes con mayor gasto total, indicando: nombre del cliente, categoría raíz, total gastado, número de órdenes, ticket promedio, y el porcentaje que representa su gasto sobre el total de ventas de esa categoría raíz. Incluye solo clientes activos (con al menos una orden en los últimos 12 meses) y categorías con al menos 5 clientes distintos.
-
-<br/>
-
-
-**Requisitos técnicos del reto:**
-
-Tu solución debe:
-1. Usar AL MENOS 4 CTEs encadenados con nombres descriptivos
-2. Incluir un CTE que calcule la jerarquía de categorías (raíz → hoja) usando WITH RECURSIVE (o una versión simplificada con JOIN de dos niveles)
-3. Filtrar clientes activos usando una subconsulta o CTE separado
-4. Calcular el porcentaje del gasto del cliente sobre el total de la categoría
-5. Usar RANK() o ROW_NUMBER() para obtener el top 3 por categoría
-6. El resultado final debe tener estas columnas: categoria_raiz, rank, cliente, total_gastado, num_ordenes, ticket_promedio,pct_sobre_categoria
-
-
-<br/>
-
-```sql
--- Estructura sugerida (completa el contenido de cada CTE):
-
-WITH
-clientes_activos AS (
-    -- TODO: clientes con al menos una orden en los últimos 12 meses
-),
-ventas_cliente_categoria AS (
-    -- TODO: total gastado, número de órdenes por cliente y categoría hoja
-),
-ventas_con_raiz AS (
-    -- TODO: mapear categoría hoja a categoría raíz
-),
-total_por_raiz AS (
-    -- TODO: total de ventas por categoría raíz (para calcular porcentaje)
-),
-ranking_clientes AS (
-    -- TODO: RANK() de clientes dentro de cada categoría raíz
-),
-categorias_con_suficientes_clientes AS (
-    -- TODO: filtrar categorías con al menos 5 clientes distintos
-)
-SELECT
-    -- TODO: columnas finales del reporte
-FROM ranking_clientes
--- TODO: JOINs y filtros finales
-ORDER BY categoria_raiz, rank;
-
-```
-
-<br/>
-
-**Criterios de Evaluación:**
-
-| Criterio | Puntos |
-|----------|--------|
-| Uso correcto de al menos 4 CTEs encadenados | 25 pts |
-| Filtro correcto de clientes activos (últimos 12 meses) | 20 pts |
-| Cálculo correcto del porcentaje sobre la categoría | 20 pts |
-| Ranking correcto (top 3 por categoría) | 20 pts |
-| Filtro de categorías con ≥ 5 clientes | 15 pts |
-| **Total** | **100 pts** |
-
-
-> **Nivel de Dificultad:** Intermedio-Alto
 
 <br/>
 <br/>

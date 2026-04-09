@@ -1679,27 +1679,6 @@ ORDER BY table_name;
 <br/>
 
 
-### Reto Final 
-
-**Nivel de Dificultad: Intermedio-Avanzado**
-
-Sin consultar la solución del instructor, escribe una consulta SQL que responda la siguiente pregunta de negocio:
-
-¿Cuáles son los 3 vendedores con mayor crecimiento acumulado en los últimos 6 meses disponibles del dataset? Para cada vendedor, muestra: su ranking de crecimiento, el total de ventas en los últimos 6 meses, el total de ventas en los 6 meses anteriores, la variación porcentual entre ambos períodos, y su posición percentil respecto a todos los vendedores.
-
-
-
-**Restricciones:**
-- Debes usar al menos una CTE y al menos una función de ventana.
-- No puedes usar subconsultas anidadas en el `WHERE`.
-- El resultado debe estar ordenado de mayor a menor crecimiento.
-- Debes manejar correctamente el caso de vendedores sin ventas en alguno de los períodos.
-
-
-<br/>
-<br/>
-
-
 ## Recursos Adicionales
 
 - **Documentación oficial de PostgreSQL – Window Functions:** Referencia completa de todas las funciones de ventana disponibles en PostgreSQL 16, incluyendo sintaxis de `OVER`, `PARTITION BY`, `ORDER BY` y definición de frames. Disponible en: [https://www.postgresql.org/docs/current/functions-window.html](https://www.postgresql.org/docs/current/functions-window.html).
