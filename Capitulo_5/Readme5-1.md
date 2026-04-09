@@ -15,6 +15,15 @@ Al completar esta práctica, serás capaz de:
 
 <br/><br/>
 
+
+## Objetivo Visual
+
+<p align="center">
+  <img src="../images/i21.png" style="display: block; margin: 0 auto;" />
+</p>
+
+<br/><br/>
+
 ## Prerrequisitos
 
 ### Conocimiento Requerido
@@ -1564,8 +1573,8 @@ Ejecuta los siguientes comandos para limpiar los objetos creados durante la prá
 -- ============================================================
 -- ÍNDICES A CONSERVAR 
 -- ============================================================
--- idx_ventas_fecha_venta    → Usado en Lab 06-00-01 (Power BI)
--- idx_ventas_cliente_id     → Usado en consultas de dashboard
+-- idx_sales_date            → Usado en Práctica 6.1 (Power BI)
+-- idx_sales_customer_id     → Usado en consultas de dashboard
 -- idx_ventas_region_id      → Usado en reportes por región
 -- idx_ventas_metadata_gin   → Usado en análisis JSONB
 -- idx_mv_resumen_unique     → Requerido para REFRESH CONCURRENTLY
@@ -1575,7 +1584,7 @@ Ejecuta los siguientes comandos para limpiar los objetos creados durante la prá
 -- ============================================================
 
 -- Eliminar índice Hash (redundante con el B-Tree de cliente_id)
-DROP INDEX IF EXISTS idx_ventas_cliente_hash;
+DROP INDEX IF EXISTS idx_sales_customer_hash;
 
 -- Eliminar índice compuesto de región+fecha (conservar si se usa en reportes)
 -- DROP INDEX IF EXISTS idx_ventas_region_fecha;
@@ -1601,16 +1610,10 @@ SELECT
     pg_size_pretty(pg_relation_size(indexname::regclass)) AS tamano
 FROM pg_indexes
 WHERE schemaname = 'public'
-  AND tablename IN ('ventas', 'mv_resumen_ventas_mensual')
+  AND tablename IN ('sales', 'mv_resumen_ventas_mensual')
   AND indexname NOT LIKE '%pkey'
 ORDER BY tablename, indexname;
 ```
-
-<br/>
-
-> **Advertencia:** No elimines los índices `idx_ventas_fecha_venta`, `idx_ventas_cliente_id`, `idx_ventas_region_id` ni `idx_ventas_metadata_gin`. Estos índices son fundamentales para el rendimiento de las consultass siguientes.
-
-
 
 <br/><br/>
 
