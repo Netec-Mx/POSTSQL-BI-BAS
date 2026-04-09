@@ -81,14 +81,15 @@ Esta práctica refleja patrones reales de ingeniería de datos: encapsular regla
 
    - **Duración estimada**: 60 min.
 
+<br/><br/>
 
+### [ Práctica 5.1. Monitoreo y Optimización de Consultas](Capitulo_5/Readme5-1.md)
 
-### [Práctica 5.1 Nombre de la práctica](Capitulo_5/Readme5-1.md)
+En esta práctica aplicarás técnicas de indexación avanzada sobre el dataset de ventas construido en las prácticas  anteriores para diagnosticar y eliminar cuellos de botella en consultas lentas. Partirás de un conjunto de consultas deliberadamente no optimizadas, analizarás sus planes de ejecución con `EXPLAIN` y `EXPLAIN ANALYZE`, crearás índices B-Tree, Hash, GIN y parciales estratégicamente, y medirás el impacto real en tiempos de respuesta antes y después de cada optimización. Esta práctica refleja el flujo de trabajo real de un DBA o analista de datos que debe garantizar que los dashboards de Power BI respondan en tiempo aceptable sobre millones de registros.
 
-  - **Descripción**: xxx.
-
-  - **Duración estimada**: xx min.
-
+  - **Duración estimada**: 60 min.
+ 
+<br/><br/>
 
 
 ### [Práctica 6.2 Nombre de la práctica](Capitulo_6/Readme6-1.md)
