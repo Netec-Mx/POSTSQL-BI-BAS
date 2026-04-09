@@ -15,6 +15,15 @@ Al completar esta práctica, serás capaz de:
 
 <br/><br/>
 
+## Objetivo Visual
+
+<p align="center">
+  <img src="../images/i20.png" style="display: block; margin: 0 auto;" />
+</p>
+
+<br/><br/>
+
+
 ## Prerrequisitos
 
 ### Conocimiento Requerido
