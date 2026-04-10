@@ -475,17 +475,17 @@ Confirmar que el driver ODBC de PostgreSQL está correctamente instalado en Wind
 
 <br/>
 
-<p align="center">
-  <img src="../images/c6_4.png" style="display: block; margin: 0 auto;" />
-</p>
-
-<br/>
-
 **Verificación:**
 
 - El Administrador ODBC muestra `PostgreSQL Unicode` en la lista de controladores
 - El DSN `PostgreSQL_Curso` aparece en la pestaña "DSN de sistema"
 - La prueba de conexión retorna "Connection successful"
+
+<br/>
+
+<p align="center">
+  <img src="../images/c6_4.png" style="display: block; margin: 0 auto;" />
+</p>
 
 <br/>
 <br/>
@@ -563,6 +563,8 @@ Realizar transformaciones básicas en Power Query para limpiar los datos, correg
 
 2. Renombra la consulta para que tenga un nombre más limpio: haz clic derecho sobre `vw_pbi_hechos_ventas` en el panel izquierdo → **Cambiar nombre** → escribe `Hechos_Ventas`. Repite para todas las vistas:
 
+<p align="center">
+
    | Nombre original | Nombre nuevo |
    |-----------------|--------------|
    | vw_pbi_hechos_ventas | Hechos_Ventas |
@@ -572,6 +574,8 @@ Realizar transformaciones básicas en Power Query para limpiar los datos, correg
    | vw_pbi_dim_vendedores | Dim_Vendedores |
    | vw_pbi_dim_regiones | Dim_Regiones |
    | vw_pbi_resumen_mensual | Resumen_Mensual |
+
+</p>
 
 <br/>
 
@@ -945,7 +949,7 @@ Construir un dashboard interactivo de una página con múltiples visualizaciones
 
 <br/>
 
-La salida debería de ser similar a la siguiente imagen:
+La salida podría ser similar a la siguiente imagen:
 
 <p align="center">
   <img src="../images/c7-final.png" style="display: block; margin: 0 auto;" />
@@ -1001,6 +1005,8 @@ Agregar una segunda página al reporte con análisis más detallados de vendedor
 
 5. Agrega un botón de navegación de regreso al Dashboard. En **Insertar** → **Botones** → **Atrás**. Colócalo en la esquina superior izquierda. En Formato del botón → Acción → Tipo: **Navegación de página** → Destino: `Dashboard Ejecutivo`.
 
+>**Nota:** En Power BI Desktop usamos [Ctrl] + [Enter] para probar navegación.
+
 <br/>
 
 6. En la página `Dashboard Ejecutivo`, agrega un botón de navegación hacia `Análisis Detallado`. En **Insertar** → **Botones** → **Vacío** (personalizado):
@@ -1019,6 +1025,15 @@ Agregar una segunda página al reporte con análisis más detallados de vendedor
 - Haz clic en el botón "Ver Análisis Detallado" → navega correctamente a la segunda página
 - El botón "Atrás" regresa al Dashboard Ejecutivo
 - El gráfico de dispersión muestra puntos para cada vendedor con tamaños variables
+
+
+<br/>
+
+La salida podría ser similar a la siguiente imagen:
+
+<p align="center">
+  <img src="../images/c8_navegacion.png" style="display: block; margin: 0 auto;" />
+</p>
 
 <br/>
 <br/>
