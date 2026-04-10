@@ -585,6 +585,7 @@ Realizar transformaciones básicas en Power Query para limpiar los datos, correg
 
 5. Selecciona `Dim_Tiempo`. Verifica que la columna `fecha` sea tipo **Date**. Elimina columnas redundantes que ya están en `Hechos_Ventas`: selecciona `anio`, `mes_numero` (mantén Ctrl) y verifica que no haya duplicados innecesarios.
 
+
 <br/>
 
 6. Selecciona `Dim_Clientes`. Verifica que `fecha_registro` sea tipo **Date**.
@@ -595,9 +596,6 @@ Realizar transformaciones básicas en Power Query para limpiar los datos, correg
 
 <br/>
 
-8. Selecciona `Dim_Vendedores`. En la columna `cuota_mensual`, verifica que sea tipo **Número decimal**.
-
-<br/>
 
 9. Revisa el panel **Configuración de la consulta** (derecha) para cada tabla y confirma que los pasos aplicados son mínimos y limpios. El objetivo es tener solo los pasos necesarios.
 
@@ -605,7 +603,7 @@ Realizar transformaciones básicas en Power Query para limpiar los datos, correg
 
 10. Haz clic en **Inicio** → **Cerrar y aplicar** para cargar los datos al modelo de Power BI.
 
-   > La carga puede tomar varios minutos si el dataset tiene 500,000+ registros. Es normal.
+   > La carga puede tomar varios minutos si el dataset tiene 100,000+ registros. Es normal.
 
 <br/>
 
@@ -839,6 +837,14 @@ Crear medidas DAX que calculen los KPIs clave del dashboard de ventas, equivalen
 - Verifica que `Crecimiento YoY %` muestra BLANK para el primer año (no hay año anterior) y valores porcentuales para los años siguientes
 - Confirma que `Ticket Promedio` es mayor que 0
 
+<br/>
+
+La salida debería de ser similar a la siguiente imagen:
+
+<p align="center">
+  <img src="../images/c62_3.png" style="display: block; margin: 0 auto;" />
+</p>
+
 
 <br/>
 <br/>
@@ -856,13 +862,19 @@ Construir un dashboard interactivo de una página con múltiples visualizaciones
 
 <br/>
 
+<p align="center">
+  <img src="../images/c72_2.png.png" style="display: block; margin: 0 auto;" width="300" />
+</p>
+
+<br/>
+
 3. **Tarjetas KPI (fila superior):** Agrega 4 tarjetas de KPI en la parte superior del dashboard:
 
-   a. Haz clic en el ícono de **Tarjeta** en el panel Visualizaciones.
-   b. Arrastra `Total Ventas Netas` al campo **Valor** de la tarjeta.
-   c. En el panel Formato, cambia el título a `Total Ventas`.
-   d. Repite para crear 3 tarjetas adicionales con: `Clientes Activos`, `Ticket Promedio` y `Crecimiento YoY %`.
-   e. Alinea las 4 tarjetas en una fila horizontal en la parte superior del lienzo.
+   a. Haz clic en el ícono de **Tarjeta** en el panel Visualizaciones.<br/>
+   b. Arrastra `Total Ventas Netas` al campo **Valor** de la tarjeta.<br/>
+   c. En el panel Formato, cambia el título a `Total Ventas`.<br/>
+   d. Repite para crear 3 tarjetas adicionales con: `Clientes Activos`, `Ticket Promedio` y `Crecimiento YoY %`.<br/>
+   e. Alinea las 4 tarjetas en una fila horizontal en la parte superior del lienzo.<br/>
 
 <br/>
 
@@ -903,9 +915,9 @@ Construir un dashboard interactivo de una página con múltiples visualizaciones
 
 8. **Segmentadores (Slicers) para filtrado interactivo:** Agrega 3 segmentadores:
 
-   a. Segmentador de **Año**: Visualización → **Segmentador** → campo: `Dim_Tiempo[anio]` → Estilo: Lista vertical
-   b. Segmentador de **Categoría**: campo: `Dim_Productos[categoria]` → Estilo: Lista vertical
-   c. Segmentador de **Región**: campo: `Dim_Regiones[nombre_region]` → Estilo: Lista vertical
+   a. Segmentador de **Año**: Visualización → **Segmentador** → campo: `Dim_Tiempo[anio]` → Estilo: Lista vertical<br/>
+   b. Segmentador de **Categoría**: campo: `Dim_Productos[categoria]` → Estilo: Lista vertical<br/>
+   c. Segmentador de **Región**: campo: `Dim_Regiones[nombre_region]` → Estilo: Lista vertical<Br/>
    
    Coloca los 3 segmentadores en la columna lateral izquierda del dashboard.
 
@@ -930,6 +942,14 @@ Construir un dashboard interactivo de una página con múltiples visualizaciones
 - Las tarjetas KPI se actualizan cuando aplicas filtros
 - El archivo `.pbix` se guarda sin errores
 
+
+<br/>
+
+La salida debería de ser similar a la siguiente imagen:
+
+<p align="center">
+  <img src="../images/c7-final.png" style="display: block; margin: 0 auto;" />
+</p>
 
 <br/>
 <br/>
