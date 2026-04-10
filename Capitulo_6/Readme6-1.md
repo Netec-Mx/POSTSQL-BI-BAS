@@ -105,10 +105,10 @@ ORDER BY t.table_name;
 <br/>
 
 > **Notas:**
-* information_schema.tables: contiene el listado de todas las tablas y vistas accesibles en la base de datos
-* information_schema.columns: contiene información de todas las columnas de todas las tablas
-* pg_class: tabla interna de PostgreSQL, contiene información física de las relaciones (tablas, índices, etc.)
-* pg_namespace: contiene los esquemas de la base de datos.
+* **information_schema.tables**: contiene el listado de todas las tablas y vistas accesibles en la base de datos
+* **information_schema.columns**: contiene información de todas las columnas de todas las tablas
+* **pg_class**: tabla interna de PostgreSQL, contiene información física de las relaciones (tablas, índices, etc.)
+* **pg_namespace**: contiene los esquemas de la base de datos.
 
 <br/>
 
