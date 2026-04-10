@@ -867,7 +867,7 @@ Construir un dashboard interactivo de una página con múltiples visualizaciones
 <br/>
 
 <p align="center">
-  <img src="../images/c72_2.png.png" style="display: block; margin: 0 auto;" width="300" />
+  <img src="../images/c72_2.png" style="display: block; margin: 0 auto;" width="270" />
 </p>
 
 <br/>
