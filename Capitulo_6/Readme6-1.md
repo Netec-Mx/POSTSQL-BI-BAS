@@ -34,7 +34,7 @@ Al completar esta práctica, serás capaz de:
 - Driver ODBC de PostgreSQL (psqlODBC 16.x) instalado en el sistema Windows.
 - Contenedor Docker con PostgreSQL 16 ejecutándose.
 - Vistas materializadas e índices configurados de la práctica 5.1.
-- Dataset de ventas con al menos 500,000 registros cargado en PostgreSQL.
+- Dataset de ventas con al menos 100,000 registros cargado en PostgreSQL.
 
 <br/><br/>
 
@@ -105,10 +105,10 @@ ORDER BY t.table_name;
 <br/>
 
 > **Notas:**
-> information_schema.tables: contiene el listado de todas las tablas y vistas accesibles en la base de datos
-> information_schema.columns: contiene información de todas las columnas de todas las tablas
-> pg_class: tabla interna de PostgreSQL, contiene información física de las relaciones (tablas, índices, etc.)
-> pg_namespace: contiene los esquemas de la base de datos.
+* information_schema.tables: contiene el listado de todas las tablas y vistas accesibles en la base de datos
+* information_schema.columns: contiene información de todas las columnas de todas las tablas
+* pg_class: tabla interna de PostgreSQL, contiene información física de las relaciones (tablas, índices, etc.)
+* pg_namespace: contiene los esquemas de la base de datos.
 
 <br/>
 
