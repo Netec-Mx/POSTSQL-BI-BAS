@@ -1055,6 +1055,7 @@ Publicar el reporte en Power BI Service para que pueda ser accedido desde cualqu
    - En el diálogo de selección de destino, selecciona **Mi área de trabajo** (o un workspace específico si tienes uno configurado).
    - Haz clic en **Seleccionar**.
 
+
 <br/>
 
 4. Espera a que la publicación se complete. Verás una barra de progreso. Al finalizar, aparece el mensaje:
@@ -1062,14 +1063,29 @@ Publicar el reporte en Power BI Service para que pueda ser accedido desde cualqu
    ¡Listo!
    'Dashboard_Ventas_PostgreSQL' se publicó correctamente en Power BI.
    ```
-
 <br/>
+
 
 5. Haz clic en el enlace **Abrir 'Dashboard_Ventas_PostgreSQL' en Power BI** para abrir el reporte en el navegador.
 
 <br/>
 
+<p align="center">
+  <img src="../images/c9_1.png" style="display: block; margin: 0 auto;" />
+</p>
+
+<br/>
+
 6. En Power BI Service (app.powerbi.com), navega a **Mi área de trabajo** → **Conjuntos de datos**. Busca `Dashboard_Ventas_PostgreSQL`.
+
+<br/>
+
+
+Si la autentiticación es correcta y tienes un workspace, veras la siguiente imagen:
+
+<p align="center">
+  <img src="../images/c9_3.png" style="display: block; margin: 0 auto;" />
+</p>
 
 <br/>
 
@@ -1089,6 +1105,8 @@ Publicar el reporte en Power BI Service para que pueda ser accedido desde cualqu
    > **Nota:** Si PostgreSQL está en localhost (tu máquina local), Power BI Service no puede conectarse directamente. Para actualizaciones programadas desde la nube, se requiere el On-premises Data Gateway. El Paso 10 cubre su instalación básica.
 
 <br/>
+
+
 
 9. Crea un **Dashboard** en Power BI Service a partir del reporte publicado:
    - En el reporte publicado, navega a la página `Dashboard Ejecutivo`
@@ -1110,88 +1128,6 @@ Publicar el reporte en Power BI Service para que pueda ser accedido desde cualqu
 <br/>
 <br/>
 
-### Paso 10: Configurar On-premises Data Gateway
-
-Instalar y configurar el On-premises Data Gateway para permitir que Power BI Service se conecte al PostgreSQL local y programe actualizaciones automáticas de datos.
-
-
-1. Descarga el On-premises Data Gateway desde Power BI Service. En app.powerbi.com, haz clic en el ícono de **Configuración** (engranaje) → **Administrar gateways** → **+ Nuevo gateway** → **Descargar gateway**.
-
-   Alternativamente, descárgalo directamente desde:
-   ```
-   https://go.microsoft.com/fwlink/?LinkId=2116849&clcid=0x40a
-   ```
-
-<br/>
-
-2. Ejecuta el instalador descargado (`GatewayInstall.exe`) como administrador. Acepta los términos y elige la instalación estándar (no el modo personal). La instalación toma aproximadamente 5 minutos.
-
-<br/>
-
-3. Una vez instalado, el asistente de configuración del gateway se abre automáticamente. Inicia sesión con tu cuenta Microsoft.
-
-<br/>
-
-4. Registra el gateway con un nombre descriptivo:
-   ```
-   Nombre del gateway: Gateway_Curso_PostgreSQL
-   Clave de recuperación: [crea una clave segura y guárdala]
-   ```
-   Haz clic en **Configurar**.
-
-<br/>
-
-5. Verifica que el gateway aparece en Power BI Service. En app.powerbi.com → **Configuración** → **Administrar gateways** → deberías ver `Gateway_Curso_PostgreSQL` con estado **En línea**.
-
-<br/>
-
-6. Agrega la fuente de datos PostgreSQL al gateway. En la página del gateway → **Agregar origen de datos**:
-   ```
-   Nombre del origen de datos: PostgreSQL_Local
-   Tipo de origen de datos: PostgreSQL
-   Servidor: localhost
-   Base de datos: ventas_db
-   Método de autenticación: Básico
-   Nombre de usuario: postgres
-   Contraseña: postgres
-   ```
-   Haz clic en **Agregar**.
-
-<br/>
-
-7. Vincula el dataset al gateway. En **Mi área de trabajo** → **Conjuntos de datos** → `Dashboard_Ventas_PostgreSQL` → tres puntos → **Configuración** → **Conexiones de gateway** → selecciona `Gateway_Curso_PostgreSQL` y el origen `PostgreSQL_Local` → **Aplicar**.
-
-<br/>
-
-8. Configura la actualización programada. En la misma página de configuración del dataset → **Actualización programada**:
-   ```
-   Mantener actualizados los datos: Activado
-   Frecuencia de actualización: Diaria
-   Zona horaria: (tu zona horaria local)
-   Hora: 06:00 AM
-   ```
-   Haz clic en **Aplicar**.
-
-<br/>
-
-9. Ejecuta una actualización manual para verificar que funciona. En **Mi área de trabajo** → **Conjuntos de datos** → tres puntos junto a `Dashboard_Ventas_PostgreSQL` → **Actualizar ahora**.
-
-<br/>
-
-10. Verifica el historial de actualización. Haz clic en los tres puntos → **Historial de actualización**. Deberías ver una entrada con estado **Completado**.
-
-<br/>
-
-**Verificación:**
-
-- El gateway muestra estado "En línea" en la página de administración
-- La actualización manual completa sin errores
-- El dataset en Power BI Service muestra la fecha/hora de la última actualización correcta
-
-
-<br/>
-<br/>
-
 ## Validación y Pruebas
 
 ### Criterios de Éxito
@@ -1199,11 +1135,10 @@ Instalar y configurar el On-premises Data Gateway para permitir que Power BI Ser
 - [ ] Las 7 vistas PostgreSQL (`vw_pbi_*`) se crearon correctamente y retornan datos válidos.
 - [ ] La conexión Power BI Desktop ↔ PostgreSQL se establece sin errores usando el conector nativo o ODBC.
 - [ ] El modelo de datos en estrella tiene exactamente 5 relaciones activas con cardinalidad `*:1`.
-- [ ] Las 10 medidas DAX están creadas y retornan valores no nulos para el dataset completo.
+- [ ] Las medidas DAX están creadas y retornan valores no nulos para el dataset completo.
 - [ ] El dashboard tiene al menos 6 visualizaciones interactivas en la página principal.
 - [ ] Los segmentadores filtran correctamente todos los visuales del dashboard.
 - [ ] El reporte se publicó exitosamente en Power BI Service.
-- [ ] El On-premises Data Gateway está configurado y la actualización manual completa sin errores.
 
 <br/>
 
@@ -1244,21 +1179,28 @@ Instalar y configurar el On-premises Data Gateway para permitir que Power BI Ser
    # Verificar en PostgreSQL el crecimiento YoY para un año específico
    docker exec -it curso_postgres psql -U postgres -d ventas_db -c "
    WITH ventas_anuales AS (
-       SELECT
-           EXTRACT(YEAR FROM fecha_venta)::int AS anio,
-           SUM(cantidad * precio_unitario * (1 - COALESCE(descuento, 0))) AS ventas_netas
-       FROM ventas
-       GROUP BY EXTRACT(YEAR FROM fecha_venta)
+      SELECT
+         EXTRACT(YEAR FROM sale_date)::int AS anio,
+         SUM(quantity * unit_price) AS ventas_netas
+      FROM sales
+      WHERE estado = 'completado'  -- opcional pero recomendado
+      GROUP BY EXTRACT(YEAR FROM sale_date)
+   ),
+   ventas_con_lag AS (
+      SELECT
+         anio,
+         ventas_netas,
+         LAG(ventas_netas) OVER (ORDER BY anio) AS ventas_previas
+      FROM ventas_anuales
    )
    SELECT
-       anio,
-       ROUND(ventas_netas::numeric, 2) AS ventas_netas,
-       ROUND(
-           ((ventas_netas - LAG(ventas_netas) OVER (ORDER BY anio)) /
-            NULLIF(LAG(ventas_netas) OVER (ORDER BY anio), 0) * 100)::numeric,
-           2
-       ) AS crecimiento_yoy_pct
-   FROM ventas_anuales
+      anio,
+      ROUND(ventas_netas, 2) AS ventas_netas,
+      ROUND(
+         ((ventas_netas - ventas_previas) / NULLIF(ventas_previas, 0) * 100),
+         2
+      ) AS crecimiento_yoy_pct
+   FROM ventas_con_lag
    ORDER BY anio;
    "
    ```
@@ -1267,7 +1209,7 @@ Instalar y configurar el On-premises Data Gateway para permitir que Power BI Ser
 
    Compara los porcentajes con los valores mostrados por la medida `Crecimiento YoY %` en Power BI al filtrar por año.
 
-   **Resultado esperado:** Los porcentajes de crecimiento YoY coinciden entre PostgreSQL y Power BI (diferencia máxima: ±0.1%).
+   **Resultado esperado:** Los porcentajes de crecimiento YoY coinciden entre PostgreSQL y Power BI.
 
 <br/>
 
