@@ -145,21 +145,29 @@ Crear vistas SQL optimizadas que exporten los datos en el formato ideal para Pow
    -- Vista de hechos de ventas para Power BI
    CREATE OR REPLACE VIEW vw_pbi_hechos_ventas AS
    SELECT
-       v.id_venta,
-       v.fecha_venta::date AS fecha_venta,
-       v.id_cliente,
-       v.id_producto,
-       v.id_vendedor,
-       v.id_region,
-       v.cantidad,
-       v.precio_unitario,
-       v.descuento,
-       v.cantidad * v.precio_unitario               AS monto_bruto,
-       v.cantidad * v.precio_unitario * (1 - COALESCE(v.descuento, 0)) AS monto_neto,
-       EXTRACT(YEAR FROM v.fecha_venta)::int        AS anio,
-       EXTRACT(MONTH FROM v.fecha_venta)::int       AS mes,
-       EXTRACT(QUARTER FROM v.fecha_venta)::int     AS trimestre
-   FROM ventas v;
+      s.sale_id AS id_venta,
+      s.sale_date AS fecha_venta,
+      s.customer_id AS id_cliente,
+      s.product_id AS id_producto,
+
+      -- No existen en sales
+      NULL::INT AS id_vendedor,
+      NULL::INT AS id_region,
+      0::NUMERIC AS descuento,
+
+      s.quantity AS cantidad,
+      s.unit_price AS precio_unitario,
+
+      -- Métricas
+      s.quantity * s.unit_price AS monto_bruto,
+      s.quantity * s.unit_price AS monto_neto,
+
+      -- Tiempo
+      EXTRACT(YEAR FROM s.sale_date)::int AS anio,
+      EXTRACT(MONTH FROM s.sale_date)::int AS mes,
+      EXTRACT(QUARTER FROM s.sale_date)::int AS trimestre
+
+   FROM sales s;
    ```
 
 <br/>
@@ -171,22 +179,29 @@ Crear vistas SQL optimizadas que exporten los datos en el formato ideal para Pow
    -- Vista de dimensión tiempo para Power BI
    CREATE OR REPLACE VIEW vw_pbi_dim_tiempo AS
    SELECT DISTINCT
-       fecha_venta::date                                    AS fecha,
-       EXTRACT(YEAR FROM fecha_venta)::int                  AS anio,
-       EXTRACT(QUARTER FROM fecha_venta)::int               AS trimestre,
-       EXTRACT(MONTH FROM fecha_venta)::int                 AS mes_numero,
-       TO_CHAR(fecha_venta, 'TMMonth')                      AS mes_nombre,
-       TO_CHAR(fecha_venta, 'YYYY-MM')                      AS anio_mes,
-       EXTRACT(WEEK FROM fecha_venta)::int                  AS semana_anio,
-       EXTRACT(DOW FROM fecha_venta)::int                   AS dia_semana_numero,
-       TO_CHAR(fecha_venta, 'TMDay')                        AS dia_semana_nombre,
-       CASE
-           WHEN EXTRACT(DOW FROM fecha_venta) IN (0, 6) THEN false
-           ELSE true
-       END                                                  AS es_dia_laboral,
-       CONCAT('T', EXTRACT(QUARTER FROM fecha_venta)::int,
-              '-', EXTRACT(YEAR FROM fecha_venta)::int)     AS etiqueta_trimestre
-   FROM ventas
+      s.sale_date::date                                   AS fecha,
+      EXTRACT(YEAR FROM s.sale_date)::int                AS anio,
+      EXTRACT(QUARTER FROM s.sale_date)::int             AS trimestre,
+      EXTRACT(MONTH FROM s.sale_date)::int               AS mes_numero,
+      TRIM(TO_CHAR(s.sale_date, 'TMMonth'))              AS mes_nombre,
+      TO_CHAR(s.sale_date, 'YYYY-MM')                    AS anio_mes,
+      EXTRACT(WEEK FROM s.sale_date)::int                AS semana_anio,
+      EXTRACT(DOW FROM s.sale_date)::int                 AS dia_semana_numero,
+      TRIM(TO_CHAR(s.sale_date, 'TMDay'))                AS dia_semana_nombre,
+
+      CASE
+         WHEN EXTRACT(DOW FROM s.sale_date) IN (0, 6) THEN false
+         ELSE true
+      END                                                AS es_dia_laboral,
+
+      CONCAT(
+         'T',
+         EXTRACT(QUARTER FROM s.sale_date)::int,
+         '-',
+         EXTRACT(YEAR FROM s.sale_date)::int
+      )                                                  AS etiqueta_trimestre
+
+   FROM sales s
    ORDER BY fecha;
    ```
 
@@ -196,16 +211,17 @@ Crear vistas SQL optimizadas que exporten los datos en el formato ideal para Pow
 
    ```sql
    -- Vista de dimensión clientes para Power BI
-   CREATE OR REPLACE VIEW vw_pbi_dim_clientes AS
+  CREATE OR REPLACE VIEW vw_pbi_dim_clientes AS
    SELECT
-       c.id_cliente,
-       c.nombre_cliente,
-       c.email,
-       c.ciudad,
-       c.pais,
-       c.segmento_cliente,
-       c.fecha_registro::date                           AS fecha_registro,
-       EXTRACT(YEAR FROM AGE(CURRENT_DATE, c.fecha_registro))::int AS anios_como_cliente
+      c.id_cliente,
+      CONCAT(c.nombre, ' ', c.apellido)         AS nombre_cliente,
+      c.correo                                 AS email,
+      c.ciudad,
+      c.pais,
+      c.categoria_cliente                      AS segmento_cliente,
+      c.fecha_registro::date                   AS fecha_registro,
+      EXTRACT(YEAR FROM AGE(CURRENT_DATE, c.fecha_registro))::int 
+         AS anios_como_cliente
    FROM clientes c;
    ```
 
@@ -218,15 +234,17 @@ Crear vistas SQL optimizadas que exporten los datos en el formato ideal para Pow
    -- Vista de dimensión productos para Power BI
    CREATE OR REPLACE VIEW vw_pbi_dim_productos AS
    SELECT
-       p.id_producto,
-       p.nombre_producto,
-       p.categoria,
-       p.subcategoria,
-       p.precio_base,
-       p.costo_unitario,
-       p.precio_base - p.costo_unitario                AS margen_unitario,
-       ROUND(((p.precio_base - p.costo_unitario) / NULLIF(p.precio_base, 0)) * 100, 2) AS pct_margen
-   FROM productos p;
+      p.id_producto,
+      p.nombre                            AS nombre_producto,
+      c.nombre_categoria                  AS categoria,
+      NULL::VARCHAR                       AS subcategoria,
+      p.precio_unitario                   AS precio_base,
+      p.precio_unitario                   AS costo_unitario,
+      (p.precio_unitario - p.precio_unitario) AS margen_unitario,
+      0::NUMERIC                          AS pct_margen
+   FROM productos p
+   LEFT JOIN categorias c
+      ON p.id_categoria = c.id_categoria;
    ```
 
 <br/>
@@ -237,13 +255,12 @@ Crear vistas SQL optimizadas que exporten los datos en el formato ideal para Pow
    -- Vista de dimensión vendedores para Power BI
    CREATE OR REPLACE VIEW vw_pbi_dim_vendedores AS
    SELECT
-       v.id_vendedor,
-       v.nombre_vendedor,
-       v.apellido_vendedor,
-       CONCAT(v.nombre_vendedor, ' ', v.apellido_vendedor) AS nombre_completo,
-       v.region_asignada,
-       v.fecha_contratacion::date                          AS fecha_contratacion,
-       v.cuota_mensual
+      v.id_vendedor,
+      v.nombre,
+      v.apellido,
+      CONCAT(v.nombre, ' ', v.apellido) AS nombre_completo,
+      v.region,
+      v.correo
    FROM vendedores v;
    ```
 
@@ -256,12 +273,9 @@ Crear vistas SQL optimizadas que exporten los datos en el formato ideal para Pow
    -- Vista de dimensión regiones para Power BI
    CREATE OR REPLACE VIEW vw_pbi_dim_regiones AS
    SELECT
-       r.id_region,
-       r.nombre_region,
-       r.pais,
-       r.zona_geografica,
-       r.gerente_regional
-   FROM regiones r;
+      r.region_id,
+      r.region_name
+   FROM regions r;
    ```
 
 <br/>
@@ -273,25 +287,42 @@ Crear vistas SQL optimizadas que exporten los datos en el formato ideal para Pow
    -- Vista de resumen mensual para KPIs del dashboard
    CREATE OR REPLACE VIEW vw_pbi_resumen_mensual AS
    SELECT
-       EXTRACT(YEAR FROM v.fecha_venta)::int                          AS anio,
-       EXTRACT(MONTH FROM v.fecha_venta)::int                         AS mes,
-       TO_CHAR(v.fecha_venta, 'YYYY-MM')                              AS anio_mes,
-       r.nombre_region,
-       p.categoria,
-       COUNT(DISTINCT v.id_venta)                                     AS total_transacciones,
-       COUNT(DISTINCT v.id_cliente)                                   AS clientes_activos,
-       SUM(v.cantidad * v.precio_unitario * (1 - COALESCE(v.descuento, 0))) AS ventas_netas,
-       AVG(v.cantidad * v.precio_unitario * (1 - COALESCE(v.descuento, 0))) AS ticket_promedio,
-       SUM(v.cantidad)                                                AS unidades_vendidas
-   FROM ventas v
-   JOIN regiones r ON v.id_region = r.id_region
-   JOIN productos p ON v.id_producto = p.id_producto
+      EXTRACT(YEAR FROM s.sale_date)::int          AS anio,
+      EXTRACT(MONTH FROM s.sale_date)::int         AS mes,
+      TO_CHAR(s.sale_date, 'YYYY-MM')              AS anio_mes,
+
+      r.region_name                               AS nombre_region,
+      cat.nombre_categoria                        AS categoria,
+
+      COUNT(*)                                    AS total_transacciones,
+      COUNT(DISTINCT s.customer_id)               AS clientes_activos,
+
+      SUM(s.quantity * s.unit_price)              AS ventas_netas,
+      AVG(s.quantity * s.unit_price)              AS ticket_promedio,
+      SUM(s.quantity)                             AS unidades_vendidas
+
+   FROM sales s
+
+   -- Cliente → Región
+   JOIN customers cu 
+      ON s.customer_id = cu.customer_id
+
+   JOIN regions r 
+      ON cu.region_id = r.region_id
+
+   -- Producto → Categoría
+   JOIN productos p 
+      ON s.product_id = p.id_producto
+
+   JOIN categorias cat 
+      ON p.id_categoria = cat.id_categoria
+
    GROUP BY
-       EXTRACT(YEAR FROM v.fecha_venta),
-       EXTRACT(MONTH FROM v.fecha_venta),
-       TO_CHAR(v.fecha_venta, 'YYYY-MM'),
-       r.nombre_region,
-       p.categoria;
+      EXTRACT(YEAR FROM s.sale_date),
+      EXTRACT(MONTH FROM s.sale_date),
+      TO_CHAR(s.sale_date, 'YYYY-MM'),
+      r.region_name,
+      cat.nombre_categoria;
    ```
 
 <br/>
@@ -343,9 +374,9 @@ Crear vistas SQL optimizadas que exporten los datos en el formato ideal para Pow
 
 **Verificación:**
 
-- Confirma que aparecen exactamente 7 vistas con prefijo `vw_pbi_`
-- Verifica que `vw_pbi_hechos_ventas` tiene al menos 500,000 registros
-- Confirma que `vw_pbi_dim_tiempo` tiene registros de fechas sin duplicados
+- Confirma que aparecen exactamente 7 vistas con prefijo `vw_pbi_`.
+- Verifica que `vw_pbi_hechos_ventas` tiene al menos 100,000 registros.
+- Confirma que `vw_pbi_dim_tiempo` tiene registros de fechas sin duplicados.
 
 <br/>
 <br/>
@@ -364,6 +395,12 @@ Confirmar que el driver ODBC de PostgreSQL está correctamente instalado en Wind
 
 <br/>
 
+<p align="center">
+  <img src="../images/c6_2.png" style="display: block; margin: 0 auto;" />
+</p>
+
+<br/>
+
 3. Si el driver NO está instalado, descárgalo e instálalo. Abre PowerShell como administrador y ejecuta:
 
    ```powershell
@@ -373,6 +410,12 @@ Confirmar que el driver ODBC de PostgreSQL está correctamente instalado en Wind
      Select-Object PSChildName, DriverODBCVer |
      Where-Object { $_.PSChildName -like "*PostgreSQL*" }
    ```
+
+<br/>
+
+<p align="center">
+  <img src="../images/c6_1.png" style="display: block; margin: 0 auto;" />
+</p>
 
 <br/>
 
@@ -398,7 +441,20 @@ Confirmar que el driver ODBC de PostgreSQL está correctamente instalado en Wind
 
 <br/>
 
+<p align="center">
+  <img src="../images/c6_3.png" style="display: block; margin: 0 auto;" />
+</p>
+
+<br/>
+
+
 7. Haz clic en **Test** para verificar la conexión. Deberías ver el mensaje "Connection successful".
+
+<br/>
+
+<p align="center">
+  <img src="../images/c6_5.png" style="display: block; margin: 0 auto;" />
+</p>
 
 <br/>
 
@@ -407,15 +463,21 @@ Confirmar que el driver ODBC de PostgreSQL está correctamente instalado en Wind
    ```powershell
    # Probar conexión ODBC desde PowerShell
    $conn = New-Object System.Data.Odbc.OdbcConnection
-   $conn.ConnectionString = "DSN=PostgreSQL_Curso;UID=postgres;PWD=postgres"
+   $conn.ConnectionString = "DSN=curso_postgresql;UID=postgres;PWD=postgres"
    try {
-       $conn.Open()
-       Write-Host "✅ Conexión ODBC exitosa. Estado: $($conn.State)" -ForegroundColor Green
-       $conn.Close()
+      $conn.Open()
+      Write-Host "Conexión ODBC exitosa. Estado: $($conn.State)" -ForegroundColor Green
+      $conn.Close()
    } catch {
-       Write-Host "❌ Error de conexión: $_" -ForegroundColor Red
+      Write-Host "Error de conexión: $_" -ForegroundColor Red
    }
    ```
+
+<br/>
+
+<p align="center">
+  <img src="../images/c6_4.png" style="display: block; margin: 0 auto;" />
+</p>
 
 <br/>
 
