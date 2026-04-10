@@ -211,18 +211,18 @@ Crear vistas SQL optimizadas que exporten los datos en el formato ideal para Pow
 
    ```sql
    -- Vista de dimensión clientes para Power BI
-  CREATE OR REPLACE VIEW vw_pbi_dim_clientes AS
-   SELECT
-      c.id_cliente,
-      CONCAT(c.nombre, ' ', c.apellido)         AS nombre_cliente,
-      c.correo                                 AS email,
-      c.ciudad,
-      c.pais,
-      c.categoria_cliente                      AS segmento_cliente,
-      c.fecha_registro::date                   AS fecha_registro,
-      EXTRACT(YEAR FROM AGE(CURRENT_DATE, c.fecha_registro))::int 
-         AS anios_como_cliente
-   FROM clientes c;
+   CREATE OR REPLACE VIEW vw_pbi_dim_clientes AS
+      SELECT
+         c.id_cliente,
+         CONCAT(c.nombre, ' ', c.apellido)         AS nombre_cliente,
+         c.correo                                 AS email,
+         c.ciudad,
+         c.pais,
+         c.categoria_cliente                      AS segmento_cliente,
+         c.fecha_registro::date                   AS fecha_registro,
+         EXTRACT(YEAR FROM AGE(CURRENT_DATE, c.fecha_registro))::int 
+            AS anios_como_cliente
+      FROM clientes c;
    ```
 
 <br/>
