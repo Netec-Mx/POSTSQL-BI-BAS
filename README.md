@@ -6,7 +6,7 @@
   <img src="images/neteclogo.png" alt="logo" width="300"/>
 </p>
 
-# Nombre del curso: PostgreSQL & Power BI
+# PostgreSQL & Power BI
 
 ### Clave: POSTSQL-BI-BAS
 
