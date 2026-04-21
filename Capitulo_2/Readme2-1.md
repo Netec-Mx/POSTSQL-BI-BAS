@@ -958,7 +958,7 @@ Escribe y ejecuta una consulta SQL para cada una de las siguientes preguntas de 
 
 <br/>
 
-   **Resultado Esperado:**
+**Resultado Esperado:**
 
 ![Resultado esperado práctica 2.1](../images/i2.png)
   
