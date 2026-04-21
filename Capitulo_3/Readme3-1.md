@@ -1213,6 +1213,7 @@ ORDER BY nivel;
 
 <br/>
 
+
 4. Documenta tus observaciones sobre legibilidad y rendimiento:
 
    - Consulta de resumen: comparar tiempos de ejecución
