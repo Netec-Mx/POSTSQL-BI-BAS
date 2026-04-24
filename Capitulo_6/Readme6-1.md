@@ -1,6 +1,4 @@
-# Práctica 6.1 Integrando PostgreSQL con Power BI
-
-<br/>
+# Práctica 10: Integrando PostgreSQL con Power BI
 
 ## Objetivos
 
