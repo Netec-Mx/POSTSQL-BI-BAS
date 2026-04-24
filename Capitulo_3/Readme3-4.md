@@ -1,4 +1,4 @@
-# Práctica 3.4 Uso de Funciones de Tiempo 
+# Práctica 6: Uso de Funciones de Tiempo 
 
 <br/>
 
