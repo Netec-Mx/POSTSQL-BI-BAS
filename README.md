@@ -55,13 +55,13 @@ Este práctica es el punto de partida del dataset de ventas que se reutilizará,
 - **Descripción**: En este práctica ampliarás el esquema del dataset de ventas incorporando una tabla de categorías jerárquica (relación padre-hijo) y una tabla de empleados con estructura de reporte (manager-subordinado). A partir de ese esquema enriquecido, aprenderás a escribir subconsultas no correlacionadas y correlacionadas en las cláusulas `WHERE`, `FROM` y `SELECT`, para luego refactorizar esas mismas consultas utilizando CTEs (`WITH`) y CTEs recursivos (`WITH RECURSIVE`). La práctica culmina con un ejercicio comparativo que te permitirá evaluar la legibilidad y el plan de ejecución de ambos enfoques, consolidando criterios prácticos para elegir la técnica más adecuada en cada situación analítica.
 
 
-- **Tiempo estimado**: 90 min.
+- ⏱️ **Duración estimada**: 90 min.
 
 <br/><br/>
 
 ### [Práctica 4: Aplicación de Funciones de Ventana](Capitulo_3/Readme3-2.md)
 
-- **Descripción**: En este laboratorio aplicarás las funciones de ventana (window functions) de PostgreSQL, una de las herramientas más poderosas del SQL analítico moderno. A diferencia de las funciones de agregación tradicionales con `GROUP BY`, las funciones de ventana calculan valores sobre un conjunto de filas relacionadas **sin colapsar el resultado**, permitiéndote combinar detalle y agregación en una sola consulta.
+- **Descripción**: En esta práctica aplicarás las funciones de ventana (window functions) de PostgreSQL, una de las herramientas más poderosas del SQL analítico moderno. A diferencia de las funciones de agregación tradicionales con `GROUP BY`, las funciones de ventana calculan valores sobre un conjunto de filas relacionadas **sin colapsar el resultado**, permitiéndote combinar detalle y agregación en una sola consulta.
 
 Trabajarás con el dataset de ventas enriquecido con 24 meses de datos temporales construido en el laboratorio anterior. Aplicarás funciones de ranking para clasificar productos y vendedores, calcularás variaciones porcentuales mes a mes con `LAG()` y `LEAD()`, implementarás promedios móviles con la sintaxis `ROWS BETWEEN`, segmentarás clientes en cuartiles con `NTILE(4)`, y aprenderás a reutilizar definiciones de ventana con la cláusula `WINDOW`. Estas técnicas son fundamentales en análisis financiero, reportes de KPIs y dashboards de Business Intelligence.
 
