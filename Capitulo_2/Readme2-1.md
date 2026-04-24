@@ -1,7 +1,7 @@
 # Práctica 2: Consultas sobre tablas
 
 ## Duración
-60 minutos 
+90 minutos 
 
 ## Objetivos
 
