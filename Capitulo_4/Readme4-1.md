@@ -1,6 +1,4 @@
-# Práctica 4.1. Creación y Uso de Vistas y Vistas Materializadas
-
-<br/>
+# Práctica 7: Creación y Uso de Vistas y Vistas Materializadas
 
 ## Objetivos  
 
