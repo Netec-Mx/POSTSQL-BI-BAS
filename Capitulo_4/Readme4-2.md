@@ -1,7 +1,5 @@
 # Práctica 8: Creación de Procedimientos y Funciones
 
-<br/>
-
 ## Objetivos
 
 Al completar esta práctica, serás capaz de:
