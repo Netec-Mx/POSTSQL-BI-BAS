@@ -1,7 +1,5 @@
 # Práctica 6: Uso de Funciones de Tiempo 
 
-<br/>
-
 ## Objetivos
 
 Al completar esta práctica, serás capaz de:
