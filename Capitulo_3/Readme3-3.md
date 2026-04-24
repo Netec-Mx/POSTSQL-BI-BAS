@@ -1,6 +1,4 @@
-# Práctica 3.3 Uso de Agrupaciones Avanzadas
-
-<br/>
+# Práctica 5: Uso de Agrupaciones Avanzadas
 
 ## Objetivos
 
