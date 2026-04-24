@@ -1,4 +1,4 @@
-# Práctica 1.1 Instalación de imagen PostgreSQL en Docker
+# Práctica 1: Instalación de imagen PostgreSQL en Docker
 
 <br/><br/>
 
