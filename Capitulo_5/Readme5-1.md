@@ -1,8 +1,5 @@
 # Práctica 9: Monitoreo y Optimización de Consultas
 
-
-<br/>
-
 ## Objetivos
 
 Al completar esta práctica, serás capaz de:
