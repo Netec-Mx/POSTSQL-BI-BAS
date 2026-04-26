@@ -119,7 +119,7 @@ En esta práctica integradora conectarás todo el trabajo realizado en PostgreSQ
 
 Esta práctica representa la culminación del curso: demuestra cómo las capacidades analíticas de PostgreSQL (índices, vistas materializadas, funciones de ventana, KPIs financieros) se traducen en reportes visuales e interactivos accesibles para usuarios de negocio sin conocimientos de SQL.
 
-- **Tiempo estimado**: 120 min.
+- **Tiempo estimado**: 180 min.
 
 <br/><br/>
 
