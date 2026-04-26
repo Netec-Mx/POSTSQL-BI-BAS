@@ -1,132 +1,125 @@
 
+
+
+
 <p align="center">
   <img src="images/neteclogo.png" alt="logo" width="300"/>
 </p>
 
 # PostgreSQL & Power BI
 
-## Plataforma de laboratorios
-
-
-
-Te damos la bienvenida a la **plataforma de laboratorios** del curso **PostgreSQL & Power BI**. Aquí podrás explorar diferentes tecnologías a través de prácticas guiadas. ¡Desarrolla tus habilidades y lleva tus conocimientos al siguiente nivel!
+### Clave: POSTSQL-BI-BAS
 
 
 
 <br/><br/>
 
 ---
-## Capítulo 1: Introducción a PostgreSQL
 
-### [Práctica 1: Instalación de imagen PostgreSQL en Docker](Capitulo_1/Readme1-1.md) 
+### [Práctica 1.1 Instalación de imagen PostgreSQL en Docker](Capitulo_1/Readme1-1.md) 
 
-- **Descripción**: En esta práctica configurarás desde cero el entorno de desarrollo que utilizarás durante todo el curso. Levantarás un contenedor PostgreSQL 16 junto con pgAdmin 4 usando Docker Compose, realizarás tus primeras conexiones al motor de base de datos y explorarás los comandos fundamentales del cliente psql. Este entorno es la base sobre la que construirás todos los ejercicios de SQL avanzado, optimización e integración con Power BI de los módulos siguientes.
+En este laboratorio configurarás desde cero el entorno de desarrollo que utilizarás durante todo el curso. Levantarás un contenedor PostgreSQL 16 junto con pgAdmin 4 usando Docker Compose, realizarás tus primeras conexiones al motor de base de datos y explorarás los comandos fundamentales del cliente psql. Este entorno es la base sobre la que construirás todos los ejercicios de SQL avanzado, optimización e integración con Power BI de los módulos siguientes.
 
 La relevancia práctica de este laboratorio va más allá del curso: saber levantar un entorno PostgreSQL reproducible con Docker es una habilidad directamente aplicable en equipos de desarrollo y análisis de datos del mundo real, donde la consistencia del entorno entre desarrolladores es crítica.
 
-- ⏱️ **Duración estimada**: 90 min.
+- **Tiempo estimado**: 90 min.
 
 <br/><br/>
 
 ---
-## Capítulo 2: Fundamentos de SQL
 
-### [Práctica 2: Consultas sobre tablas](Capitulo_2/Readme2-1.md)
+### [Práctica 2.1 Consultas sobre tablas](Capitulo_2/Readme2-1.md)
 
-- **Descripción**: En esta práctica construirás y consultarás un dataset de ventas minoristas compuesto por seis tablas relacionadas: clientes, productos, categorias, vendedores, ordenes y detalle_ordenes. Partiendo desde SELECTs simples con filtros WHERE, avanzarás progresivamente hacia consultas multi-tabla con distintos tipos de JOIN, manejo de valores NULL y análisis agregados con GROUP BY. Al finalizar, serás capaz de responder preguntas de negocio concretas usando SQL como herramienta analítica, aplicando todas las convenciones de estilo y reglas de escritura estudiadas en la Lección 2.1.
+En esta práctica construirás y consultarás un dataset de ventas minoristas compuesto por seis tablas relacionadas: clientes, productos, categorias, vendedores, ordenes y detalle_ordenes. Partiendo desde SELECTs simples con filtros WHERE, avanzarás progresivamente hacia consultas multi-tabla con distintos tipos de JOIN, manejo de valores NULL y análisis agregados con GROUP BY. Al finalizar, serás capaz de responder preguntas de negocio concretas usando SQL como herramienta analítica, aplicando todas las convenciones de estilo y reglas de escritura estudiadas en la Lección 2.1.
 
 Este práctica es el punto de partida del dataset de ventas que se reutilizará, enriquecerá y algunas veces adaptarás en todas las prácticas siguientes del curso. Es fundamental completarlo en su totalidad antes de avanzar a la siguiente práctica.
 
-- ⏱️ **Duración estimada**: 90 min.
+- **Tiempo estimado**: 90 min.
 
 <br/><br/>
 
 ---
-## Capítulo 3: SQL analítico
 
-### [Práctica 3: Creación de Consultas con Subconsultas y CTEs](Capitulo_3/Readme3-1.md)
+### [Práctica 3.1 Creación de Consultas con Subconsultas y CTEs](Capitulo_3/Readme3-1.md)
 
-- **Descripción**: En este práctica ampliarás el esquema del dataset de ventas incorporando una tabla de categorías jerárquica (relación padre-hijo) y una tabla de empleados con estructura de reporte (manager-subordinado). A partir de ese esquema enriquecido, aprenderás a escribir subconsultas no correlacionadas y correlacionadas en las cláusulas `WHERE`, `FROM` y `SELECT`, para luego refactorizar esas mismas consultas utilizando CTEs (`WITH`) y CTEs recursivos (`WITH RECURSIVE`). La práctica culmina con un ejercicio comparativo que te permitirá evaluar la legibilidad y el plan de ejecución de ambos enfoques, consolidando criterios prácticos para elegir la técnica más adecuada en cada situación analítica.
+En este práctica ampliarás el esquema del dataset de ventas incorporando una tabla de categorías jerárquica (relación padre-hijo) y una tabla de empleados con estructura de reporte (manager-subordinado). A partir de ese esquema enriquecido, aprenderás a escribir subconsultas no correlacionadas y correlacionadas en las cláusulas `WHERE`, `FROM` y `SELECT`, para luego refactorizar esas mismas consultas utilizando CTEs (`WITH`) y CTEs recursivos (`WITH RECURSIVE`). La práctica culmina con un ejercicio comparativo que te permitirá evaluar la legibilidad y el plan de ejecución de ambos enfoques, consolidando criterios prácticos para elegir la técnica más adecuada en cada situación analítica.
 
 
-- ⏱️ **Duración estimada**: 90 min.
+- **Tiempo estimado**: 90 min.
 
 <br/><br/>
 
-### [Práctica 4: Aplicación de Funciones de Ventana](Capitulo_3/Readme3-2.md)
+### [Práctica 3.2 Aplicación de Funciones de Ventana](Capitulo_3/Readme3-2.md)
 
-- **Descripción**: En esta práctica aplicarás las funciones de ventana (window functions) de PostgreSQL, una de las herramientas más poderosas del SQL analítico moderno. A diferencia de las funciones de agregación tradicionales con `GROUP BY`, las funciones de ventana calculan valores sobre un conjunto de filas relacionadas **sin colapsar el resultado**, permitiéndote combinar detalle y agregación en una sola consulta.
+En este laboratorio aplicarás las funciones de ventana (window functions) de PostgreSQL, una de las herramientas más poderosas del SQL analítico moderno. A diferencia de las funciones de agregación tradicionales con `GROUP BY`, las funciones de ventana calculan valores sobre un conjunto de filas relacionadas **sin colapsar el resultado**, permitiéndote combinar detalle y agregación en una sola consulta.
 
 Trabajarás con el dataset de ventas enriquecido con 24 meses de datos temporales construido en el laboratorio anterior. Aplicarás funciones de ranking para clasificar productos y vendedores, calcularás variaciones porcentuales mes a mes con `LAG()` y `LEAD()`, implementarás promedios móviles con la sintaxis `ROWS BETWEEN`, segmentarás clientes en cuartiles con `NTILE(4)`, y aprenderás a reutilizar definiciones de ventana con la cláusula `WINDOW`. Estas técnicas son fundamentales en análisis financiero, reportes de KPIs y dashboards de Business Intelligence.
 
-- ⏱️ **Duración estimada**: 90 min.
+- **Tiempo estimado**: 90 min.
 
 <br/><br/>
 
-### [Práctica 5: Uso de Agrupaciones Avanzadas](Capitulo_3/Readme3-3.md)
+### [Práctica 3.3 Uso de Agrupaciones Avanzadas](Capitulo_3/Readme3-3.md)
 
-- **Descripción**: En esta prática explorarás las capacidades de agregación avanzada de PostgreSQL para construir análisis multidimensionales sobre el dataset de ventas. Aprenderás a generar múltiples niveles de resumen en una sola consulta usando `GROUPING SETS`, `ROLLUP` y `CUBE`, evitando la necesidad de ejecutar múltiples consultas separadas y unirlas con `UNION ALL`. Adicionalmente, utilizarás la cláusula `FILTER` para calcular métricas condicionales en una sola pasada, y aplicarás funciones estadísticas avanzadas como `STDDEV()`, `VARIANCE()`, `CORR()` y `PERCENTILE_CONT()` para derivar KPIs financieros significativos.
+En esta prática explorarás las capacidades de agregación avanzada de PostgreSQL para construir análisis multidimensionales sobre el dataset de ventas. Aprenderás a generar múltiples niveles de resumen en una sola consulta usando `GROUPING SETS`, `ROLLUP` y `CUBE`, evitando la necesidad de ejecutar múltiples consultas separadas y unirlas con `UNION ALL`. Adicionalmente, utilizarás la cláusula `FILTER` para calcular métricas condicionales en una sola pasada, y aplicarás funciones estadísticas avanzadas como `STDDEV()`, `VARIANCE()`, `CORR()` y `PERCENTILE_CONT()` para derivar KPIs financieros significativos.
 
 Estas técnicas son fundamentales en entornos de Business Intelligence donde los reportes requieren subtotales, totales generales y análisis cruzados por múltiples dimensiones simultáneamente, como los que se construyen en herramientas como Power BI o Tableau.
 
-- ⏱️ **Duración estimada**: 90 min.
+- **Tiempo estimado**: 90 min.
 
 <br/><br/>
 
-### [Práctica 6: Uso de Funciones de Tiempo](Capitulo_3/Readme3-4.md)
+### [Práctica 3.4 Uso de Funciones de Tiempo](Capitulo_3/Readme3-4.md)
 
-- **Descripción**: En esta práctica aplicarás técnicas avanzadas de análisis temporal en PostgreSQL utilizando el dataset de ventas enriquecido construido en las prácticas anteriores. Dominarás funciones clave como DATE_TRUNC(), EXTRACT(), INTERVAL y generate_series() para realizar agrupaciones temporales, detectar gaps en datos, construir comparaciones Year-over-Year (YoY) y Month-over-Month (MoM), e implementar un análisis de cohortes de clientes. Finalizarás explorando TimescaleDB, una extensión de PostgreSQL diseñada específicamente para series de tiempo, aprendiendo a crear hypertables y ejecutar consultas optimizadas con time_bucket().
+En esta práctica aplicarás técnicas avanzadas de análisis temporal en PostgreSQL utilizando el dataset de ventas enriquecido construido en las prácticas anteriores. Dominarás funciones clave como DATE_TRUNC(), EXTRACT(), INTERVAL y generate_series() para realizar agrupaciones temporales, detectar gaps en datos, construir comparaciones Year-over-Year (YoY) y Month-over-Month (MoM), e implementar un análisis de cohortes de clientes. Finalizarás explorando TimescaleDB, una extensión de PostgreSQL diseñada específicamente para series de tiempo, aprendiendo a crear hypertables y ejecutar consultas optimizadas con time_bucket().
 
 El análisis temporal es una competencia fundamental en cualquier proyecto de analítica de negocio. Las técnicas aprendidas aquí son directamente aplicables en reportes financieros, análisis de retención de clientes, detección de anomalías operacionales y construcción de dashboards de KPIs en herramientas como Power BI.
 
-- ⏱️ **Duración estimada**: 90 min.
+- **Tiempo estimado**: 90 min.
 
 <br/><br/>
 
 ---
-## Capítulo 4: Modelado analítico, funciones y automatización 
 
-### [Práctica 7: Creación y uso de vistas y vistas materializadas](Capitulo_4/Readme4-1.md)
+### [Práctica 4.1. Creación y Uso de Vistas y Vistas Materializadas](Capitulo_4/Readme4-1.md)
 
-- **Descripción**: En esta práctica aprenderás a crear y gestionar vistas lógicas y vistas materializadas en PostgreSQL 16 como mecanismo de abstracción sobre el modelo de datos de ventas construido en los módulos anteriores. Las vistas lógicas encapsulan consultas complejas con JOINs y agregaciones, simplificando el acceso a datos para aplicaciones y analistas. Las vistas materializadas van un paso más allá: persisten físicamente los resultados de consultas costosas, reduciendo drásticamente los tiempos de respuesta para dashboards y reportes.
+En esta práctica aprenderás a crear y gestionar vistas lógicas y vistas materializadas en PostgreSQL 16 como mecanismo de abstracción sobre el modelo de datos de ventas construido en los módulos anteriores. Las vistas lógicas encapsulan consultas complejas con JOINs y agregaciones, simplificando el acceso a datos para aplicaciones y analistas. Las vistas materializadas van un paso más allá: persisten físicamente los resultados de consultas costosas, reduciendo drásticamente los tiempos de respuesta para dashboards y reportes.
 
 Esta práctica tiene relevancia directa en entornos de producción: las vistas materializadas son una de las técnicas más utilizadas para optimizar el rendimiento de dashboards de Power BI conectados a PostgreSQL, ya que permiten que las herramientas de visualización consulten datos pre-agregados en lugar de recalcular millones de filas en cada actualización del reporte.
 
-- ⏱️ **Duración estimada**: 90 min.
+- **Tiempo estimado**: 90 min.
 
 <br/><br/>
 
-### [Práctica 8: Creación de Procedimientos y Funciones](Capitulo_4/Readme4-2.md)
+### [Práctica 4.2 Creación de Procedimientos y Funciones](Capitulo_4/Readme4-2.md)
 
-- **Descripción**: En esta práctica aprenderás a programar lógica de negocio directamente en PostgreSQL usando PL/pgSQL. Comenzarás con funciones simples para calcular descuentos y categorizar clientes, avanzarás hacia funciones con múltiples parámetros de salida, e implementarás un procedimiento completo de carga incremental con manejo explícito de transacciones (`COMMIT` / `ROLLBACK`). Finalmente, utilizarás cursores explícitos para procesar registros de forma iterativa y bloques `DO $$` para ejecutar lógica ad-hoc, concluyendo con una introducción a pgAgent para programar la ejecución automática del procedimiento de carga diaria.
+En esta práctica aprenderás a programar lógica de negocio directamente en PostgreSQL usando PL/pgSQL. Comenzarás con funciones simples para calcular descuentos y categorizar clientes, avanzarás hacia funciones con múltiples parámetros de salida, e implementarás un procedimiento completo de carga incremental con manejo explícito de transacciones (`COMMIT` / `ROLLBACK`). Finalmente, utilizarás cursores explícitos para procesar registros de forma iterativa y bloques `DO $$` para ejecutar lógica ad-hoc, concluyendo con una introducción a pgAgent para programar la ejecución automática del procedimiento de carga diaria.
 
 Esta práctica refleja patrones reales de ingeniería de datos: encapsular reglas de negocio en la base de datos garantiza consistencia, reutilización y mantenibilidad en entornos analíticos y de producción.
 
-- ⏱️ **Duración estimada**: 90 min.
+- **Tiempo estimado**: 90 min.
 
 <br/><br/>
 
 ---
-## Capítulo 5: Optimización e indexación
 
-### [ Práctica 9: Monitoreo y Optimización de Consultas](Capitulo_5/Readme5-1.md)
+### [ Práctica 5.1. Monitoreo y Optimización de Consultas](Capitulo_5/Readme5-1.md)
 
-- **Descripción**: En esta práctica aplicarás técnicas de indexación avanzada sobre el dataset de ventas construido en las prácticas  anteriores para diagnosticar y eliminar cuellos de botella en consultas lentas. Partirás de un conjunto de consultas deliberadamente no optimizadas, analizarás sus planes de ejecución con `EXPLAIN` y `EXPLAIN ANALYZE`, crearás índices B-Tree, Hash, GIN y parciales estratégicamente, y medirás el impacto real en tiempos de respuesta antes y después de cada optimización. Esta práctica refleja el flujo de trabajo real de un DBA o analista de datos que debe garantizar que los dashboards de Power BI respondan en tiempo aceptable sobre millones de registros.
+En esta práctica aplicarás técnicas de indexación avanzada sobre el dataset de ventas construido en las prácticas  anteriores para diagnosticar y eliminar cuellos de botella en consultas lentas. Partirás de un conjunto de consultas deliberadamente no optimizadas, analizarás sus planes de ejecución con `EXPLAIN` y `EXPLAIN ANALYZE`, crearás índices B-Tree, Hash, GIN y parciales estratégicamente, y medirás el impacto real en tiempos de respuesta antes y después de cada optimización. Esta práctica refleja el flujo de trabajo real de un DBA o analista de datos que debe garantizar que los dashboards de Power BI respondan en tiempo aceptable sobre millones de registros.
 
-- ⏱️ **Duración estimada**: 90 min.
+- **Tiempo estimado**: 90 min.
  
 <br/><br/>
 
 ---
-## Capítulo 6: Integración y despliegue BI
 
-### [Práctica 10: Integrando PostgreSQL con Power BI](Capitulo_6/Readme6-1.md)
+### [Práctica 6.1 Integrando PostgreSQL con Power BI](Capitulo_6/Readme6-1.md)
 
-- **Descripción**: En esta práctica integradora conectarás todo el trabajo realizado en PostgreSQL a lo largo del curso con Power BI Desktop para construir un dashboard ejecutivo de ventas completo. Importarás las vistas materializadas y tablas del dataset de ventas/sales, construirás un modelo de datos en estrella, crearás medidas DAX equivalentes a los KPIs calculados en SQL y diseñarás un reporte interactivo con múltiples visualizaciones. Finalmente, publicarás el reporte en Power BI Service y configurarás los mecanismos básicos de actualización y compartición de datos.
+En esta práctica integradora conectarás todo el trabajo realizado en PostgreSQL a lo largo del curso con Power BI Desktop para construir un dashboard ejecutivo de ventas completo. Importarás las vistas materializadas y tablas del dataset de ventas/sales, construirás un modelo de datos en estrella, crearás medidas DAX equivalentes a los KPIs calculados en SQL y diseñarás un reporte interactivo con múltiples visualizaciones. Finalmente, publicarás el reporte en Power BI Service y configurarás los mecanismos básicos de actualización y compartición de datos.
 
 Esta práctica representa la culminación del curso: demuestra cómo las capacidades analíticas de PostgreSQL (índices, vistas materializadas, funciones de ventana, KPIs financieros) se traducen en reportes visuales e interactivos accesibles para usuarios de negocio sin conocimientos de SQL.
 
-- ⏱️ **Duración estimada**: 180 min.
+- **Tiempo estimado**: 120 min.
 
 <br/><br/>
 
