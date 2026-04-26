@@ -123,8 +123,10 @@ docker volume create pgdata_custom
 Ahora levanta el contenedor:
 
 ```bash
-docker run -d --name postgres_custom  -p 5555:5432   -v pgdata_custom:/var/lib/postgresql/data tu_usuario/postgres-custom:1.0
+docker run -d --name postgres_custom  -p 5555:5432   -v pgdata_custom:/var/lib/postgresql tu_usuario/postgres-custom:1.0
 ```
+
+> Nota: Para PostgreSQL 16 -v pgdata_custom:/var/lib/postgresql
 
 <br/><br/>
 
