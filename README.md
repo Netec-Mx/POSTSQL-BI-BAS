@@ -13,12 +13,6 @@ Te damos la bienvenida a la **plataforma de laboratorios** del curso **PostgreSQ
 
 
 
-## Lista de laboratorios
-
-
-
-Cada uno de estos laboratorios está diseñado para ofrecerte una experiencia práctica. Haz clic en los enlaces para comenzar.
-
 <br/><br/>
 
 ---
