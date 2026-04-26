@@ -587,7 +587,9 @@ En Linux no se aplican límites de la misma forma, pero puedes configurar `--mem
    - **Password:** `postgres`
    - Marca la casilla **Save password**
 
-   > 💡 **Importante:** El hostname debe ser `curso_postgres` (el nombre del contenedor), NO `localhost`. Ambos contenedores están en la misma red Docker (`curso_network`), por lo que se comunican usando los nombres de los contenedores como hostnames.
+<br/>
+
+> **Importante:** El hostname debe ser `curso_postgres` (el nombre del contenedor), NO `localhost`. Ambos contenedores están en la misma red Docker (`curso_network`), por lo que se comunican usando los nombres de los contenedores como hostnames.
 
 6. Haz clic en **Save** para guardar y conectar.
 
