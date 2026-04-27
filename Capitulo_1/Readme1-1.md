@@ -298,7 +298,7 @@ En Linux no se aplican límites de la misma forma, pero puedes configurar `--mem
        container_name: curso_pgadmin
        restart: unless-stopped
        environment:
-         PGADMIN_DEFAULT_EMAIL: admin@curso.local
+         PGADMIN_DEFAULT_EMAIL: admin@curso.com
          PGADMIN_DEFAULT_PASSWORD: admin123
          PGADMIN_CONFIG_SERVER_MODE: 'False'
        volumes:
