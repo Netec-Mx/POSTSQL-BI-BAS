@@ -67,19 +67,6 @@ ORDER BY nivel, id;
 
 <br/><br/>
 
-### Resultado esperado
-
-| id | nombre         | jefe_id | nivel | ruta                          |
-| -- | -------------- | ------- | ----- | ----------------------------- |
-| 1  | CEO            | NULL    | 1     | CEO                           |
-| 2  | Gerente Ventas | 1       | 2     | CEO -> Gerente Ventas         |
-| 3  | Gerente TI     | 1       | 2     | CEO -> Gerente TI             |
-| 4  | Ventas 1       | 2       | 3     | CEO -> Gerente Ventas -> ...  |
-| 8  | Intern TI      | 6       | 4     | CEO -> Gerente TI -> Dev 1... |
-
-
-<br/><br/>
-
 ### Notas
 
 Una CTE recursiva tiene **dos partes obligatorias**:
