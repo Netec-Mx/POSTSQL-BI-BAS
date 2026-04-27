@@ -1,4 +1,4 @@
-# Práctica 4: Aplicación de Funciones de Ventana
+# Práctica 3.2: Aplicación de Funciones de Ventana
 
 ## Objetivos
 
