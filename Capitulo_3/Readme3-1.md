@@ -1,4 +1,4 @@
-# Práctica 3: Creación de Consultas con Subconsultas y CTEs
+# Práctica 3.1: Creación de Consultas con Subconsultas y CTEs
 
 ## Objetivos
 
