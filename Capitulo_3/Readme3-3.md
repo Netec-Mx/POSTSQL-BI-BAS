@@ -280,7 +280,7 @@ docker compose up -d
 
 1. `ROLLUP` es un caso especial de `GROUPING SETS` diseñado para jerarquías. `ROLLUP(A, B, C)` es equivalente a `GROUPING SETS((A,B,C), (A,B), (A), ())`. Ejecuta la siguiente consulta para construir el reporte jerárquico de ventas:
 
-   ```sql
+```sql
    -- Reporte jerárquico de ventas con ROLLUP: Año > Trimestre > Mes
     SELECT
         anio,
@@ -303,13 +303,13 @@ docker compose up -d
         anio   NULLS LAST,
         trimestre NULLS LAST,
         mes    NULLS LAST;
-   ```
+```
 
 <br/>
 
 2. Para facilitar la lectura, filtra el resultado para mostrar solo los subtotales por trimestre (útil para reportes ejecutivos):
 
-   ```sql
+```sql
    -- Filtrar solo subtotales trimestrales y el gran total
   SELECT
     COALESCE(anio::TEXT, 'GRAN TOTAL')           AS anio,
@@ -335,13 +335,13 @@ docker compose up -d
     FROM v_ventas_enriquecida
     GROUP BY ROLLUP(anio, trimestre)
     ORDER BY anio NULLS LAST, trimestre NULLS LAST;
-   ```
+```
 
 <br/>
 
 3. Ahora construye un reporte de ventas por región y categoría con `ROLLUP` para generar subtotales por región:
 
-   ```sql
+```sql
    -- ROLLUP aplicado a dimensiones de negocio: región > categoría
     SELECT
         COALESCE(region,   'TOTAL GENERAL')    AS region,
@@ -357,7 +357,7 @@ docker compose up -d
     FROM v_ventas_enriquecida
     GROUP BY ROLLUP(region, categoria)
     ORDER BY region NULLS LAST, categoria NULLS LAST;
-   ```
+```
 
 <br/>
                             
@@ -374,7 +374,7 @@ docker compose up -d
 
 1. `CUBE(A, B, C)` genera todas las combinaciones posibles: `(A,B,C)`, `(A,B)`, `(A,C)`, `(B,C)`, `(A)`, `(B)`, `(C)` y `()`. Para N dimensiones, genera 2^N grupos. Ejecuta primero con solo 2 dimensiones para entender el patrón:
 
-   ```sql
+```sql
    -- CUBE con 2 dimensiones: genera 2^2 = 4 combinaciones de agrupación
     SELECT
         COALESCE(region,   'TODAS LAS REGIONES')     AS region,
@@ -389,13 +389,13 @@ docker compose up -d
         GROUPING(categoria),
         region   NULLS LAST,
     categoria NULLS LAST;
-   ```
+```
 
 <br/>
 
 2. Ahora aplica `CUBE` con 3 dimensiones para el análisis completo. Ten en cuenta que con 3 dimensiones se generan 2^3 = 8 tipos de agrupación:
 
-   ```sql
+```sql
    -- CUBE con 3 dimensiones: región, categoría y año
    -- Genera 2^3 = 8 combinaciones de agrupación
     SELECT
@@ -415,13 +415,13 @@ docker compose up -d
         region   NULLS LAST,
         categoria NULLS LAST,
         anio     NULLS LAST;
-   ```
+```
 
 <br/>
 
 3. Una aplicación práctica de `CUBE` es construir una **tabla pivot** de ventas. Ejecuta esta consulta para crear una vista de tabla de contingencia región × categoría:
 
-   ```sql
+```sql
    -- Tabla pivot usando CUBE y agregación condicional
    -- Muestra ventas por región en filas y categorías en columnas
     SELECT
@@ -435,8 +435,7 @@ docker compose up -d
     FROM v_ventas_enriquecida
     GROUP BY CUBE(region)
     ORDER BY region NULLS LAST;
-   ```
-   --OJOJOJOJO
+```
 
 <br/>
 
@@ -453,7 +452,7 @@ docker compose up -d
 
 1. Primero, comprende la diferencia entre `FILTER` y `CASE WHEN`. Ambos producen el mismo resultado, pero `FILTER` es más legible y, en algunos casos, más eficiente. Observa la comparación:
 
-   ```sql
+```sql
    -- Comparación: CASE WHEN vs FILTER (ambos producen el mismo resultado)
     SELECT
         region,
@@ -466,13 +465,13 @@ docker compose up -d
     FROM v_ventas_enriquecida
     GROUP BY region
     ORDER BY region;
-   ```
+```
 
 <br/>
 
 2. Ahora construye el reporte completo de KPIs por región usando `FILTER` para calcular múltiples métricas en una sola consulta:
 
-   ```sql
+```sql
    -- Reporte de KPIs por región usando FILTER para métricas condicionales
     SELECT
         region,
@@ -500,13 +499,13 @@ docker compose up -d
     FROM v_ventas_enriquecida
     GROUP BY region
     ORDER BY total_ventas DESC;
-   ```
+```
 
 <br/>
 
 3. Aplica `FILTER` en un análisis temporal para comparar el rendimiento de ventas en diferentes períodos del día (útil para análisis de patrones de compra):
 
-   ```sql
+```sql
    -- Análisis temporal con FILTER: comparar ventas por período del día
     SELECT
         DATE_TRUNC('month', fecha_venta)::DATE                     AS mes,
@@ -528,7 +527,7 @@ docker compose up -d
     WHERE fecha_venta >= '2024-01-01'
     GROUP BY DATE_TRUNC('month', fecha_venta)
     ORDER BY mes;
-   ```
+```
 
 <br/>
 
@@ -545,7 +544,7 @@ docker compose up -d
 
 1. Comienza con las funciones de dispersión estadística para analizar la variabilidad de los precios por categoría:
 
-   ```sql
+```sql
    -- KPIs de dispersión estadística por categoría de producto
    SELECT
         categoria,
@@ -570,13 +569,13 @@ docker compose up -d
     GROUP BY categoria
     ORDER BY desviacion_estandar DESC;
 
-   ```
+```
 
 <br/>
 
 2. Calcula la correlación entre el descuento aplicado y el volumen de unidades vendidas. Una correlación positiva sugiere que los descuentos incentivan compras de mayor volumen:
 
-   ```sql
+```sql
    -- Análisis de correlación: descuento vs volumen de compra por región
     SELECT
         region,
@@ -597,13 +596,13 @@ docker compose up -d
     WHERE descuento IS NOT NULL AND cantidad IS NOT NULL
     GROUP BY region
     ORDER BY corr_descuento_cantidad DESC;
-   ```
+```
 
 <br/>
 
 3. Construye el reporte final de KPIs financieros completo, combinando todas las funciones estadísticas:
 
-   ```sql
+```sql
    -- Reporte integral de KPIs financieros por categoría y región
    -- Combina métricas de tendencia central, dispersión, percentiles y correlación
     WITH estadisticas_base AS (
@@ -646,13 +645,13 @@ docker compose up -d
         END AS clasificacion_variabilidad
     FROM estadisticas_base
     ORDER BY total_ventas DESC;
-   ```
+```
 
 <br/>
 
 4. Como análisis final, calcula los percentiles de ticket promedio por cliente para segmentación:
 
-   ```sql
+```sql
    -- Segmentación de clientes por percentil de gasto
     WITH gasto_por_cliente AS (
         SELECT
@@ -690,7 +689,7 @@ docker compose up -d
     CROSS JOIN percentiles p
     ORDER BY gc.gasto_total DESC
     LIMIT 20;
-   ```
+```
 
 <br/>
 
