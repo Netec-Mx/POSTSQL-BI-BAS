@@ -545,7 +545,7 @@ WHERE p.precio_unitario > cat_avg.avg_precio_unitario;
 - Ambos `COUNT` deben devolver el mismo número, confirmando equivalencia lógica
 - Observa en el plan de ejecución la aparición de `SubPlan` que indica subconsulta correlacionada.
 - PostgreSQL está haciendo un escaneo secuencial completo de la tabla productos, no está usando índices, está leyendo todas las 33 filas.
-- Toma en cuenta que la tabla es pequqña, por eso el optimizador decide que leer todos es más barato que usar un índice.
+- Toma en cuenta que la tabla es pequeña, por eso el optimizador decide que leer todos es más barato que usar un índice.
 - La subconsulta correlacionada, se ejecuta 33 veces, una por cada fila de productos (loops=33). 
 - Si tuvieras 10,000 productos esto se haría 10,000 scans.
 - También se calcula AVG() en cada ejecución del subquery. También se repite 33 veces.
