@@ -1313,7 +1313,7 @@ FROM (
 
 <br/>
 
->**Resultado Esperado:** `total_categorias = 26`, `total_empleados = 13`, `productos_con_cat = total de productos`
+>**Resultado Esperado:** `total_categorias = 26`, `total_empleados = 13`, `productos_con_cat = 33`
 
 <br/>
 
