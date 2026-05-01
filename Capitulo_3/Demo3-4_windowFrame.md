@@ -249,6 +249,8 @@ FROM ventas_demo;
 * `ROWS` → físico (filas)
 * `RANGE` → lógico (valores)
 
+<br/>
+
 | Caso                                | Usar  |
 | ----------------------------------- | ----- |
 | BI clásico (acumulados, moving avg) | ROWS  |
@@ -257,7 +259,7 @@ FROM ventas_demo;
 
 <br/><br/>
 
-## Combinaciones interesantes
+## Combinaciones adicionales - interesantes
 
 ### 1. Ventana centrada
 
@@ -451,20 +453,12 @@ FROM ventas_demo;
 
 ### Observaciones
 
-* Las combinaciones interesantes están en cómo interpretas el negocio
-
-### Traducción a negocio
-
-| Patrón      | Significado       |
-| ----------- |------------------ |
-| PRECEDING   | historial         |
-| FOLLOWING   | proyección        |
-| CURRENT ROW | presente          |
-| UNBOUNDED   | todo              |
-| RANGE       | lógica de negocio |
-| ROWS        | física            |
-
-<br/><br/>
-
-* Un window frame no es técnico es una pregunta de negocio disfrazada.
+* Las combinaciones interesantes están en cómo interpretas el negocio.
+* Un window frame no es solamente técnico es una pregunta de negocio disfrazada.
+* PRECEDING: historial     
+* FOLLOWING: proyección    
+* CURRENT ROW: presente    
+* UNBOUNDED: todo          
+* RANGE: lógica de negocio 
+* ROWS: posición física  
 
