@@ -196,6 +196,9 @@ Covarianza cercana a 0 -> poca relación lineal
 ## 10. Todo junto
 
 ```sql
+
+\x
+
 SELECT
     AVG(ventas)        AS avg_ventas,
     VARIANCE(ventas)   AS variance_ventas,
