@@ -106,6 +106,7 @@ FROM ventas_demo;
 ```sql
 SELECT
     vendedor,
+    region,
     monto,
     PERCENT_RANK() OVER (PARTITION BY region ORDER BY monto) AS percent_rank
 FROM ventas_demo;
@@ -124,6 +125,7 @@ FROM ventas_demo;
 ```sql
 SELECT
     vendedor,
+    region,
     monto,
     CUME_DIST() OVER (PARTITION BY region ORDER BY monto)
 FROM ventas_demo;
@@ -142,6 +144,7 @@ FROM ventas_demo;
 ```sql
 SELECT
     vendedor,
+    region,
     monto,
     NTILE(3) OVER (PARTITION BY region ORDER BY monto DESC) AS grupo
 FROM ventas_demo;
@@ -156,6 +159,7 @@ FROM ventas_demo;
 ```sql
 SELECT
     vendedor,
+    region,
     monto,
     LAG(monto) OVER (PARTITION BY region ORDER BY monto) AS anterior
 FROM ventas_demo;
@@ -168,6 +172,7 @@ FROM ventas_demo;
 ```sql
 SELECT
     vendedor,
+    region,
     monto,
     LEAD(monto) OVER (PARTITION BY region ORDER BY monto) AS siguiente
 FROM ventas_demo;
