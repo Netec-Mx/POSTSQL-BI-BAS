@@ -244,7 +244,7 @@ FROM ventas_demo;
 
 <br/><br>
 
-## Consulta final (TODO)
+## Consulta con todas las funciones de ventana
 
 ```sql
 SELECT
@@ -280,11 +280,53 @@ SELECT
 FROM ventas_demo;
 ```
 
-<br/><br>
-
+<br/><br/>
 
 ## Resultado esperado
 
+<br/>
+
+![Resultado esperado](../images/i1.png)
+<br/><br>
+
+## Consulta con funciones de agregación usadas como funciones de ventana
+
+```sql
+
+SELECT
+    id,
+    vendedor,
+    region,
+    monto,
+
+    -- Promedio por región (cohorte)
+    AVG(monto) OVER (PARTITION BY region) AS promedio_region,
+
+    -- Suma acumulada global (ordenada por id)
+    SUM(monto) OVER (ORDER BY id) AS acumulado_global,
+
+    -- Conteo por región
+    COUNT(*) OVER (PARTITION BY region) AS total_registros_region,
+
+    -- Máximo por región
+    MAX(monto) OVER (PARTITION BY region) AS max_region,
+
+    -- Mínimo por región
+    MIN(monto) OVER (PARTITION BY region) AS min_region
+
+FROM ventas_demo
+ORDER BY id;
+
+```
+
+
+<br/><br/>
+
+## Resultado esperado
+
+<br/>
+
+![Resultado esperado](../images/i2.png)
 
 
 <br/><br>
