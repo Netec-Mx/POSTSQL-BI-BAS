@@ -183,8 +183,6 @@ FROM ventas_demo;
 
 ## 7. Acceso por posición
 
-### IMPORTANTE
-
 Estas funciones dependen del **window frame**, no solo del ORDER BY.
 
 ### 7.1 `first_value()`
@@ -221,7 +219,7 @@ SELECT
 FROM ventas_demo;
 ```
 
-### Explicación
+<br/>
 
 Sin ese `ROWS BETWEEN`, **NO funciona como espera**
 
