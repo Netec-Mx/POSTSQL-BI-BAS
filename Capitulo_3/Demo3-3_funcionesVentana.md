@@ -70,8 +70,10 @@ FROM ventas_demo;
 ```
 
 <br/>
+
 * Numera cada fila de forma única, 1,...,9223372036854775807
 * BIGING entero con signo de 64 bits 
+
 <br/><br>
 
 ### 4.2 `rank()`
@@ -85,7 +87,9 @@ SELECT
 FROM ventas_demo;
 
 ```
+
 <br/>
+
 * Ranking con huecos cuando hay empates.
 
 <br/><br>
@@ -101,7 +105,9 @@ SELECT
 FROM ventas_demo;
 
 ```
+
 <br/>
+
 * Ranking sin huecos cuando hay empates.
 
 <br/><br>
@@ -120,6 +126,7 @@ FROM ventas_demo;
 ```
 
 <br/>
+
 * Posición relativa (0 a 1) dentro del grupo.
 * Va de **0 a 1**
 * Fórmula: (rank - 1) / (n - 1)
@@ -139,6 +146,7 @@ FROM ventas_demo;
 ```
 
 <br/>
+
 * % acumulado de filas hasta la actual
 * Ejemplo: 0.75 = está en el 75% superior
 
@@ -154,7 +162,9 @@ SELECT
     NTILE(3) OVER (PARTITION BY region ORDER BY monto DESC) AS grupo
 FROM ventas_demo;
 ```
+
 <br/>
+
 * Divide filas en n grupos, por ejemplo:
 * Cuartiles (*Q*) divide en 4 partes, cada parte representa 25%
 * Quintiles (*K*) divide en 5 partes, cada parte representa 20%
@@ -176,6 +186,7 @@ FROM ventas_demo;
 ```
 
 <br/>
+
 * Valor anterior (comparaciones temporales)
 
 <br/><br>
@@ -193,6 +204,7 @@ FROM ventas_demo;
 ```
 
 <br/>
+
 * Valor Siguiente 
 
 <br/><br>
@@ -218,6 +230,7 @@ FROM ventas_demo;
 ```
 
 <br/>
+
 * Primer valor 
 
 <br/><br>
@@ -238,6 +251,7 @@ FROM ventas_demo;
 ```
 
 <br/>
+
 * Último valor (depende del frame)
 * Sin `ROWS BETWEEN`, nO funciona como espera
 
@@ -403,7 +417,7 @@ ORDER BY id;
 OVER (PARTITION BY categoria)
 ```
 
-Define el “grupo lógico” donde se calcula la función
+* Define el “grupo lógico” donde se calcula la función
 
 <br>
 
@@ -413,7 +427,7 @@ Define el “grupo lógico” donde se calcula la función
 OVER (ORDER BY fecha)
 ```
 
-Define la secuencia (ej. mes, año, etc)
+* Define la secuencia (ej. mes, año, etc)
 
 <br/><br>
 
@@ -428,7 +442,7 @@ SUM(ventas) OVER (
 )
 ```
 
-Esto define **acumulados**
+* Esto define **acumulados**
 
 
 <br/><br>
