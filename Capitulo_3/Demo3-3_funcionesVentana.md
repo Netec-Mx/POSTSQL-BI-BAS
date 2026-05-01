@@ -74,7 +74,13 @@ FROM ventas_demo;
 ### 4.2 `rank()`
 
 ```sql
-RANK() OVER (PARTITION BY region ORDER BY monto DESC)
+SELECT
+    vendedor,
+    region,
+    monto,
+    RANK() OVER (PARTITION BY region ORDER BY monto DESC)
+FROM ventas_demo;
+
 ```
 
 <br/><br>
@@ -82,7 +88,13 @@ RANK() OVER (PARTITION BY region ORDER BY monto DESC)
 ### 4.3 `dense_rank()`
 
 ```sql
-DENSE_RANK() OVER (PARTITION BY region ORDER BY monto DESC)
+SELECT
+    vendedor,
+    region,
+    monto,
+    DENSE_RANK() OVER (PARTITION BY region ORDER BY monto DESC)
+FROM ventas_demo;
+
 ```
 
 <br/><br>
@@ -110,7 +122,12 @@ FROM ventas_demo;
 ### 5.2 `cume_dist()`
 
 ```sql
-CUME_DIST() OVER (PARTITION BY region ORDER BY monto)
+SELECT
+    vendedor,
+    monto,
+    CUME_DIST() OVER (PARTITION BY region ORDER BY monto)
+FROM ventas_demo;
+
 ```
 
 ### Interpretación
@@ -123,7 +140,11 @@ CUME_DIST() OVER (PARTITION BY region ORDER BY monto)
 ### 5.3 `ntile(3)`
 
 ```sql
-NTILE(3) OVER (PARTITION BY region ORDER BY monto DESC) AS grupo
+SELECT
+    vendedor,
+    monto,
+    NTILE(3) OVER (PARTITION BY region ORDER BY monto DESC) AS grupo
+FROM ventas_demo;
 ```
 
 <br/><br>
@@ -145,24 +166,36 @@ FROM ventas_demo;
 ### 6.2 `lead()`
 
 ```sql
-LEAD(monto) OVER (PARTITION BY region ORDER BY monto) AS siguiente
+SELECT
+    vendedor,
+    monto,
+    LEAD(monto) OVER (PARTITION BY region ORDER BY monto) AS siguiente
+FROM ventas_demo;
+
 ```
 
 <br/><br>
 
 ## 7. Acceso por posición
 
-### IMPORTANTE (clave pedagógica)
+### IMPORTANTE
 
 Estas funciones dependen del **window frame**, no solo del ORDER BY.
 
 ### 7.1 `first_value()`
 
 ```sql
-FIRST_VALUE(monto) OVER (
-    PARTITION BY region
-    ORDER BY monto DESC
-) AS mayor_venta
+SELECT
+    region,
+    vendedor,
+    monto,
+    FIRST_VALUE(monto) OVER (PARTITION BY region ORDER BY monto DESC) AS mayor_venta,
+    FIRST_VALUE(monto) OVER (
+        PARTITION BY region 
+        ORDER BY monto DESC
+        RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+    ) AS mayor_venta
+FROM ventas_demo;
 ```
 
 
@@ -171,27 +204,37 @@ FIRST_VALUE(monto) OVER (
 ### 7.2 `last_value()`  
 
 ```sql
-LAST_VALUE(monto) OVER (
-    PARTITION BY region
-    ORDER BY monto DESC
-    ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+SELECT
+    region,
+    vendedor,
+    monto,
+    LAST_VALUE(monto) OVER (
+            PARTITION BY region 
+            ORDER BY monto DESC 
+            ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
 ) AS menor_venta
+FROM ventas_demo;
 ```
 
 ### Explicación
 
-Sin ese `ROWS BETWEEN`, **NO funciona como esperas**
+Sin ese `ROWS BETWEEN`, **NO funciona como espera**
 
 <br/><br>
 
 ### 7.3 `nth_value()`
 
 ```sql
+SELECT
+    region,
+    vendedor,
+    monto,
 NTH_VALUE(monto, 2) OVER (
     PARTITION BY region
     ORDER BY monto DESC
     ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
 ) AS segundo_mejor
+FROM ventas_demo; 
 ```
 
 <br/><br>
