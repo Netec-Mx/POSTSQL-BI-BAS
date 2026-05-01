@@ -14,100 +14,6 @@ Probar y entender el comportamiento de:
 * Acceso por posición (first/last/nth)
 
 
-<br/><br>
-
-## Tablas de ayuda 
-
-### Funiones de Ventana 
-
-
-| Función          | ¿Para qué sirve?                                     | Ejemplo rápido                                                     |
-| ---------------- | ---------------------------------------------------- | ------------------------------------------------------------------ |
-| `row_number()`   | Numera cada fila de forma única dentro de la cohorte | `row_number() OVER (PARTITION BY categoria ORDER BY ventas DESC)`  |
-| `rank()`         | Ranking con huecos cuando hay empates                | `rank() OVER (ORDER BY ventas DESC)`                               |
-| `dense_rank()`   | Ranking sin huecos                                   | `dense_rank() OVER (ORDER BY ventas DESC)`                         |
-| `percent_rank()` | Posición relativa (0 a 1) dentro del grupo           | `percent_rank() OVER (ORDER BY ventas)`                            |
-| `cume_dist()`    | % acumulado de filas hasta la actual                 | `cume_dist() OVER (ORDER BY ventas)`                               |
-| `ntile(n)`       | Divide filas en *n* grupos (ej. cuartiles)           | `ntile(4) OVER (ORDER BY ventas)`                                  |
-| `lag()`          | Valor anterior (comparaciones temporales)            | `lag(ventas) OVER (ORDER BY fecha)`                                |
-| `lead()`         | Valor siguiente                                      | `lead(ventas) OVER (ORDER BY fecha)`                               |
-| `first_value()`  | Primer valor de la cohorte                           | `first_value(ventas) OVER (PARTITION BY categoria ORDER BY fecha)` |
-| `last_value()`   | Último valor (depende del frame)                     | `last_value(ventas) OVER (...)`                                    |
-| `nth_value()`    | Valor en posición específica                         | `nth_value(ventas, 2) OVER (...)`                                  |
-
-
-
-### Funciones agregadas como ventana  
-
-| Función   | ¿Para qué sirve?                    | Ejemplo                                     |
-| --------- | ----------------------------------- | ------------------------------------------- |
-| `avg()`   | Promedio sin agrupar filas          | `avg(ventas) OVER (PARTITION BY categoria)` |
-| `sum()`   | Acumulados o totales por cohorte    | `sum(ventas) OVER (ORDER BY fecha)`         |
-| `count()` | Conteo por cohorte                  | `count(*) OVER (PARTITION BY categoria)`    |
-| `max()`   | Máximo por grupo sin perder detalle | `max(ventas) OVER (PARTITION BY categoria)` |
-| `min()`   | Mínimo por grupo                    | `min(ventas) OVER (PARTITION BY categoria)` |
-
-
-## Conceptos clave 
-
-### NO agrupan filas
-
-* A diferencia de `GROUP BY`, aquí **no pierdes detalle**
-* Cada fila conserva su contexto
-
-### Cohortes 
-
-```sql
-OVER (PARTITION BY categoria)
-```
-
-Define el “grupo lógico” donde se calcula la función
-
-### Orden 
-
-```sql
-OVER (ORDER BY fecha)
-```
-
-Define la secuencia (ej. mes, año, etc)
-
-### Window Frame
-
-Ejemplo:
-
-```sql
-SUM(ventas) OVER (
-    ORDER BY fecha
-    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
-)
-```
-
-Esto define **acumulados**
-
-
-<br/><br>
-
-##  Errores comunes 
-
-* `last_value()` no funciona como esperan necesita frame
-* Olvidar `ORDER BY` en `lag()` / `lead()`
-* Confundir `rank()` vs `dense_rank()`
-* Creer que es igual a `GROUP BY`
-
-
-<br/><br>
-
-### A nivel negocio
-
-| Caso                    | Función          |
-| ----------------------- | ---------------- |
-| Top clientes            | `rank()`         |
-| Crecimiento mes a mes   | `lag()`          |
-| Segmentación (Top 25%)  | `ntile()`        |
-| Participación acumulada | `cume_dist()`    |
-| Posición relativa       | `percent_rank()` |
-
-
 <br/><br/>
 
 ### 1. Crear tabla ventas_demo
@@ -330,6 +236,113 @@ FROM ventas_demo;
 
 
 ## Resultado esperado
+
+
+
+<br/><br>
+
+## Tablas de ayuda 
+
+### Funiones de Ventana 
+
+
+| Función          | ¿Para qué sirve?                                     | Ejemplo rápido                                                     |
+| ---------------- | ---------------------------------------------------- | ------------------------------------------------------------------ |
+| `row_number()`   | Numera cada fila de forma única dentro de la cohorte | `row_number() OVER (PARTITION BY categoria ORDER BY ventas DESC)`  |
+| `rank()`         | Ranking con huecos cuando hay empates                | `rank() OVER (ORDER BY ventas DESC)`                               |
+| `dense_rank()`   | Ranking sin huecos                                   | `dense_rank() OVER (ORDER BY ventas DESC)`                         |
+| `percent_rank()` | Posición relativa (0 a 1) dentro del grupo           | `percent_rank() OVER (ORDER BY ventas)`                            |
+| `cume_dist()`    | % acumulado de filas hasta la actual                 | `cume_dist() OVER (ORDER BY ventas)`                               |
+| `ntile(n)`       | Divide filas en *n* grupos (ej. cuartiles)           | `ntile(4) OVER (ORDER BY ventas)`                                  |
+| `lag()`          | Valor anterior (comparaciones temporales)            | `lag(ventas) OVER (ORDER BY fecha)`                                |
+| `lead()`         | Valor siguiente                                      | `lead(ventas) OVER (ORDER BY fecha)`                               |
+| `first_value()`  | Primer valor de la cohorte                           | `first_value(ventas) OVER (PARTITION BY categoria ORDER BY fecha)` |
+| `last_value()`   | Último valor (depende del frame)                     | `last_value(ventas) OVER (...)`                                    |
+| `nth_value()`    | Valor en posición específica                         | `nth_value(ventas, 2) OVER (...)`                                  |
+
+
+<br/><br>
+
+
+### Funciones agregadas como ventana  
+
+| Función   | ¿Para qué sirve?                    | Ejemplo                                     |
+| --------- | ----------------------------------- | ------------------------------------------- |
+| `avg()`   | Promedio sin agrupar filas          | `avg(ventas) OVER (PARTITION BY categoria)` |
+| `sum()`   | Acumulados o totales por cohorte    | `sum(ventas) OVER (ORDER BY fecha)`         |
+| `count()` | Conteo por cohorte                  | `count(*) OVER (PARTITION BY categoria)`    |
+| `max()`   | Máximo por grupo sin perder detalle | `max(ventas) OVER (PARTITION BY categoria)` |
+| `min()`   | Mínimo por grupo                    | `min(ventas) OVER (PARTITION BY categoria)` |
+
+
+<br/><br>
+
+## Conceptos clave 
+
+### 1. NO agrupan filas
+
+* A diferencia de `GROUP BY`, aquí **no pierdes detalle**
+* Cada fila conserva su contexto
+
+<br/>
+
+### 2. Cohortes 
+
+```sql
+OVER (PARTITION BY categoria)
+```
+
+Define el “grupo lógico” donde se calcula la función
+
+<br>
+
+### 3. Orden 
+
+```sql
+OVER (ORDER BY fecha)
+```
+
+Define la secuencia (ej. mes, año, etc)
+
+<br/><br>
+
+### 4. Window Frame
+
+Ejemplo:
+
+```sql
+SUM(ventas) OVER (
+    ORDER BY fecha
+    ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW
+)
+```
+
+Esto define **acumulados**
+
+
+<br/><br>
+
+##  Errores comunes 
+
+* `last_value()` no funciona como esperan necesita frame
+* Olvidar `ORDER BY` en `lag()` / `lead()`
+* Confundir `rank()` vs `dense_rank()`
+* Creer que es igual a `GROUP BY`
+
+
+<br/><br>
+
+### A nivel negocio
+
+| Caso                    | Función          |
+| ----------------------- | ---------------- |
+| Top clientes            | `rank()`         |
+| Crecimiento mes a mes   | `lag()`          |
+| Segmentación (Top 25%)  | `ntile()`        |
+| Participación acumulada | `cume_dist()`    |
+| Posición relativa       | `percent_rank()` |
+
+
 
 
  
