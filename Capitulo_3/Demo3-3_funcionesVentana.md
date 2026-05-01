@@ -69,6 +69,9 @@ SELECT
 FROM ventas_demo;
 ```
 
+<br/>
+* Numera cada fila de forma única, 1,...,9223372036854775807
+* BIGING entero con signo de 64 bits 
 <br/><br>
 
 ### 4.2 `rank()`
@@ -82,6 +85,8 @@ SELECT
 FROM ventas_demo;
 
 ```
+<br/>
+* Ranking con huecos cuando hay empates.
 
 <br/><br>
 
@@ -96,6 +101,8 @@ SELECT
 FROM ventas_demo;
 
 ```
+<br/>
+* Ranking sin huecos cuando hay empates.
 
 <br/><br>
 
@@ -112,9 +119,8 @@ SELECT
 FROM ventas_demo;
 ```
 
-
-### Interpretación
-
+<br/>
+* Posición relativa (0 a 1) dentro del grupo.
 * Va de **0 a 1**
 * Fórmula: (rank - 1) / (n - 1)
 
@@ -132,9 +138,8 @@ FROM ventas_demo;
 
 ```
 
-### Interpretación
-
-* Acumulado
+<br/>
+* % acumulado de filas hasta la actual
 * Ejemplo: 0.75 = está en el 75% superior
 
 <br/><br>
@@ -149,6 +154,11 @@ SELECT
     NTILE(3) OVER (PARTITION BY region ORDER BY monto DESC) AS grupo
 FROM ventas_demo;
 ```
+<br/>
+* Divide filas en n grupos, por ejemplo:
+* Cuartiles (*Q*) divide en 4 partes, cada parte representa 25%
+* Quintiles (*K*) divide en 5 partes, cada parte representa 20%
+* Deciles (*D*) divice en 10 partes, cada parte representa el 10%
 
 <br/><br>
 
@@ -165,6 +175,9 @@ SELECT
 FROM ventas_demo;
 ```
 
+<br/>
+* Valor anterior (comparaciones temporales)
+
 <br/><br>
 
 ### 6.2 `lead()`
@@ -178,6 +191,9 @@ SELECT
 FROM ventas_demo;
 
 ```
+
+<br/>
+* Valor Siguiente 
 
 <br/><br>
 
@@ -201,6 +217,8 @@ SELECT
 FROM ventas_demo;
 ```
 
+<br/>
+* Primer valor 
 
 <br/><br>
 
@@ -220,8 +238,8 @@ FROM ventas_demo;
 ```
 
 <br/>
-
-Sin ese `ROWS BETWEEN`, **NO funciona como espera**
+* Último valor (depende del frame)
+* Sin `ROWS BETWEEN`, nO funciona como espera
 
 <br/><br>
 
@@ -239,6 +257,10 @@ NTH_VALUE(monto, 2) OVER (
 ) AS segundo_mejor
 FROM ventas_demo; 
 ```
+
+<br/>
+
+* Valor en posición específica.
 
 <br/><br>
 
@@ -287,7 +309,7 @@ FROM ventas_demo;
 ![Resultado esperado](../images/i1.png)
 <br/><br>
 
-## Consulta con funciones de agregación usadas como funciones de ventana
+### Consulta con funciones de agregación usadas como funciones de ventana
 
 ```sql
 
@@ -320,7 +342,7 @@ ORDER BY id;
 
 <br/><br/>
 
-## Resultado esperado
+### Resultado esperado
 
 <br/>
 
@@ -347,6 +369,7 @@ ORDER BY id;
 | `first_value()`  | Primer valor de la cohorte                           | `first_value(ventas) OVER (PARTITION BY categoria ORDER BY fecha)` |
 | `last_value()`   | Último valor (depende del frame)                     | `last_value(ventas) OVER (...)`                                    |
 | `nth_value()`    | Valor en posición específica                         | `nth_value(ventas, 2) OVER (...)`                                  |
+
 
 
 <br/><br>
@@ -417,6 +440,14 @@ Esto define **acumulados**
 * Confundir `rank()` vs `dense_rank()`
 * Creer que es igual a `GROUP BY`
 
+<br/><br>
+
+## Más notas:
+* Si la función de ventana habla de posición, ranking o anterior/siguiente, necesita ORDER BY
+* Ranking implica "ordenar para comparar"
+* Navegación implica "moverse entre filas"
+* Agregación implica "acumular o resumir dentro de una ventana"
+
 
 <br/><br>
 
@@ -435,7 +466,7 @@ Esto define **acumulados**
 
 ## Referencias
 
-- [Window Functionss](ttps://www.postgresql.org/docs/16/functions-window.html)
+- [Window Functionss](https://www.postgresql.org/docs/16/functions-window.html)
 - [PostgreSQL 16.13 Documentation](https://www.postgresql.org/docs/16/index.html)
 
  
