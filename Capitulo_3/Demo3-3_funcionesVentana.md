@@ -433,6 +433,11 @@ Esto define **acumulados**
 | Posición relativa       | `percent_rank()` |
 
 
+<br/><br/>
 
+## Referencias
+
+- [Window Functionss](ttps://www.postgresql.org/docs/16/functions-window.html)
+- [PostgreSQL 16.13 Documentation](https://www.postgresql.org/docs/16/index.html)
 
  
