@@ -1079,7 +1079,38 @@ ORDER BY semana DESC, ingresos DESC;
 6. Explora las características de la hypertable:
 
 ```sql
--- Ver los chunks creados por TimescaleDB
+-- Var los chunks creapor TimescaleDB, PostgresSQL16
+SELECT
+    chunk_name,
+    range_start::DATE,
+    range_end::DATE,
+    pg_size_pretty(
+        pg_total_relation_size(chunk_schema || '.' || chunk_name)
+    ) AS tamanio
+FROM timescaledb_information.chunks
+WHERE hypertable_name = 'ventas_metricas'
+ORDER BY range_start;
+```
+
+<br/>
+
+```sql
+
+-- Alternativa más detallada, separando los tamaños.
+
+SELECT
+    chunk_name,
+    pg_size_pretty(pg_relation_size(chunk_schema || '.' || chunk_name)) AS data_size,
+    pg_size_pretty(pg_indexes_size(chunk_schema || '.' || chunk_name)) AS index_size,
+    pg_size_pretty(pg_total_relation_size(chunk_schema || '.' || chunk_name)) AS total_size
+FROM timescaledb_information.chunks
+WHERE hypertable_name = 'ventas_metricas';
+```
+
+<br/>
+
+```sql
+-- Ver los chunks creados por TimescaleDB, PostgreSQL18+
 SELECT 
     chunk_name,
     range_start::DATE,
