@@ -463,7 +463,7 @@ Observaciones:
 * IMMUTABLE debe de ser bajo tiempo
 * VOLATILE considerablemente mas alto tiempo
 * VOLATILE y STABLE no permiten indexación funcional
-* pg_stat_statements no cu´ntas veces se ejecuta una función internamente, sino el impacto total de la consulta
+* pg_stat_statements no cuántas veces se ejecuta una función internamente, sino el impacto total de la consulta
 * En funciones VOLATILE, la condición del WHERE puede cambiar en cada fila, esto es, resultados diferentes en cada ejecución.
 * En filtros con valores constantes, STABLE o IMMUTABLE pueden comportarse de forma similar, ya que ambas se evalúan una sola vez por consulta.
 * El uso de funciones VOLATIL puede incrementar significativamente el costo de una consulta, especialmente en tablas grandes.
