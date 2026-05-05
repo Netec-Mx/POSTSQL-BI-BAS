@@ -1,4 +1,3 @@
-Perfecto — te reescribo la **demo completa, limpia, coherente y lista para clase**, incluyendo ahora **VOLATILE, STABLE e IMMUTABLE** bien integradas y con propósito claro.
 
 # Demo 4.1: Volatilidad de funciones en PostgreSQL (VOLATILE, STABLE, IMMUTABLE)
 
