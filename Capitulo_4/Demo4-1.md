@@ -118,6 +118,41 @@ END;
 $$;
 ```
 
+#### Verificación
+
+```sql
+SELECT 
+    n.nspname AS esquema,
+    p.proname AS nombre_funcion,
+    p.oid::regprocedure AS firma
+FROM pg_proc p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE p.proname LIKE 'f_%'  AND
+  AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+ORDER BY 1,2;
+
+-- verificación de volatilidad
+SELECT 
+    proname,
+    provolatile,
+    CASE provolatile
+        WHEN 'v' THEN 'VOLATILE'
+        WHEN 's' THEN 'STABLE'
+        WHEN 'i' THEN 'IMMUTABLE'
+    END AS tipo_volatilidad
+FROM pg_proc
+WHERE proname LIKE 'f_%'
+ORDER BY proname;
+
+-- definición
+SELECT 
+    pg_get_functiondef(p.oid)
+FROM pg_proc p
+WHERE p.proname LIKE 'f_%';
+
+
+```
+
 <br/><br/>
 
 ### 3. Prueba 1: Evaluación directa
@@ -405,6 +440,20 @@ SELECT
     mean_exec_time
 FROM pg_stat_statements
 WHERE query LIKE '%demo_volatilidad%';
+
+
+-- reset
+SELECT pg_stat_statements_reset();
+
+-- pruebas
+SELECT * FROM demo_volatilidad WHERE valor = f_volatil(500000);
+SELECT * FROM demo_volatilidad WHERE valor = f_inmutable(500000);
+SELECT * FROM demo_volatilidad WHERE valor = f_stable(500000);
+
+-- resultados
+SELECT query, total_exec_time
+FROM pg_stat_statements
+WHERE query ILIKE 'select%';
 ```
 
 <br/>
@@ -413,8 +462,14 @@ Observaciones:
 
 * IMMUTABLE debe de ser bajo tiempo
 * VOLATILE considerablemente mas alto tiempo
-* No mide funciones internas
-* Mide impacto total de la consulta
+* VOLATILE y STABLE no permiten indexación funcional
+* pg_stat_statements no cu´ntas veces se ejecuta una función internamente, sino el impacto total de la consulta
+* En funciones VOLATILE, la condición del WHERE puede cambiar en cada fila, esto es, resultados diferentes en cada ejecución.
+* En filtros con valores constantes, STABLE o IMMUTABLE pueden comportarse de forma similar, ya que ambas se evalúan una sola vez por consulta.
+* El uso de funciones VOLATIL puede incrementar significativamente el costo de una consulta, especialmente en tablas grandes.
+* La elección incorrecta de la volatilidad de una función puede provocar planes de ejecución ineficientes, impedir el uso de índices y generar resultados no determinísticos.
+* Si creas una función sin especificar nada, entonces es VOLATIL
+
 
 <br/><br/>
 
