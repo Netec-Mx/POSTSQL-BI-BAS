@@ -127,7 +127,7 @@ SELECT
     p.oid::regprocedure AS firma
 FROM pg_proc p
 JOIN pg_namespace n ON n.oid = p.pronamespace
-WHERE p.proname LIKE 'f_%'  AND
+WHERE p.proname LIKE 'f_%'  
   AND n.nspname NOT IN ('pg_catalog', 'information_schema')
 ORDER BY 1,2;
 
