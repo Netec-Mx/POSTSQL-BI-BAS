@@ -57,7 +57,7 @@ Resultado esperado: tabla con 1,000,000 registros.
 
 Una función VOLATITLE en PostgreSQL puede modificar la base de datos y devolver resultados diferentes en cada llamada con los mismos argumentos.
 
-Ee la categoría predetermina, obliga al optimizador a reevaluar la función en cada fila. Ejemplos: incluye funciones con numéros aleatorios, timeofday(), o comandos INSERT/UPDATE/DELETE.
+Es la categoría predetermina, obliga al optimizador a reevaluar la función en cada fila. Ejemplos: incluye funciones con numéros aleatorios, timeofday(), o comandos INSERT/UPDATE/DELETE.
 
 <br/>
 
@@ -76,8 +76,6 @@ $$;
 <br/><br/>
 
 #### Función STABLE
-
-En PostgreSQL, laSTABLE palabra clave es una categoría de volatilidad que se utiliza durante la creación de funciones para indicar al optimizador cómo se comporta la función en relación con el estado de la base de datos y la ejecución de la consulta. 
 
 Una función marcada como STABLE:
 - No se puede modificar la base de datos: no debe contener comandos como INSERT, UPDATE, o DELETE.
