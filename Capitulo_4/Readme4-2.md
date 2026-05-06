@@ -871,8 +871,8 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
                 AVG(v.monto_total)                        AS ticket_promedio
             FROM public.ventas v
             INNER JOIN public.clientes c
-                ON v.cliente_id = c.id_cliente   -- 👈 CLAVE
-            WHERE c.region_id = p_id_region      -- 👈 FIX
+                ON v.cliente_id = c.id_cliente   -- CLAVE
+            WHERE c.region_id = p_id_region      -- FIX
             AND EXTRACT(YEAR FROM v.fecha_venta) = p_anio
             GROUP BY DATE_TRUNC('month', v.fecha_venta)
             ORDER BY mes;
