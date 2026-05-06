@@ -79,10 +79,10 @@ $$ LANGUAGE plpython3u;
 ### 6. Probar la función
 
 ```sql
-SELECT f_extraer_numeros('ABC123XYZ456');
+SELECT f_extraer_numeros('ABC123XYZ456');   -- Letras numeros letras numeros -> numeros
 ```
 
-esultado:
+Resultado:
 
 ```
 123456
