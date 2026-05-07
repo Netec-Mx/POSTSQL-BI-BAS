@@ -448,7 +448,7 @@ ORDER BY n_live_tup DESC;
     ON sales(customer_id, product_id);
 
     -- Actualizar estadísticas después de crear todos los índices
-    ANALYZE ventas;
+    ANALYZE sales;
    ```
 
 <br/>
@@ -541,7 +541,7 @@ ORDER BY n_live_tup DESC;
     CREATE INDEX idx_sales_customer_hash
     ON sales USING HASH (customer_id);
 
-   ANALYZE ventas;
+   ANALYZE sales;
    ```
 
 <br/>
@@ -1382,7 +1382,7 @@ El planificador de PostgreSQL puede preferir un Seq Scan cuando: (1) la tabla es
 
 ```sql
 -- Paso 1: Actualizar estadísticas de la tabla
-ANALYZE ventas;
+ANALYZE sales;
 
 -- Paso 2: Verificar el tamaño real de la tabla
 SELECT
