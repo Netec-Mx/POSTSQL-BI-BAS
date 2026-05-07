@@ -1539,8 +1539,7 @@ La extensión `pg_stat_statements` requiere que esté habilitada en `postgresql.
 
 ```bash
 # Paso 1: Modificar postgresql.conf dentro del contenedor
-docker exec -it postgres_curso bash -c \
-  "echo \"shared_preload_libraries = 'pg_stat_statements'\" >> /var/lib/postgresql/data/postgresql.conf"
+docker exec -it curso_postgres bash -c "echo \"shared_preload_libraries = 'pg_stat_statements'\" >> /var/lib/postgresql/data/postgresql.conf"
 
 # Paso 2: Reiniciar el contenedor para aplicar el cambio
 docker restart postgres_curso
@@ -1549,12 +1548,10 @@ docker restart postgres_curso
 sleep 5
 
 # Paso 4: Conectarse y crear la extensión
-docker exec -it postgres_curso psql -U postgres -d ventas_db \
-  -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
+docker exec -it curso_postgres psql -U postgres -d ventas_db -c "CREATE EXTENSION IF NOT EXISTS pg_stat_statements;"
 
 # Verificar que la extensión está activa
-docker exec -it postgres_curso psql -U postgres -d ventas_db \
-  -c "SELECT * FROM pg_extension WHERE extname = 'pg_stat_statements';"
+docker exec -it curso_postgres psql -U postgres -d ventas_db -c "SELECT * FROM pg_extension WHERE extname = 'pg_stat_statements';"
 ```
 
 <br/><br/>
