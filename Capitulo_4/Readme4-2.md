@@ -182,7 +182,7 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
 
        -- Los procedimientos usan CALL, no SELECT
        -- y pueden hacer COMMIT aquí si es necesario
-       COMMIT;
+       -- COMMIT;
    END;
    $$;
 
@@ -630,9 +630,11 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
        FOR rec IN
            SELECT
                c.id_cliente,
+               -- BLEI  v.total_venta por v.monto_total
                COALESCE(AVG(v.total_venta), 0) AS ticket_promedio
            FROM public.clientes c
-           LEFT JOIN public.ventas v ON c.id_cliente = v.id_cliente
+           -- BLEI c.id_cliente = v.id_cliente
+           LEFT JOIN public.ventas v ON c.id_cliente = v.cliente_id
            GROUP BY c.id_cliente
        LOOP
            -- Determinar categoría con IF/ELSIF
@@ -1101,9 +1103,9 @@ COMMENT ON SCHEMA analytics IS 'Schema para funciones, procedimientos y objetos 
         );
 
         -- COMMIT explícito: confirmar toda la transacción
-        --COMMIT;
+        -- COMMIT;
 
-        RAISE NOTICE '[%] ✓ Carga completada exitosamente. Duración: % segundos',
+        RAISE NOTICE '[%] Carga completada exitosamente. Duración: % segundos',
             NOW()::TIME, ROUND(v_duracion_seg, 3);
 
     EXCEPTION
