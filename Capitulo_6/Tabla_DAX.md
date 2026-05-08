@@ -227,3 +227,7 @@ IF(
 
 <br/><br/>
 
+## Referencias
+
+[Data Analysis Expressions (DAX) Overview](https://learn.microsoft.com/es-mx/dax/)
+[DAX Function Reference](https://learn.microsoft.com/es-mx/dax/dax-function-reference)
