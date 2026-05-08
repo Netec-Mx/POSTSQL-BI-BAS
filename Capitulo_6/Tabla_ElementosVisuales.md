@@ -1,4 +1,4 @@
-# Tabla de ayuda — Elementos visuales de [Microsoft Power BI]
+# Tabla de ayuda — Elementos visuales
 
 <br/><br/>
 
