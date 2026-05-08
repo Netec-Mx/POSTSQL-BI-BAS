@@ -1,6 +1,8 @@
 
 # Tabla de Ayuda – Fórmulas DAX más usadas en Power BI
 
+<br/><br/>
+
 ## ¿Qué es DAX?
 
 Data Analysis Expressions
@@ -8,8 +10,16 @@ Data Analysis Expressions
 Es el lenguaje de fórmulas utilizado en:
 
 - Power BI
-- Microsoft Analysis Services
+    Plataforma de Business Intelligence (BI) de Microsoft.
+
+- Microsoft Analysis Services -  SSAS (SQL Server Analysis Services)
+    Tecnología de Microsoft para análisis multidimensional. 
+
 - Power Pivot para Excel
+    Extensión avanzada de Excel para análisis de grandes volúmenes de datos.
+
+
+<br/>
 
 DAX se utiliza para:
 
@@ -19,6 +29,9 @@ DAX se utiliza para:
 - Analizar datos en el tiempo
 - Generar agregaciones dinámicas
 - Construir dashboards interactivos
+
+<br/>
+<br/>
 
 ## Tablas de Ayuda
 
